@@ -20,7 +20,7 @@ export default function DrawerNavigator() {
         <Drawer.Screen name="Details" component={DetailsScreen}  options={({ navigation, route }) => ({
           header: () => <Header navigation={navigation} route={route} />,
         })} />
-        <Drawer.Screen name="Login" component={LoginScreen}  options={{ headerShown: false }}  />
+        <Drawer.Screen name="Login" component={LoginScreen}  options={{ headerShown: false ,drawerItemStyle: { display: 'none' },}}  />
       </Drawer.Navigator>
     </NavigationContainer>
   );
