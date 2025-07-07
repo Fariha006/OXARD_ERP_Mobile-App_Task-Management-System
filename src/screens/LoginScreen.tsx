@@ -21,8 +21,9 @@ export default function LoginScreen({ navigation }: Props) {
   const handleSignIn = () => {
     console.log('Username:', username);
     console.log('Password:', password);
-   
-    navigation.navigate('Home');
+  
+   //navigation.navigate('Home');
+   navigation.navigate('Main');
     // Add your authentication logic here
   };
 

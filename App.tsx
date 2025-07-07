@@ -1,43 +1,41 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
 
-// import { NewAppScreen } from '@react-native/new-app-screen';
-// import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 
-// function App() {
-//   const isDarkMode = useColorScheme() === 'dark';
+// import React from 'react';
+// import { NavigationContainer } from '@react-navigation/native';
 
+// import AppNavigator from './src/navigation/DrawerNavigator';
+
+// export default function App() {
 //   return (
-//     <View style={styles.container}>
-//       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-//       <NewAppScreen templateFileName="App.tsx" />
-//     </View>
+
+//        <AppNavigator /> 
 //   );
 // }
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//   },
-// });
-
-// export default App;
-
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-// import AppNavigator from './src/navigation/AppNavigator';
-import AppNavigator from './src/navigation/DrawerNavigator';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import DrawerLayout from './src/navigation/DrawerLayout';
+import LoginScreen from './src/screens/LoginScreen';
+import DetailsScreen from './src/screens/DetailsScreen';
+import Header from './src/components/Header';
+import CustomDrawer from './src/navigation/CustomDrawer';
+const Drawer = createDrawerNavigator();
 
 export default function App() {
   return (
-    // <NavigationContainer>
-    //   <AppNavigator /> 
-    // </NavigationContainer>
-       <AppNavigator /> 
+    <NavigationContainer>
+      <Drawer.Navigator initialRouteName="Login" drawerContent={(props) => <CustomDrawer {...props} />}>
+        <Drawer.Screen name="Main" component={DrawerLayout} options={{ headerShown: false}}/>
+
+        <Drawer.Screen name="Login" component={LoginScreen}  options={{ headerShown: false ,drawerItemStyle: { display: 'none' },}}  />
+
+          
+      </Drawer.Navigator>
+    </NavigationContainer>
   );
 }
+
+
+
 

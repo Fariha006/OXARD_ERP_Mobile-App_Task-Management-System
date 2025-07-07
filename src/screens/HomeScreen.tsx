@@ -147,6 +147,7 @@ const ANNOUNCEMENTS = [
         renderItem={renderItem}
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingBottom: 20 }}
+         scrollEnabled={false}
       />
       </View>
       <View style={styles.anouncementcontainer}>
@@ -156,6 +157,7 @@ const ANNOUNCEMENTS = [
           renderItem={announcementRenderItem}
           keyExtractor={item => item.id}
           contentContainerStyle={{ paddingBottom: 20 }}
+          scrollEnabled={false}
         />
       </View>
       </ScrollView>
