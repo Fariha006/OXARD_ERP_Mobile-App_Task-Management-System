@@ -38,8 +38,18 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
       </View>
       <View style={styles.mydeskbtnfirstraw}>
-          <View style={styles.tile}>
+          <View style={styles.tilecontainer} >
          <TouchableOpacity key='1' style={styles.tile}>
+            <Image source={require('../../assets/images/Circle-icons-profile.svg.png')} style={styles.image} />
+            <Text style={styles.title}>Personal information</Text>
+          </TouchableOpacity>
+           </View>
+           <View>
+            <Text >Sr.SoftwareDeveleper</Text>   
+            <Text >IT.Department</Text>     
+           </View>
+           <View>
+           <TouchableOpacity key='1' style={styles.tileend}>
             <Image source={require('../../assets/images/Circle-icons-profile.svg.png')} style={styles.image} />
             <Text style={styles.title}>Personal information</Text>
           </TouchableOpacity>
@@ -102,17 +112,37 @@ logoContainer:{
 },
 mydeskbtnfirstraw: {
     flexDirection: 'row',
-   
-    justifyContent: 'space-between',
+
+    
 },
-  tile: {
+tilecontainer:{
+  flexDirection:'column',
+},
+  tileview: {
     width: '22%',
+    
+  },
+  tile: {
+    width: '35%',
+    height: '35%',
     aspectRatio: 1,
     backgroundColor: '#e0e0e0',
     borderRadius: 10,
     marginBottom: 15,
     marginRight: 10,
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    padding: 2,
+  },
+    tileend: {
+    width: '35%',
+    height: '35%',
+    aspectRatio: 1,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 10,
+    marginBottom: 15,
+    marginRight: 10,
+    alignItems: 'flex-end',
     justifyContent: 'center',
     padding: 2,
   },
@@ -121,6 +151,7 @@ mydeskbtnfirstraw: {
     height: 30,
     marginBottom: 8,
     resizeMode: 'contain',
+    alignItems:'center'
   },
     title: {
     fontSize: 14,
