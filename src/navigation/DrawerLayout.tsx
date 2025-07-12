@@ -6,7 +6,7 @@ import Header from '../components/Header';
 import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
 import MydeskScreen from '../screens/MyDeskScreen';
-
+import Personalinformationscreen from '../screens/Personalinformationscreen';
 
 const Stack = createStackNavigator();
 
@@ -26,6 +26,14 @@ const InnerStack = () => (
     <Stack.Screen
       name="MyDesk"
       component={MydeskScreen}
+      options={({ navigation, route }) => ({
+        header: () => <Header navigation={navigation} route={route} />
+      })}
+    />
+
+<Stack.Screen
+      name="Personalinfo"
+      component={Personalinformationscreen}
       options={({ navigation, route }) => ({
         header: () => <Header navigation={navigation} route={route} />
       })}

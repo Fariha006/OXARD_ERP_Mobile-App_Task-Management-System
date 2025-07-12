@@ -1,88 +1,29 @@
-// import React from 'react';
-// import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-
-// import { DrawerHeaderProps } from '@react-navigation/drawer'; 
-
-// import Ionicons from 'react-native-vector-icons/Ionicons';
 
 
-// const Header = ({ navigation, route }: DrawerHeaderProps) => {
-//   return (
-//     <View style={styles.container}>
-//       <TouchableOpacity onPress={() =>  navigation.toggleDrawer()}>
-//          <Ionicons name="menu" size={50} color="white" />
-//       </TouchableOpacity>
-//       <Text style={styles.title}>AHALLYA INFOTECH PVT LTD </Text>
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     height: 60,
-//     backgroundColor: '#6200ee',
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     paddingHorizontal: 15,
-//   },
-//   back: {
-//     color: 'white',
-//     fontSize: 20,
-//     marginRight: 15,
-//   },
-//   title: {
-//     color: 'white',
-//     fontSize: 18,
-//     fontWeight: 'bold',
-//   },
-// });
-
-// export default Header;
-// components/Header.tsx
-//
-// import React from 'react';
-// import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-// import { DrawerHeaderProps } from '@react-navigation/drawer';
-// import Ionicons from 'react-native-vector-icons/Ionicons';
-
-// const Header = ({ navigation, route }: DrawerHeaderProps) => {
-//   return (
-//     <View style={styles.container}>
-
-//       <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
-//         <Ionicons name="menu" size={25} color="white" />
-//       </TouchableOpacity>
-//       <Text style={styles.title}>AHALLYA INFOTECH PVT LTD</Text>
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     height: 60,
-//     backgroundColor: '#6200ee',
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     paddingHorizontal: 15,
-//   },
-//   title: {
-//     color: 'white',
-//     fontSize: 18,
-//     fontWeight: 'bold',
-//     marginLeft: 15,
-//   },
-// });
-
-// export default Header;
-//
-
-import React from 'react';
+import React, { useState,useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { DrawerHeaderProps } from '@react-navigation/drawer';
+import UserStorage from '../utils/userStorage';
+import { getFileUrl } from '../config/apiConfig';
 
 const Header = ({ navigation, route }: DrawerHeaderProps) => {
+  const [userData, setUserData] = useState<any>(null);
   const isShow = route.name === 'Details' || route.name === 'Home';
+  useEffect(() => {
+    loadUserData();
+  }, []);
+
+  const loadUserData = async () => {
+    try {    
+      const storedUserData = await UserStorage.getUserData();     
+      if (storedUserData) {
+        setUserData(storedUserData);
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -90,7 +31,13 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
         <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
           <Ionicons name="menu" size={25} color="white" />
         </TouchableOpacity>
-        <Text style={styles.title}>AHALLYA INFOTECH PVT LTD</Text>
+        <Text style={styles.title}>
+  {userData?.CompNam
+    ? userData.CompNam.length > 28
+      ? userData.CompNam.slice(0, 25) + '...'
+      : userData.CompNam
+    : 'COMPANY NAME'}
+</Text>
         <View style={styles.Iconnotfction}><Image source={require('../../assets/images/notification.png')} style={styles.menuIcon} /></View>
       </View>
 
@@ -99,12 +46,12 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
         <View style={styles.profileContainer}>
           <View style={styles.userimagewraper}>
             <View style={styles.userimagewrapergray}>
-              <Image source={require('../../assets/images/userphoto.jpg')} style={styles.userimage} />
+              <Image source={userData?.EmployeePhotoUrl ? { uri: getFileUrl(`/${userData.EmployeePhotoUrl}`) } : require('../../assets/images/userphoto.jpg')}style={styles.userimage} />
             </View>
           </View>
           <View style={styles.userInfo}>
-            <Text style={styles.userName}>George Fernandes</Text>
-            <Text style={styles.userRole}>Sr. Software Developer</Text>
+            <Text style={styles.userName}>{userData?.EmployeeName || 'User Name'}</Text>
+            <Text style={styles.userRole}>{userData?.UserNam || 'email@email.com'}</Text>
           </View>
         </View>
       )}

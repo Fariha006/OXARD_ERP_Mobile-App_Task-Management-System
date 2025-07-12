@@ -11,15 +11,15 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 export default function HomeScreen({ navigation }: Props) {
 
   const tiles = [
-    { id: 1, title: 'My Desk', image: require('../../assets/images/home/mydesk.png') },
-    { id: 2, title: 'My Requests', image: require('../../assets/images/home/request.png') },
-    { id: 3, title: 'Payslips', image: require('../../assets/images/home/payslip.png') },
-    { id: 4, title: 'Approval', image: require('../../assets/images/home/aproval.png') },
-    { id: 5, title: 'Directory', image: require('../../assets/images/home/directory.png') },
-    { id: 6, title: 'Messages', image: require('../../assets/images/home/msgs.png') },
-    { id: 7, title: 'Leave Outstandings ', image: require('../../assets/images/home/leave.png') },
-    { id: 8, title: 'Approval', image: require('../../assets/images/home/aprovb.png') },
-    { id: 9, title: 'Add ', image: require('../../assets/images/home/addbtn.png') },
+    { id: 1, title: 'My Desk', image: require('../../assets/images/home/mydesk.png'),route:'Main',screen:'MyDesk' },
+    { id: 2, title: 'My Requests', image: require('../../assets/images/home/request.png'),route:'Main',screen:'MyRequests' },
+    { id: 3, title: 'Payslips', image: require('../../assets/images/home/payslip.png'),route:'Main',screen:'Payslips' },
+    { id: 4, title: 'Approval', image: require('../../assets/images/home/aproval.png'),route:'Main',screen:'Approval' },
+    { id: 5, title: 'Directory', image: require('../../assets/images/home/directory.png'),route:'Main',screen:'Directory' },
+    { id: 6, title: 'Messages', image: require('../../assets/images/home/msgs.png'),route:'Main',screen:'Messages' },
+    { id: 7, title: 'Leave Outstandings ', image: require('../../assets/images/home/leave.png'),route:'Main',screen:'LeaveOutstandings' },
+    { id: 8, title: 'Approval', image: require('../../assets/images/home/aprovb.png'),route:'Main',screen:'Approval' },
+    { id: 9, title: 'Add ', image: require('../../assets/images/home/addbtn.png'),route:'Main',screen:'Add' },
   ];
 
   const DATA = [
@@ -127,7 +127,7 @@ export default function HomeScreen({ navigation }: Props) {
           showsVerticalScrollIndicator={false} horizontal={true} showsHorizontalScrollIndicator={false}>
           <View style={styles.grid}>
             {tiles.map((tile) => (
-              <TouchableOpacity key={tile.id} style={styles.tile}>
+              <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: tile.screen })} key={tile.id} style={styles.tile}>
                 <Image source={tile.image} style={styles.image} />
                 <Text style={styles.title}>{tile.title}</Text>
               </TouchableOpacity>
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     paddingLeft: 6,
     paddingTop: 6,
-    height: 48,
+    height:56,
     borderRadius: 6,
     marginTop: 5,
   },

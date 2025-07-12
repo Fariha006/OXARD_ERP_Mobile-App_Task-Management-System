@@ -1,83 +1,160 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
+import UserStorage from '../utils/userStorage';
+import { MenuItem } from '../api/api';
+import { getFileUrl } from '../config/apiConfig';
+
 
 const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    loadUserData();
+  }, []);
+
+  const loadUserData = async () => {
+    try {
+      const storedMenuItems = await UserStorage.getMenuItems();
+      const storedUserData = await UserStorage.getUserData();
+      
+      if (storedMenuItems) {
+        setMenuItems(storedMenuItems);
+      }
+      if (storedUserData) {
+        setUserData(storedUserData);
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    }
+  };
+
+  const isMenuItemVisible = (menuText: string): boolean => {
+
+   
+    return menuItems.some(item => 
+      item.MenuDisplayCaption && 
+      item.MenuDisplayCaption.toLowerCase().replace(/\s/g, '') === menuText.toLowerCase().replace(/\s/g, '')
+    );
+  };
+
+  // Menu items configuration
+  const menuItemsConfig = [
+    {
+      id: 'mydesk',
+      text: 'My Desk',
+      icon: require('../../assets/images/home.png'),
+      screen: 'MyDesk',
+      navigationParams: { screen: 'MyDesk' }
+    },
+    {
+      id: 'myrequests',
+      text: 'My Requests',
+      icon: require('../../assets/images/requst.png'),
+      screen: 'Home',
+      navigationParams: { screen: 'Home' }
+    },
+    {
+      id: 'payslips',
+      text: 'Payslips',
+      icon: require('../../assets/images/payslip.png'),
+      screen: 'Details',
+      navigationParams: { screen: 'Details' }
+    },
+    {
+      id: 'approval',
+      text: 'Approval',
+      icon: require('../../assets/images/aproval.png'),
+      screen: 'Details',
+      navigationParams: { screen: 'Details' }
+    },
+    {
+      id: 'directory',
+      text: 'Directory',
+      icon: require('../../assets/images/directory.png'),
+      screen: 'Details',
+      navigationParams: { screen: 'Details' }
+    },
+    {
+      id: 'messages',
+      text: 'Messages',
+      icon: require('../../assets/images/messages.png'),
+      screen: 'Details',
+      navigationParams: { screen: 'Details' }
+    },
+    {
+      id: 'leaveoutstanding',
+      text: 'Leave Outstanding',
+      icon: require('../../assets/images/messages.png'),
+      screen: 'Details',
+      navigationParams: { screen: 'Details' }
+    },
+    {
+      id: 'approval2',
+      text: 'Approval',
+      icon: require('../../assets/images/approval2.png'),
+      screen: 'Details',
+      navigationParams: { screen: 'Details' }
+    },
+    {
+      id: 'addbuttons',
+      text: 'Add Buttons',
+      icon: require('../../assets/images/addbtn.png'),
+      screen: 'Details',
+      navigationParams: { screen: 'Details' }
+    }
+  ];
+
   return (
     <View style={styles.container}>
       <View style={styles.headsep} />
       <View style={styles.userimagewraper}>
         <View style={styles.userimagewrapergray}>
-          <Image source={require('../../assets/images/userphoto.jpg')} style={styles.userimage} />
+          <Image 
+            source={userData?.EmployeePhotoUrl ? { uri: getFileUrl(`/${userData.EmployeePhotoUrl}`) } : require('../../assets/images/userphoto.jpg')} 
+            style={styles.userimage} 
+          />
         </View>
       </View>
       <View style={styles.Usrnmanddownarow}>
         <View>
-          <Text style={styles.Username}>George Fernandes</Text>
-          <Text style={styles.Useremail}>georgefernandes88@gmail.com</Text>
+          {/* <Text style={styles.Username}>George Fernandes</Text>
+          <Text style={styles.Useremail}>georgefernandes88@gmail.com</Text> */}
+          <Text style={styles.Username}>{userData?.EmployeeName || 'User Name'}</Text>
+          <Text style={styles.Useremail}>{userData?.UserNam || 'email@email.com'}</Text>
         </View>
         <View style={styles.downarows}>
           <Image source={require('../../assets/images/arrowdown.png')} />
         </View>
       </View>
       <View style={styles.drawwraper}>
-        {/* <Text style={styles.title}>📂 Drawer Menu</Text> */}
-        <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'MyDesk' })}>
-          <View style={[styles.menuItem, styles.menuItemactive]}>
-            <View style={styles.divmenuIcon}><Image source={require('../../assets/images/home.png')} style={styles.menuIcon} /></View>
-            <Text style={styles.menuText}>My Desk</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Home' })}>
-          <View style={styles.menuItem}>
-            <View style={styles.divmenuIcon}><Image source={require('../../assets/images/requst.png')} style={styles.menuIcon} /></View>
-            <Text style={styles.menuText}>My Requests</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Details' })}>
-          <View style={styles.menuItem}>
-            <View style={styles.divmenuIcon}><Image source={require('../../assets/images/payslip.png')} style={styles.menuIcon} /></View>
-            <Text style={styles.menuText}>Payslips</Text>
-          </View>
-        </TouchableOpacity>
+       
+      
 
-        <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Details' })}>
-          <View style={styles.menuItem}>
-            <View style={styles.divmenuIcon}><Image source={require('../../assets/images/aproval.png')} style={styles.menuIcon} /></View>
-            <Text style={styles.menuText}>Approval</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Details' })}>
-          <View style={styles.menuItem}>
-            <View style={styles.divmenuIcon}><Image source={require('../../assets/images/directory.png')} style={styles.menuIcon} /></View>
-            <Text style={styles.menuText}>Directory</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Details' })}>
-          <View style={styles.menuItem}>
-            <View style={styles.divmenuIcon}><Image source={require('../../assets/images/messages.png')} style={styles.menuIcon} /></View>
-            <Text style={styles.menuText}>Messages</Text>
-          </View>
-        </TouchableOpacity>
+{menuItemsConfig.map((item, index) => {
+          // Check if this menu item should be visible
+          // const isVisible = isMenuItemVisible(item.text);
+          
+          // // If not visible, don't render the TouchableOpacity
+          // if (!isVisible) {
+          //   return null;
+          // }
 
-        <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Details' })}>
-          <View style={styles.menuItem}>
-            <View style={styles.divmenuIcon}><Image source={require('../../assets/images/messages.png')} style={styles.menuIcon} /></View>
-            <Text style={styles.menuText}>Leave Outstanding</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Details' })}>
-          <View style={styles.menuItem}>
-            <View style={styles.divmenuIcon}><Image source={require('../../assets/images/approval2.png')} style={styles.menuIcon} /></View>
-            <Text style={styles.menuText}>Approval</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Details' })}>
-          <View style={styles.menuItem}>
-            <View style={styles.divmenuIcon}><Image source={require('../../assets/images/addbtn.png')} style={styles.menuIcon} /></View>
-            <Text style={styles.menuText}>Add Buttons</Text>
-          </View>
-        </TouchableOpacity>
+          return (
+            <TouchableOpacity 
+              key={item.id}
+              onPress={() => navigation.navigate('Main', item.navigationParams)}
+            >
+              <View style={[styles.menuItem, index === 0 ? styles.menuItemactive : null]}>
+                <View style={styles.divmenuIcon}>
+                  <Image source={item.icon} style={styles.menuIcon} />
+                </View>
+                <Text style={styles.menuText}>{item.text}</Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
         
       </View>
     </View>

@@ -7,24 +7,86 @@ import {
   Image,
   SafeAreaView,
   KeyboardAvoidingView,
-  Platform,TouchableOpacity,Text
+  Platform,TouchableOpacity,Text,Alert
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { loginUser, LoginRequest, UserData, MenuItem } from '../api/api';
+import UserStorage from '../utils/userStorage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 export default function LoginScreen({ navigation }: Props) {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [usernameError, setUsernameError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignIn = () => {
-    console.log('Username:', username);
-    console.log('Password:', password);
-  
-  
-   navigation.navigate('Main');
-  
+  const validateFields = () => {
+    let isValid = true;
+    
+    // Reset previous errors
+    setUsernameError('');
+    setPasswordError('');
+    
+    // Validate username
+    if (!username.trim()) {
+      setUsernameError('Username is required');
+      isValid = false;
+    }
+    
+    // Validate password
+    if (!password.trim()) {
+      setPasswordError('Password is required');
+      isValid = false;
+    }
+    
+    return isValid;
+  };
+
+  const storeUserData = async (userData: UserData, menuItems: MenuItem[], token: string) => {
+    try {
+      await UserStorage.storeSessionData(userData, menuItems, token);
+      console.log('User data stored successfully');
+    } catch (error) {
+      console.error('Error storing user data:', error);
+    }
+  };
+
+  const handleSignIn = async () => {
+    if (!validateFields()) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const loginData: LoginRequest = {
+        UserNam: username.trim(),
+        UserLgnPwd: password.trim()
+      };
+
+      const response = await loginUser(loginData);
+
+      if (response.success && response.userData && response.menuItems && response.token) {
+        console.log('Login successful:', response.userData);
+        console.log('Menu items:', response.menuItems);
+        
+        // Store user data, menu items, and token
+        await storeUserData(response.userData, response.menuItems, response.token);
+        
+        // Navigate to Home with user data
+        navigation.navigate('Main', { screen: 'Home' });
+      } else {
+        Alert.alert('Login Failed', response.message || 'Invalid credentials');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -45,25 +107,40 @@ export default function LoginScreen({ navigation }: Props) {
         <TextInput
           placeholder="Username"
           value={username}
-          onChangeText={setUsername}
-          style={[styles.input, styles.inputusr]}
+          onChangeText={(text) => {
+            setUsername(text);
+            if (usernameError) setUsernameError('');
+          }}
+          style={[styles.input, styles.inputusr, usernameError ? styles.inputError : null]}
+          editable={!isLoading}
         />
+        {usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
 
         {/* Password */}
         <Text style={styles.label}>Password</Text>
         <TextInput
           placeholder="Password"
           value={password}
-          onChangeText={setPassword}
-          style={styles.input}
+          onChangeText={(text) => {
+            setPassword(text);
+            if (passwordError) setPasswordError('');
+          }}
+          style={[styles.input, passwordError ? styles.inputError : null]}
           secureTextEntry
+          editable={!isLoading}
         />
+        {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
 
         {/* Sign In Button */}
-        {/* <View style={styles.button}><Button title="Sign In" onPress={() => handleSignIn()} /></View> */}
         <View style={styles.loginbutton}>
-          <TouchableOpacity style={styles.button} onPress={() => handleSignIn()}>
-            <Text style={styles.buttonText}>Sign In</Text>
+          <TouchableOpacity 
+            style={[styles.button, isLoading ? styles.buttonDisabled : null]} 
+            onPress={() => handleSignIn()}
+            disabled={isLoading}
+          >
+            <Text style={styles.buttonText}>
+              {isLoading ? 'Signing In...' : 'Sign In'}
+            </Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -99,6 +176,17 @@ const styles = StyleSheet.create({
   inputusr: {
     marginBottom: 15,
   },
+  inputError: {
+    borderColor: '#ff0000',
+    borderWidth: 2,
+  },
+  errorText: {
+    color: '#ff0000',
+    fontSize: 12,
+    marginTop: 4,
+    marginBottom: 8,
+    marginLeft: 2,
+  },
 button: {
   marginTop: 22,
   borderColor: '#D60808',
@@ -108,6 +196,10 @@ button: {
   justifyContent: 'center',
   alignItems: 'center',
   borderRadius: 6,
+},
+buttonDisabled: {
+  backgroundColor: '#cccccc',
+  borderColor: '#cccccc',
 },
 loginbutton: {
   width: '100%',
