@@ -48,7 +48,7 @@
 // const Header = ({ navigation, route }: DrawerHeaderProps) => {
 //   return (
 //     <View style={styles.container}>
-      
+
 //       <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
 //         <Ionicons name="menu" size={25} color="white" />
 //       </TouchableOpacity>
@@ -87,23 +87,24 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
   return (
     <View style={styles.container}>
       <View style={styles.hdrcontainer}>
-      <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
-        <Ionicons name="menu" size={25} color="white" />
-      </TouchableOpacity>
-
-      <Text style={styles.title}>AHALLYA INFOTECH PVT LTD</Text>
+        <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
+          <Ionicons name="menu" size={25} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.title}>AHALLYA INFOTECH PVT LTD</Text>
+        <View style={styles.Iconnotfction}><Image source={require('../../assets/images/notification.png')} style={styles.menuIcon} /></View>
       </View>
 
       {/* Show profile section only on the Home screen */}
       {isShow && (
         <View style={styles.profileContainer}>
-          <Image
-            source={require('../../assets/images/Circle-icons-profile.svg.png')} // Update with your image path
-            style={styles.profileImage}
-          />
+          <View style={styles.userimagewraper}>
+            <View style={styles.userimagewrapergray}>
+              <Image source={require('../../assets/images/userphoto.jpg')} style={styles.userimage} />
+            </View>
+          </View>
           <View style={styles.userInfo}>
-            <Text style={styles.userName}>John Doe</Text>
-            <Text style={styles.userRole}>Admin</Text>
+            <Text style={styles.userName}>George Fernandes</Text>
+            <Text style={styles.userRole}>Sr. Software Developer</Text>
           </View>
         </View>
       )}
@@ -113,30 +114,66 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#133F7C',
     padding: 15,
     flexDirection: 'column',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
   },
-    hdrcontainer: {
-    backgroundColor: '#007AFF',
+  hdrcontainer: {
+    backgroundColor: '#133F7C',
     padding: 5,
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
+    marginTop: 23,
+  },
+  Iconnotfction: {
+    backgroundColor: '#ffffff',
+    width: 26,
+    height: 26,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 50,
+  },
+  userimagewraper:
+  {
+    backgroundColor: '#CC0000',
+    width: 53, height: 53,
+    borderRadius: 50,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+  },
+  userimagewrapergray: {
+    backgroundColor: '#CC0000',
+    width: 53, height: 53,
+    borderRadius: 50,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  userimage: {
+    width: 50,
+    height: 50,
+    borderRadius: 50,
   },
   title: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
     flex: 1,
-    textAlign: 'left', // Align text to the left
+    textAlign: 'left',
+    marginLeft: 20,
   },
   profileContainer: {
+    marginTop: 8,
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginLeft: 10,
+    alignContent: 'center',
   },
   profileImage: {
     width: 40,
@@ -146,6 +183,7 @@ const styles = StyleSheet.create({
   },
   userInfo: {
     flexDirection: 'column',
+    marginLeft: 20,
   },
   userName: {
     color: 'white',

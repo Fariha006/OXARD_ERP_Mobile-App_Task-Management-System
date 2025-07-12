@@ -7,7 +7,7 @@ import {
   Image,
   SafeAreaView,
   KeyboardAvoidingView,
-  Platform
+  Platform,TouchableOpacity,Text
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -22,9 +22,9 @@ export default function LoginScreen({ navigation }: Props) {
     console.log('Username:', username);
     console.log('Password:', password);
   
-   //navigation.navigate('Home');
+  
    navigation.navigate('Main');
-    // Add your authentication logic here
+  
   };
 
   return (
@@ -35,20 +35,22 @@ export default function LoginScreen({ navigation }: Props) {
       >
         {/* Logo */}
         <Image
-          source={require('../../assets/images/Circle-icons-profile.svg.png')} // Make sure logo.png is inside assets folder
+          source={require('../../assets/images/loginlogo.webp')} // Make sure logo.png is inside assets folder
           style={styles.logo}
           resizeMode="contain"
         />
 
         {/* Username */}
+        <Text style={styles.label}>Username</Text>
         <TextInput
           placeholder="Username"
           value={username}
           onChangeText={setUsername}
-          style={styles.input}
+          style={[styles.input, styles.inputusr]}
         />
 
         {/* Password */}
+        <Text style={styles.label}>Password</Text>
         <TextInput
           placeholder="Password"
           value={password}
@@ -58,8 +60,11 @@ export default function LoginScreen({ navigation }: Props) {
         />
 
         {/* Sign In Button */}
-        <View style={styles.button}>
-          <Button title="Sign In" onPress={() => handleSignIn()} />
+        {/* <View style={styles.button}><Button title="Sign In" onPress={() => handleSignIn()} /></View> */}
+        <View style={styles.loginbutton}>
+          <TouchableOpacity style={styles.button} onPress={() => handleSignIn()}>
+            <Text style={styles.buttonText}>Sign In</Text>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -68,7 +73,7 @@ export default function LoginScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
   },
   inner: {
     flex: 1,
@@ -77,20 +82,42 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: '100%',
-    height: 120,
-    marginBottom: 40,
+    marginBottom: 30,
+  },
+  label: {
+    marginBottom: 6,
+    marginLeft: 2,
   },
   input: {
     height: 50,
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 8,
-    marginBottom: 16,
+    marginBottom: 0,
     paddingHorizontal: 10,
   },
-  button: {
-    marginTop: 16,
+  inputusr: {
+    marginBottom: 15,
   },
+button: {
+  marginTop: 22,
+  borderColor: '#D60808',
+  backgroundColor: '#D60808',
+  width: 163,
+  height: 44,
+  justifyContent: 'center',
+  alignItems: 'center',
+  borderRadius: 6,
+},
+loginbutton: {
+  width: '100%',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+  buttonText:{
+    color: '#ffffff',
+}
 });
 
 
