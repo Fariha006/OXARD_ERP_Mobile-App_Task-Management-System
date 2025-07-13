@@ -43,13 +43,19 @@ class UserStorage {
   // Get user data
   static async getUserData(): Promise<UserData | null> {
     try {
+      console.log('UserStorage: Attempting to get user data...');
       const userDataString = await AsyncStorage.getItem(STORAGE_KEYS.USER_DATA);
+      console.log('UserStorage: Raw user data string:', userDataString);
+      
       if (userDataString) {
-        return JSON.parse(userDataString) as UserData;
+        const parsedData = JSON.parse(userDataString) as UserData;
+        console.log('UserStorage: Parsed user data:', parsedData);
+        return parsedData;
       }
+      console.log('UserStorage: No user data found');
       return null;
     } catch (error) {
-      console.error('Error getting user data:', error);
+      console.error('UserStorage: Error getting user data:', error);
       return null;
     }
   }

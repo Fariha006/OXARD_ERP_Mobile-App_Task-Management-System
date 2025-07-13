@@ -33,6 +33,25 @@ export interface UserData {
   UserLgnPwd: string | null;
 }
 
+// Personal information interface
+export interface PersonalInfo {
+  EmpId: number;
+  EmpNo: string;
+  EmployeeName: string;
+  AliasName: string;
+  Nationality: string;
+  Gender: string;
+  Religion: string;
+  Caste: string;
+  PlaceOfBirth: string;
+  DateOfBirth: string;
+  MartitalStatus: string;
+  BloodGroup: string;
+  MotherTounge: string;
+  FamilyStatus: string;
+  SocialInsuranceNo: string;
+}
+
 // Menu item interface
 export interface MenuItem {
   MenuId: number;
@@ -57,6 +76,13 @@ export interface AppLoginResponse {
   userData?: UserData;
   menuItems?: MenuItem[];
   token?: string;
+}
+
+// Personal info response
+export interface PersonalInfoResponse {
+  success: boolean;
+  message?: string;
+  personalInfo?: PersonalInfo;
 }
 
 // API service class
@@ -116,6 +142,82 @@ class ApiService {
       }
     }
   }
+
+  // Get personal information API call
+  async getPersonalInfo(token: string): Promise<PersonalInfoResponse> {
+    try {
+      const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+      console.log('Personal Info API URL:', apiurl);
+      console.log('Personal Info Token:', token ? `Bearer ${token.substring(0, 20)}...` : 'No token provided');
+      
+      const requestBody = {
+        "Mode": "ONE"
+      };
+      
+      console.log('Personal Info Request Body:', requestBody);
+      
+      const response = await axios.post<PersonalInfo[]>(apiurl, requestBody, {
+        headers: {
+          ...API_CONFIG.DEFAULT_HEADERS,
+          'Authorization': `Bearer ${token}`,
+        },
+        timeout: API_CONFIG.TIMEOUT,
+      });
+
+      console.log('Personal Info API Response:', response.data);
+
+      // Check if we have personal info data
+      if (response.data && response.data.length > 0) {
+        const personalInfo = response.data[0];
+        
+        return {
+          success: true,
+          message: 'Personal information retrieved successfully',
+          personalInfo: personalInfo,
+        };
+      } else {
+        return {
+          success: false,
+          message: 'No personal information received',
+        };
+      }
+    } catch (error: any) {
+      console.error('Personal Info API Error:', error);
+      
+      if (error.response) {
+        // Server responded with error status
+        console.error('Server Error Status:', error.response.status);
+        console.error('Server Error Data:', error.response.data);
+        console.error('Server Error Headers:', error.response.headers);
+        
+        if (error.response.status === 401) {
+          return {
+            success: false,
+            message: 'Authentication failed. Please login again. (401 Unauthorized)',
+          };
+        }
+        
+        return {
+          success: false,
+          message: error.response.data?.message || `Server error: ${error.response.status}`,
+        };
+      } else if (error.request) {
+        // Network error
+        console.error('Network Error:', error.request);
+        return {
+          success: false,
+          message: 'Network error. Please check your internet connection.',
+        };
+      } else {
+        // Other error
+        console.error('Other Error:', error.message);
+        return {
+          success: false,
+          message: 'An unexpected error occurred.',
+        };
+      }
+    }
+  }
 }
 
 // Create and export API service instance
@@ -123,3 +225,4 @@ export const apiService = new ApiService();
 
 // Export individual functions for easier use
 export const loginUser = (credentials: LoginRequest) => apiService.login(credentials);
+export const getPersonalInfo = (token: string) => apiService.getPersonalInfo(token);

@@ -13,6 +13,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { loginUser, LoginRequest, UserData, MenuItem } from '../api/api';
 import UserStorage from '../utils/userStorage';
+import { useDrawer } from '../context/DrawerContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 export default function LoginScreen({ navigation }: Props) {
@@ -22,6 +23,7 @@ export default function LoginScreen({ navigation }: Props) {
   const [usernameError, setUsernameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { refreshDrawer } = useDrawer();
 
   const validateFields = () => {
     let isValid = true;
@@ -47,10 +49,18 @@ export default function LoginScreen({ navigation }: Props) {
 
   const storeUserData = async (userData: UserData, menuItems: MenuItem[], token: string) => {
     try {
+      console.log('LoginScreen: Storing user data...');
+      console.log('LoginScreen: Token to store:', token ? `Token exists (length: ${token.length})` : 'No token');
+      console.log('LoginScreen: Token preview:', token ? `${token.substring(0, 50)}...` : 'No token');
+      
       await UserStorage.storeSessionData(userData, menuItems, token);
-      console.log('User data stored successfully');
+      console.log('LoginScreen: User data stored successfully');
+      
+      // Verify the token was stored correctly
+      const storedToken = await UserStorage.getToken();
+      console.log('LoginScreen: Verification - stored token:', storedToken ? `Token exists (length: ${storedToken.length})` : 'No token found');
     } catch (error) {
-      console.error('Error storing user data:', error);
+      console.error('LoginScreen: Error storing user data:', error);
     }
   };
 
@@ -70,15 +80,21 @@ export default function LoginScreen({ navigation }: Props) {
       const response = await loginUser(loginData);
 
       if (response.success && response.userData && response.menuItems && response.token) {
-        console.log('Login successful:', response.userData);
-        console.log('Menu items:', response.menuItems);
+        console.log('LoginScreen: Login successful:', response.userData);
+        console.log('LoginScreen: Menu items:', response.menuItems);
+        console.log('LoginScreen: Token from API:', response.token ? `Token exists (length: ${response.token.length})` : 'No token');
+        console.log('LoginScreen: Token preview:', response.token ? `${response.token.substring(0, 50)}...` : 'No token');
         
         // Store user data, menu items, and token
         await storeUserData(response.userData, response.menuItems, response.token);
         
+        // Trigger drawer refresh after storing data
+        refreshDrawer();
+        
         // Navigate to Home with user data
         navigation.navigate('Main', { screen: 'Home' });
       } else {
+        console.log('LoginScreen: Login failed:', response.message);
         Alert.alert('Login Failed', response.message || 'Invalid credentials');
       }
     } catch (error) {

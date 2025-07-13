@@ -61,6 +61,11 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           source={require('../../assets/images/splashscreenlogo.png')}
           style={styles.logo}
           resizeMode="contain"
+          onError={(error) => {
+            console.log('Splash screen image error:', error);
+            // If image fails to load, still proceed after delay
+            setTimeout(() => onFinish(), 2000);
+          }}
         />
       </Animated.View>
     </View>

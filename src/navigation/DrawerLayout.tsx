@@ -51,7 +51,7 @@ const Footer = () => {
         <View><Image source={require('../../assets/images/btmhome.png')}
           style={styles.btmicon} resizeMode="contain" />
         </View>
-        <Text style={styles.label}>Home1</Text>
+        <Text style={styles.label}>Home</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.btmmenu} onPress={() => navigation.navigate('Main', { screen: 'Details' })}>

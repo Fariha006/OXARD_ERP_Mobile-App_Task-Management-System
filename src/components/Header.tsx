@@ -6,24 +6,47 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { DrawerHeaderProps } from '@react-navigation/drawer';
 import UserStorage from '../utils/userStorage';
 import { getFileUrl } from '../config/apiConfig';
+import { useDrawer } from '../context/DrawerContext';
 
 const Header = ({ navigation, route }: DrawerHeaderProps) => {
   const [userData, setUserData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const isShow = route.name === 'Details' || route.name === 'Home';
+  const { isDrawerRefreshing } = useDrawer();
+  
   useEffect(() => {
     loadUserData();
-  }, []);
+  }, [isDrawerRefreshing]); // Refresh when drawer refresh is triggered
 
   const loadUserData = async () => {
-    try {    
-      const storedUserData = await UserStorage.getUserData();     
+    try {
+      console.log('Header: Starting to load user data...');
+      setIsLoading(true);
+      setError(null);
+      
+      const storedUserData = await UserStorage.getUserData();
+      console.log('Header: Retrieved user data:', storedUserData);
+      
       if (storedUserData) {
         setUserData(storedUserData);
+        console.log('Header: User data set successfully');
+      } else {
+        console.log('Header: No user data found in storage');
+        setError('No user data available');
       }
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error('Header: Error loading user data:', error);
+      setError('Failed to load user data');
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  // Debug logging for render
+  console.log('Header: Rendering with userData:', userData);
+  console.log('Header: isLoading:', isLoading);
+  console.log('Header: error:', error);
 
   return (
     <View style={styles.container}>
@@ -32,13 +55,19 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
           <Ionicons name="menu" size={25} color="white" />
         </TouchableOpacity>
         <Text style={styles.title}>
-  {userData?.CompNam
-    ? userData.CompNam.length > 28
-      ? userData.CompNam.slice(0, 25) + '...'
-      : userData.CompNam
-    : 'COMPANY NAME'}
-</Text>
-        <View style={styles.Iconnotfction}><Image source={require('../../assets/images/notification.png')} style={styles.menuIcon} /></View>
+          {userData?.CompNam
+            ? userData.CompNam.length > 28
+              ? userData.CompNam.slice(0, 25) + '...'
+              : userData.CompNam
+            : isLoading 
+              ? 'Loading...' 
+              : error 
+                ? 'Error Loading' 
+                : 'COMPANY NAME'}
+        </Text>
+        <View style={styles.Iconnotfction}>
+          <Image source={require('../../assets/images/notification.png')} style={styles.menuIcon} />
+        </View>
       </View>
 
       {/* Show profile section only on the Home screen */}
@@ -46,12 +75,26 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
         <View style={styles.profileContainer}>
           <View style={styles.userimagewraper}>
             <View style={styles.userimagewrapergray}>
-              <Image source={userData?.EmployeePhotoUrl ? { uri: getFileUrl(`/${userData.EmployeePhotoUrl}`) } : require('../../assets/images/userphoto.jpg')}style={styles.userimage} />
+              <Image 
+                source={
+                  userData?.EmployeePhotoUrl 
+                    ? { uri: getFileUrl(`/${userData.EmployeePhotoUrl}`) } 
+                    : require('../../assets/images/userphoto.jpg')
+                }
+                style={styles.userimage}
+                onError={(error) => {
+                  console.log('Header: Image load error:', error);
+                }}
+              />
             </View>
           </View>
           <View style={styles.userInfo}>
-            <Text style={styles.userName}>{userData?.EmployeeName || 'User Name'}</Text>
-            <Text style={styles.userRole}>{userData?.UserNam || 'email@email.com'}</Text>
+            <Text style={styles.userName}>
+              {userData?.EmployeeName || (isLoading ? 'Loading...' : 'User Name')}
+            </Text>
+            <Text style={styles.userRole}>
+              {userData?.UserNam || (isLoading ? 'Loading...' : 'email@email.com')}
+            </Text>
           </View>
         </View>
       )}
@@ -62,18 +105,18 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#133F7C',
-    padding: 15,
+    padding: 10,
     flexDirection: 'column',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
   },
   hdrcontainer: {
     backgroundColor: '#133F7C',
-    padding: 5,
+    padding: 2,
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginTop: 23,
+    marginTop: 10,
   },
   Iconnotfction: {
     backgroundColor: '#ffffff',
@@ -83,6 +126,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 50,
+  },
+  menuIcon: {
+    width: 16,
+    height: 16,
   },
   userimagewraper:
   {

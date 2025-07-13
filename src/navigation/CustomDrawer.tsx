@@ -1,32 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image,Alert  } from 'react-native';
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
 import UserStorage from '../utils/userStorage';
 import { MenuItem } from '../api/api';
 import { getFileUrl } from '../config/apiConfig';
+import { useDrawer } from '../context/DrawerContext';
 
 
 const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [userData, setUserData] = useState<any>(null);
+  const { isDrawerRefreshing } = useDrawer();
 
   useEffect(() => {
     loadUserData();
-  }, []);
+  }, [isDrawerRefreshing]); // Refresh when drawer refresh is triggered
 
   const loadUserData = async () => {
     try {
+      console.log('CustomDrawer: Loading user data...');
       const storedMenuItems = await UserStorage.getMenuItems();
       const storedUserData = await UserStorage.getUserData();
       
+      console.log('CustomDrawer: Stored menu items:', storedMenuItems?.length || 0);
+      console.log('CustomDrawer: Stored user data:', storedUserData ? 'exists' : 'null');
+      
       if (storedMenuItems) {
         setMenuItems(storedMenuItems);
+        console.log('CustomDrawer: Menu items set successfully');
       }
       if (storedUserData) {
         setUserData(storedUserData);
+        console.log('CustomDrawer: User data set successfully');
       }
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error('CustomDrawer: Error loading user data:', error);
     }
   };
 
@@ -115,6 +123,7 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
             source={userData?.EmployeePhotoUrl ? { uri: getFileUrl(`/${userData.EmployeePhotoUrl}`) } : require('../../assets/images/userphoto.jpg')} 
             style={styles.userimage} 
           />
+        
         </View>
       </View>
       <View style={styles.Usrnmanddownarow}>
@@ -134,12 +143,12 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
 
 {menuItemsConfig.map((item, index) => {
           // Check if this menu item should be visible
-          // const isVisible = isMenuItemVisible(item.text);
+          const isVisible = isMenuItemVisible(item.text);
           
-          // // If not visible, don't render the TouchableOpacity
-          // if (!isVisible) {
-          //   return null;
-          // }
+          // If not visible, don't render the TouchableOpacity
+          if (!isVisible) {
+            return null;
+          }
 
           return (
             <TouchableOpacity 
