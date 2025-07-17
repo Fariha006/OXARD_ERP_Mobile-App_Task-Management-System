@@ -2,6 +2,22 @@ import axios from 'axios';
 import { API_CONFIG, getApiUrl } from '../config/apiConfig';
 import { Alert } from 'react-native';
 
+/**
+ * API Service for Oxard ERP
+ * 
+ * Available API methods:
+ * - loginUser(credentials): Login authentication
+ * - getPersonalInfo(token): Get personal information (Mode: "ONE")
+ * - getAddressInfo(token): Get address information (Mode: "TWO")
+ * 
+ * Example usage:
+ * const token = await UserStorage.getToken();
+ * const addressResponse = await getAddressInfo(token);
+ * if (addressResponse.success) {
+ *   console.log('Address:', addressResponse.addressInfo);
+ * }
+ */
+
 // API request types
 export interface LoginRequest {
   UserNam: string;
@@ -52,6 +68,44 @@ export interface PersonalInfo {
   SocialInsuranceNo: string;
 }
 
+// Address information interface
+export interface AddressInfo {
+  EmpId: number;
+  EmpNo: string;
+  EmployeeName: string;
+  AddressC: string;
+  CityCodC: string | null;
+  CityNamC: string | null;
+  CntryNamC: string | null;
+  StateNamC: string | null;
+  DistrictC: string | null;
+  BuildingNoC: string | null;
+  PostalCodeC: string | null;
+  StreetC: string | null;
+  ZipCodeC: string;
+  PhoneC: string | null;
+  MobileC: string | null;
+  AddressP: string;
+  CntryNamP: string | null;
+  StateNamP: string | null;
+  CityCodP: string | null;
+  CityNamP: string | null;
+  ZipCodeP: string;
+  PhoneP: string;
+  MobileP: string;
+  ContactPersonP: string;
+  AddressE: string;
+  CityCodE: string | null;
+  CityNamE: string | null;
+  ZipCodeE: string;
+  CntryNamE: string | null;
+  StateNamE: string | null;
+  PhoneE: string;
+  MobileE: string;
+  PersonalEmailId: string;
+  OfficialEmailId: string;
+}
+
 // Menu item interface
 export interface MenuItem {
   MenuId: number;
@@ -83,6 +137,41 @@ export interface PersonalInfoResponse {
   success: boolean;
   message?: string;
   personalInfo?: PersonalInfo;
+}
+
+// Address info response
+export interface AddressInfoResponse {
+  success: boolean;
+  message?: string;
+  addressInfo?: AddressInfo;
+}
+
+// Dependent information interface
+export interface DependentInfo {
+  EmpId: number;
+  EmpNo: string;
+  EmployeeName: string;
+  DependentName: string;
+  Relation: string;
+  DateofBirthDependent: string;
+  GenderDependent: string;
+  MaritalStatusDependent: string;
+  DependentVisa: string;
+  DependentVisaNo: string;
+  DependentVisaIssueDate: string | null;
+  DependentVisaExpiryDate: string | null;
+  DependentNationalityCode: string;
+  DependentNationality: string;
+  DependentPassportNo: string;
+  DependentPassportPlaceofIssue: string;
+  DependentUIDNo: string;
+  NationalIdDependent: string;
+  NationalIDExpiryDependent: string;
+  DependentInsuranceNo: string;
+  DependentInsuranceClass: string;
+  DependentInsuranceStatus: string | null;
+  DependentInsuranceEffectiveDate: string | null;
+  DependentInsuranceEndDate: string | null;
 }
 
 // API service class
@@ -218,6 +307,96 @@ class ApiService {
       }
     }
   }
+
+  // Get address information API call
+  async getAddressInfo(token: string): Promise<AddressInfoResponse> {
+    try {
+      const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+      console.log('Address Info API URL:', apiurl);
+      console.log('Address Info Token:', token ? `Bearer ${token.substring(0, 20)}...` : 'No token provided');
+      
+      const requestBody = {
+        "Mode": "TWO"
+      };
+      
+      console.log('Address Info Request Body:', requestBody);
+      
+      const response = await axios.post<AddressInfo[]>(apiurl, requestBody, {
+        headers: {
+          ...API_CONFIG.DEFAULT_HEADERS,
+          'Authorization': `Bearer ${token}`,
+        },
+        timeout: API_CONFIG.TIMEOUT,
+      });
+
+      console.log('Address Info API Response:', response.data);
+
+      // Check if we have address info data
+      if (response.data && response.data.length > 0) {
+        const addressInfo = response.data[0];
+        
+        return {
+          success: true,
+          message: 'Address information retrieved successfully',
+          addressInfo: addressInfo,
+        };
+      } else {
+        return {
+          success: false,
+          message: 'No address information received',
+        };
+      }
+    } catch (error: any) {
+      console.error('Address Info API Error:', error);
+      
+      if (error.response) {
+        // Server responded with error status
+        console.error('Server Error Status:', error.response.status);
+        console.error('Server Error Data:', error.response.data);
+        console.error('Server Error Headers:', error.response.headers);
+        
+        if (error.response.status === 401) {
+          return {
+            success: false,
+            message: 'Authentication failed. Please login again. (401 Unauthorized)',
+          };
+        }
+        
+        return {
+          success: false,
+          message: error.response.data?.message || `Server error: ${error.response.status}`,
+        };
+      } else if (error.request) {
+        // Network error
+        console.error('Network Error:', error.request);
+        return {
+          success: false,
+          message: 'Network error. Please check your internet connection.',
+        };
+      } else {
+        // Other error
+        console.error('Other Error:', error.message);
+        return {
+          success: false,
+          message: 'An unexpected error occurred.',
+        };
+      }
+    }
+  }
+
+  // Get dependents API call
+  async getDependents(token: string): Promise<DependentInfo[]> {
+    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const requestBody = { "Mode": "Three" };
+    const response = await axios.post<DependentInfo[]>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  }
 }
 
 // Create and export API service instance
@@ -226,3 +405,5 @@ export const apiService = new ApiService();
 // Export individual functions for easier use
 export const loginUser = (credentials: LoginRequest) => apiService.login(credentials);
 export const getPersonalInfo = (token: string) => apiService.getPersonalInfo(token);
+export const getAddressInfo = (token: string) => apiService.getAddressInfo(token);
+export const getDependents = (token: string) => apiService.getDependents(token);

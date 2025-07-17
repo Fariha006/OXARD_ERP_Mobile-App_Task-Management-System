@@ -1,10 +1,33 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import UserStorage from '../utils/userStorage';
+import { getFileUrl } from '../config/apiConfig';
 
 type Props = NativeStackScreenProps<any>;
 
 export default function HomeScreen({ navigation }: Props) {
+
+  const [userData, setUserData] = useState<any>(null);
+  
+  useEffect(() => {
+    loadUserData();
+  }, []);
+
+  const loadUserData = async () => {
+    try {
+      console.log('CustomDrawer: Loading user data...');
+     
+      const storedUserData = await UserStorage.getUserData();
+            
+      if (storedUserData) {
+        setUserData(storedUserData);
+        console.log('CustomDrawer: User data set successfully');
+      }
+    } catch (error) {
+      console.error('CustomDrawer: Error loading user data:', error);
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.back}>
@@ -21,36 +44,19 @@ export default function HomeScreen({ navigation }: Props) {
       <View>
         <View style={styles.logoContainer}>
           <View style={styles.profilepic}>
-            <Image source={require('../../assets/images/profile/mydeskprofile.png')}
+            <Image source={userData?.EmployeePhotoUrl ? { uri: getFileUrl(`/${userData.EmployeePhotoUrl}`) } : require('../../assets/images/userphoto.jpg')} 
               style={styles.logo} resizeMode="contain" />
           </View>
         </View>
         <View style={styles.logoContainercode}>
-          <Text style={styles.logoContainercodetext}>EMP 457</Text>
+          <Text style={styles.logoContainercodetext}> {userData?.EmpNo}</Text>
         </View>
         <View style={styles.logoContainercode}>
-          <Text style={styles.usernametext}>George Fernandes</Text>
+          <Text style={styles.usernametext}>{userData?.EmployeeName}</Text>
         </View>
       </View>
 
-      {/* <View style={styles.mydeskbtnfirstraw}>
-        <View style={styles.tilecontainer} >
-          <TouchableOpacity key='1' style={styles.tile}>
-            <Image source={require('../../assets/images/Circle-icons-profile.svg.png')} style={styles.image} />
-            <Text style={styles.title}>Personal information</Text>
-          </TouchableOpacity>            
-        </View>
-        <View>
-          <Text >Sr.SoftwareDeveleper</Text>
-          <Text >IT.Department</Text>
-        </View>
-        <View>
-          <TouchableOpacity key='1' style={styles.tileend}>
-            <Image source={require('../../assets/images/Circle-icons-profile.svg.png')} style={styles.image} />
-            <Text style={styles.title}>Personal information</Text>
-          </TouchableOpacity>
-        </View>
-      </View> */}
+    
       <TouchableOpacity>
         <ScrollView>
           <View style={styles.mydeskbtnfirstraw}>
@@ -61,11 +67,11 @@ export default function HomeScreen({ navigation }: Props) {
               </TouchableOpacity>
             </View>
             <View style={styles.userdetail}>
-              <Text style={styles.userdesig}>Sr. Software Developer</Text>
-              <Text style={styles.userdesig}>IT Department</Text>
+              <Text style={styles.userdesig}>{userData?.DesgNam}</Text>
+              <Text style={styles.userdesig}>{userData?.DeptDesc}</Text>
             </View>
             <View style={[styles.tile, styles.lightpink]}>
-              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: '' })}>
+              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Address' })}>
                 <Image source={require('../../assets/images/mydesk/addrss.png')} style={styles.image} />
                 <Text style={styles.title}>Address</Text>
               </TouchableOpacity>
@@ -73,7 +79,7 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
           <View style={styles.mydeskbtnfirstraw}>
             <View style={[styles.tile, styles.lightyllow]}>
-              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: '' })}>
+              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Dependent' })}>
                 <Image source={require('../../assets/images/mydesk/depnds.png')} style={styles.image} />
                 <Text style={styles.title}>Dependents</Text>
               </TouchableOpacity>

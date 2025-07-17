@@ -15,6 +15,7 @@
 import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { StatusBar } from 'react-native';
 import DrawerLayout from './src/navigation/DrawerLayout';
 import LoginScreen from './src/screens/LoginScreen';
 import DetailsScreen from './src/screens/DetailsScreen';
@@ -37,17 +38,20 @@ export default function App() {
   }
 
   return (
-    <DrawerProvider>
-      <NavigationContainer>
-        <Drawer.Navigator initialRouteName="Login" drawerContent={(props) => <CustomDrawer {...props} />}>
-          <Drawer.Screen name="Main" component={DrawerLayout} options={{ headerShown: false}}/>
+    <>
+   
+      <DrawerProvider>
+        <NavigationContainer>
+          <Drawer.Navigator initialRouteName="Login" drawerContent={(props) => <CustomDrawer {...props} />}>
+            <Drawer.Screen name="Main" component={DrawerLayout} options={{ headerShown: false}}/>
 
-          <Drawer.Screen name="Login" component={LoginScreen}  options={{ headerShown: false ,drawerItemStyle: { display: 'none' },}}  />
+            <Drawer.Screen name="Login" component={LoginScreen}  options={{ headerShown: false ,drawerItemStyle: { display: 'none' },}}  />
 
-            
-        </Drawer.Navigator>
-      </NavigationContainer>
-    </DrawerProvider>
+              
+          </Drawer.Navigator>
+        </NavigationContainer>
+      </DrawerProvider>
+    </>
   );
 }
 

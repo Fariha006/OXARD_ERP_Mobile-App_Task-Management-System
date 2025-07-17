@@ -1,7 +1,7 @@
 
 
 import React, { useState,useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet,StatusBar } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { DrawerHeaderProps } from '@react-navigation/drawer';
 import UserStorage from '../utils/userStorage';
@@ -49,12 +49,18 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
   console.log('Header: error:', error);
 
   return (
+    <>
+    <StatusBar 
+    backgroundColor="#133F7C" 
+    barStyle="light-content" 
+    translucent={false}
+  />
     <View style={styles.container}>
       <View style={styles.hdrcontainer}>
         <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
           <Ionicons name="menu" size={25} color="white" />
         </TouchableOpacity>
-        <Text style={styles.title}>
+        {/* <Text style={styles.title}>
           {userData?.CompNam
             ? userData.CompNam.length > 28
               ? userData.CompNam.slice(0, 25) + '...'
@@ -64,6 +70,10 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
               : error 
                 ? 'Error Loading' 
                 : 'COMPANY NAME'}
+        </Text> */}
+           <Text style={styles.title}>
+          {userData?.CompNam
+            }
         </Text>
         <View style={styles.Iconnotfction}>
           <Image source={require('../../assets/images/notification.png')} style={styles.menuIcon} />
@@ -99,13 +109,14 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
         </View>
       )}
     </View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#133F7C',
-    padding: 10,
+    padding: 5,
     flexDirection: 'column',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
@@ -116,7 +127,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginTop: 10,
+    marginTop: 5,
   },
   Iconnotfction: {
     backgroundColor: '#ffffff',

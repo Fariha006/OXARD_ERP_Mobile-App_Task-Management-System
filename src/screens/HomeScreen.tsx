@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList, SafeAreaView
+  View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList, SafeAreaView, StatusBar
 } from 'react-native';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -120,7 +120,13 @@ export default function HomeScreen({ navigation }: Props) {
   );
 
   return (
-    <View style={styles.container}>
+    <>
+      <StatusBar 
+        backgroundColor="#133F7C" 
+        barStyle="light-content" 
+        translucent={false}
+      />
+      <View style={styles.container}>
       <View style={styles.btncontainer}>
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
@@ -163,6 +169,7 @@ export default function HomeScreen({ navigation }: Props) {
       </ScrollView>
 
     </View>
+    </>
   );
 }
 

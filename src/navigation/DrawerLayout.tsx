@@ -7,6 +7,8 @@ import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
 import MydeskScreen from '../screens/MyDeskScreen';
 import Personalinformationscreen from '../screens/Personalinformationscreen';
+import AddressScreen from '../screens/AddressScreen';
+import DependentScreen from '../screens/DependentScreen';
 
 const Stack = createStackNavigator();
 
@@ -31,13 +33,27 @@ const InnerStack = () => (
       })}
     />
 
-<Stack.Screen
-      name="Personalinfo"
-      component={Personalinformationscreen}
-      options={({ navigation, route }) => ({
-        header: () => <Header navigation={navigation} route={route} />
-      })}
-    />
+    <Stack.Screen
+          name="Personalinfo"
+          component={Personalinformationscreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        />
+         <Stack.Screen
+          name="Address"
+          component={AddressScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        />
+            <Stack.Screen
+          name="Dependent"
+          component={DependentScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        />
 
   </Stack.Navigator>
 );
