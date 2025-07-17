@@ -85,19 +85,19 @@ export default function HomeScreen({ navigation }: Props) {
               </TouchableOpacity>
             </View>
             <View style={[styles.tile, styles.lightblue]}>
-              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: '' })}>
+              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Payments' })}>
                 <Image source={require('../../assets/images/mydesk/paymnts.png')} style={styles.image} />
                 <Text style={styles.title}>Payments</Text>
               </TouchableOpacity>
             </View>
             <View style={[styles.tile, styles.lightyllow]}>
-              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: '' })}>
+              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Qualifications' })}>
                 <Image source={require('../../assets/images/mydesk/qlfction.png')} style={styles.image} />
                 <Text style={styles.title}>Qualifications</Text>
               </TouchableOpacity>
             </View>
             <View style={[styles.tile, styles.whitebg]}>
-              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: '' })}>
+              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Documents' })}>
                 <Image source={require('../../assets/images/mydesk/documentd.png')} style={styles.image} />
                 <Text style={styles.title}>Documents</Text>
               </TouchableOpacity>
@@ -105,13 +105,13 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
           <View style={styles.mydeskbtnfirstraw}>
             <View style={[styles.tile, styles.lightblue]}>
-              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: '' })}>
+              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'ContactInfo' })}>
                 <Image source={require('../../assets/images/mydesk/cntctinfo.png')} style={styles.image} />
                 <Text style={styles.title}>Contact Info</Text>
               </TouchableOpacity>
             </View>
             <View style={[styles.tile, styles.lightpink]}>
-              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: '' })}>
+              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Salary' })}>
                 <Image source={require('../../assets/images/mydesk/salry.png')} style={styles.image} />
                 <Text style={styles.title}>Salary</Text>
               </TouchableOpacity>

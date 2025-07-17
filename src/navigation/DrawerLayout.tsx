@@ -9,6 +9,11 @@ import MydeskScreen from '../screens/MyDeskScreen';
 import Personalinformationscreen from '../screens/Personalinformationscreen';
 import AddressScreen from '../screens/AddressScreen';
 import DependentScreen from '../screens/DependentScreen';
+import PaymentsScreen from '../screens/PaymentsScreen';
+import QualificationScreen from '../screens/QualificationScreen';
+import DocumentsScreen from '../screens/DocumentsScreen';
+import ContactInfoSceen from '../screens/ContactInfoSceen';
+import SalaryScreen from '../screens/SalaryScreen';
 
 const Stack = createStackNavigator();
 
@@ -54,6 +59,42 @@ const InnerStack = () => (
             header: () => <Header navigation={navigation} route={route} />
           })}
         />
+               <Stack.Screen
+          name="Payments"
+          component={PaymentsScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
+                 <Stack.Screen
+          name="Qualifications"
+          component={QualificationScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
+
+<Stack.Screen
+          name="Documents"
+          component={DocumentsScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
+        <Stack.Screen
+          name="ContactInfo"
+          component={ContactInfoSceen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
+        <Stack.Screen
+          name="Salary"
+          component={SalaryScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
 
   </Stack.Navigator>
 );

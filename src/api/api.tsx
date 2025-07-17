@@ -174,6 +174,17 @@ export interface DependentInfo {
   DependentInsuranceEndDate: string | null;
 }
 
+// Payment information interface
+export interface PaymentInfo {
+  "Payment Mode": string;
+  "Branch ": string;
+  "Bank Branch ": string;
+  "Account No": string;
+  "IBAN No": string;
+  "Beneficiary Name": string;
+  "Salary A/C (Yes/NO)": string;
+}
+
 // API service class
 class ApiService {
   // Login API call
@@ -240,7 +251,7 @@ class ApiService {
       console.log('Personal Info Token:', token ? `Bearer ${token.substring(0, 20)}...` : 'No token provided');
       
       const requestBody = {
-        "Mode": "ONE"
+        "Mode": "One"
       };
       
       console.log('Personal Info Request Body:', requestBody);
@@ -316,7 +327,7 @@ class ApiService {
       console.log('Address Info Token:', token ? `Bearer ${token.substring(0, 20)}...` : 'No token provided');
       
       const requestBody = {
-        "Mode": "TWO"
+        "Mode": "Two"
       };
       
       console.log('Address Info Request Body:', requestBody);
@@ -397,6 +408,76 @@ class ApiService {
     });
     return response.data;
   }
+
+  // Get payments API call
+  async getPayments(token: string): Promise<PaymentInfo[]> {
+    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const requestBody = { "Mode": "Four" };
+    const response = await axios.post<PaymentInfo[]>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  }
+
+  // Get qualification data API call
+  async getQualificationData(token: string): Promise<any> {
+    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const requestBody = { "Mode": "Five" };
+    const response = await axios.post<any>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  }
+
+  // Get document data API call
+  async getDocumentData(token: string): Promise<any> {
+    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const requestBody = { "Mode": "Six" };
+    const response = await axios.post<any>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  }
+
+  // Get contact info data API call
+  async getContactInfoData(token: string): Promise<any> {
+    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const requestBody = { "Mode": "Seven" };
+    const response = await axios.post<any>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  }
+
+  // Get salary data API call
+  async getSalaryData(token: string): Promise<any> {
+    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const requestBody = { "Mode": "Eight" };
+    const response = await axios.post<any>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  }
 }
 
 // Create and export API service instance
@@ -407,3 +488,8 @@ export const loginUser = (credentials: LoginRequest) => apiService.login(credent
 export const getPersonalInfo = (token: string) => apiService.getPersonalInfo(token);
 export const getAddressInfo = (token: string) => apiService.getAddressInfo(token);
 export const getDependents = (token: string) => apiService.getDependents(token);
+export const getPayments = (token: string) => apiService.getPayments(token);
+export const getQualificationData = (token: string) => apiService.getQualificationData(token);
+export const getDocumentData = (token: string) => apiService.getDocumentData(token);
+export const getContactInfoData = (token: string) => apiService.getContactInfoData(token);
+export const getSalaryData = (token: string) => apiService.getSalaryData(token);
