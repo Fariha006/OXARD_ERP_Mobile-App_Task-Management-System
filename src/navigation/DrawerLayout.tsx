@@ -14,6 +14,10 @@ import QualificationScreen from '../screens/QualificationScreen';
 import DocumentsScreen from '../screens/DocumentsScreen';
 import ContactInfoSceen from '../screens/ContactInfoSceen';
 import SalaryScreen from '../screens/SalaryScreen';
+import EligibilitiesScreen from '../screens/EligibilitiesScreen';
+import ContractRevisionScreen from '../screens/ContractRevisionScreen';
+import AssetsScreen from '../screens/AssetsScreen';
+import LeaveHistoryScreen from '../screens/LeaveHistoryScreen';
 
 const Stack = createStackNavigator();
 
@@ -91,6 +95,34 @@ const InnerStack = () => (
         <Stack.Screen
           name="Salary"
           component={SalaryScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
+          <Stack.Screen
+          name="Eligibilities"
+          component={EligibilitiesScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
+        <Stack.Screen
+          name="ContractRevision"
+          component={ContractRevisionScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
+        <Stack.Screen
+          name="Assets"
+          component={AssetsScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
+        <Stack.Screen
+          name="LeaveHistory"
+          component={LeaveHistoryScreen}
           options={({ navigation, route }) => ({
             header: () => <Header navigation={navigation} route={route} />
           })}

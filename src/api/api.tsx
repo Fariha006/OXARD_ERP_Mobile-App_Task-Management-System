@@ -478,6 +478,62 @@ class ApiService {
     });
     return response.data;
   }
+
+  // Get eligibility data API call
+  async getEligibilityData(token: string): Promise<any> {
+    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const requestBody = { "Mode": "Nine" };
+    const response = await axios.post<any>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  }
+
+  // Get contract revision data API call
+  async getContractRevisionData(token: string): Promise<any> {
+    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const requestBody = { "Mode": "Ten" };
+    const response = await axios.post<any>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  }
+
+  // Get assets data API call
+  async getAssetsData(token: string): Promise<any> {
+    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const requestBody = { "Mode": "Eleven" };
+    const response = await axios.post<any>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  }
+
+  // Get leave history data API call
+  async getLeaveHistoryData(token: string): Promise<any> {
+    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const requestBody = { "Mode": "Twelve" };
+    const response = await axios.post<any>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  }
 }
 
 // Create and export API service instance
@@ -493,3 +549,7 @@ export const getQualificationData = (token: string) => apiService.getQualificati
 export const getDocumentData = (token: string) => apiService.getDocumentData(token);
 export const getContactInfoData = (token: string) => apiService.getContactInfoData(token);
 export const getSalaryData = (token: string) => apiService.getSalaryData(token);
+export const getEligibilityData = (token: string) => apiService.getEligibilityData(token);
+export const getContractRevisionData = (token: string) => apiService.getContractRevisionData(token);
+export const getAssetsData = (token: string) => apiService.getAssetsData(token);
+export const getLeaveHistoryData = (token: string) => apiService.getLeaveHistoryData(token);

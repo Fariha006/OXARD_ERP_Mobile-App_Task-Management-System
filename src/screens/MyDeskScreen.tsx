@@ -117,13 +117,13 @@ export default function HomeScreen({ navigation }: Props) {
               </TouchableOpacity>
             </View>
             <View style={[styles.tile, styles.whitebg]}>
-              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: '' })}>
+              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Eligibilities' })}>
                 <Image source={require('../../assets/images/mydesk/eligibilty.png')} style={styles.image} />
                 <Text style={styles.title}>Eligibilities</Text>
               </TouchableOpacity>
             </View>
             <View style={[styles.tile, styles.lightpink]}>
-              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: '' })}>
+              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'ContractRevision' })}>
                 <Image source={require('../../assets/images/mydesk/revisn.png')} style={styles.image} />
                 <Text style={styles.title}>Revisions</Text>
               </TouchableOpacity>
@@ -131,13 +131,13 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
           <View style={styles.mydeskbtnfirstraw}>
             <View style={[styles.tile, styles.whitebg]}>
-              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: '' })}>
+              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Assets' })}>
                 <Image source={require('../../assets/images/mydesk/asst.png')} style={styles.image} />
                 <Text style={styles.title}>Assets</Text>
               </TouchableOpacity>
             </View>
             <View style={[styles.tile, styles.lightyllow]}>
-              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: '' })}>
+              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'LeaveHistory' })}>
                 <Image source={require('../../assets/images/mydesk/leaverqst.png')} style={styles.image} />
                 <Text style={styles.title}>Leave Requests</Text>
               </TouchableOpacity>
