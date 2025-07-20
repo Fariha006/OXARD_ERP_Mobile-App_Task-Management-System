@@ -66,7 +66,7 @@ export default function ContactInfoSceen({ navigation }: { navigation?: any }) {
           </View>
         </TouchableOpacity>
         <View style={styles.pagewrap}>
-          <Text style={styles.pagetitle}>Contract Info</Text>
+          <Text style={styles.pagetitle}>Contract Info </Text>
         </View>
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
