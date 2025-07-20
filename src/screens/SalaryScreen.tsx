@@ -61,8 +61,10 @@ export default function SalaryScreen({ navigation }: { navigation?: any }) {
               style={styles.backiconimg} resizeMode="contain" />
           </View>
         </TouchableOpacity>
-        <Text style={styles.pagetitle}>Salary</Text>
-        <TouchableOpacity  style={styles.rightclick}></TouchableOpacity>
+        <View style={styles.pagewrap}>
+          <Text style={styles.pagetitle}>Salary</Text>
+        </View>
+        <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.accordion}>
@@ -79,7 +81,7 @@ export default function SalaryScreen({ navigation }: { navigation?: any }) {
               {data.map((item, idx) => (
                 <View key={item.PayHeadId || idx} style={idx % 2 === 0 ? styles.odd : styles.even}>
                   <Text style={styles.lbl}>{item.PayHeadName}:</Text>
-                               
+
                   <Text style={styles.vlue}>{item.BaseAmount}</Text>
                 </View>
               ))}
@@ -105,8 +107,14 @@ const styles = StyleSheet.create({
   toptitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center', 
+    alignItems: 'center',
     paddingRight: 10,
+  },
+  pagewrap: {
+    width: '100%',
+    paddingRight: 50,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   pagetitle: {
     fontSize: 22,
@@ -148,7 +156,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F1F6FD',
+    backgroundColor: '#E1E6EC',
     padding: 10,
     borderRadius: 20,
   },
@@ -167,23 +175,29 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     paddingBottom: 2,
     paddingTop: 2,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   even: {
     backgroundColor: '#F1F6FD',
-    marginBottom: 5, 
+    marginBottom: 5,
     paddingBottom: 2,
     paddingTop: 2,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   lbl: {
-    fontSize: 16,  
-    color: '#000000',  
-    paddingLeft:12,
+    fontSize: 16,
+    color: '#000000',
+    paddingLeft: 12,
   },
   vlue: {
     fontSize: 16,
     fontWeight: '600',
     color: '#000000',
-    paddingLeft:12,
+    paddingLeft: 12,
   },
   loadingContainer: {
     flex: 1,

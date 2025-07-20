@@ -1,6 +1,8 @@
-import React, { useState, useEffect }  from 'react';
-import { View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList, 
-  SafeAreaView, Alert, ActivityIndicator} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList,
+  SafeAreaView, Alert, ActivityIndicator
+} from 'react-native';
 
 import { StackScreenProps } from '@react-navigation/stack';
 import { getPersonalInfo, PersonalInfo } from '../api/api';
@@ -72,34 +74,34 @@ export default function Personalinformationscreen({ navigation }: Props) {
   const testTokenAndAPI = async () => {
     try {
       console.log('=== TOKEN DEBUG TEST ===');
-      
+
       // Test 1: Get stored token
       const token = await UserStorage.getToken();
       console.log('Test 1 - Stored Token:', token ? `Exists (${token.length} chars)` : 'NULL');
       console.log('Test 1 - Token Preview:', token ? token.substring(0, 100) : 'NULL');
-      
+
       if (!token) {
         Alert.alert('Debug Info', 'No token found in storage');
         return;
       }
-      
+
       // Test 2: Test API call with detailed logging
       console.log('Test 2 - Making API call...');
       const apiurl = 'http://216.48.184.187:8081/api/Mob1010/MyDesk';
       console.log('Test 2 - API URL:', apiurl);
       console.log('Test 2 - Authorization Header:', `Bearer ${token.substring(0, 50)}...`);
-      
+
       // Test 3: Try different header formats
       console.log('Test 3 - Testing different header formats...');
-      
+
       // Format 1: Standard Bearer
       console.log('Format 1: Bearer token');
-      
+
       // Format 2: Just the token (some APIs don't need "Bearer")
       console.log('Format 2: Token only');
-      
+
       Alert.alert('Debug Info', `Token length: ${token.length}\nToken preview: ${token.substring(0, 50)}...`);
-      
+
     } catch (error: any) {
       console.error('Debug test error:', error);
       Alert.alert('Debug Error', error?.message || error?.toString() || 'Unknown error');
@@ -129,7 +131,9 @@ export default function Personalinformationscreen({ navigation }: Props) {
                 style={styles.backiconimg} resizeMode="contain" />
             </View>
           </TouchableOpacity>
-          <Text style={styles.pagetitle}>My Desk</Text>
+          <View style={styles.pagewrap}>
+            <Text style={styles.pagetitle}>My Desk</Text>
+          </View>
           <TouchableOpacity style={styles.rightclick}>
           </TouchableOpacity>
         </View>
@@ -151,7 +155,9 @@ export default function Personalinformationscreen({ navigation }: Props) {
                 style={styles.backiconimg} resizeMode="contain" />
             </View>
           </TouchableOpacity>
-          <Text style={styles.pagetitle}>My Desk</Text>
+          <View style={styles.pagewrap}>
+            <Text style={styles.pagetitle}>My Desk</Text>
+          </View>
           <TouchableOpacity style={styles.rightclick}>
           </TouchableOpacity>
         </View>
@@ -177,8 +183,10 @@ export default function Personalinformationscreen({ navigation }: Props) {
               style={styles.backiconimg} resizeMode="contain" />
           </View>
         </TouchableOpacity>
-        <Text style={styles.pagetitle}>My Desk</Text>
-        <TouchableOpacity  style={styles.rightclick}>
+        <View style={styles.pagewrap}>
+          <Text style={styles.pagetitle}>My Desk</Text>
+        </View>
+        <TouchableOpacity style={styles.rightclick}>
         </TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -186,11 +194,11 @@ export default function Personalinformationscreen({ navigation }: Props) {
         <View style={styles.accordion}>
           <TouchableOpacity style={styles.accordionHeader}
             onPress={() => setAccordionOpen(!accordionOpen)}>
-          <View style={styles.hdrltficn}>
-            <Image source={require('../../assets/images/innerpage/star.png')}
-              style={[styles.ltficn, styles.star]} resizeMode="contain" />
-            <Text style={styles.accordionTitle}>Personal Information</Text>
-          </View>
+            <View style={styles.hdrltficn}>
+              <Image source={require('../../assets/images/innerpage/star.png')}
+                style={[styles.ltficn, styles.star]} resizeMode="contain" />
+              <Text style={styles.accordionTitle}>Personal Information</Text>
+            </View>
             <Text>{accordionOpen ? '▲' : '▼'}</Text>
           </TouchableOpacity>
           {accordionOpen && (
@@ -269,8 +277,14 @@ const styles = StyleSheet.create({
   toptitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center', 
+    alignItems: 'center',
     paddingRight: 10,
+  },
+  pagewrap: {
+    width: '100%',
+    paddingRight: 50,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   pagetitle: {
     fontSize: 22,
@@ -286,14 +300,15 @@ const styles = StyleSheet.create({
   },
   rightclick: {
     width: 110,
+    backgroundColor: 'red',
   },
   clpsclick: {
     backgroundColor: '#E2EDFC',
     borderRadius: 20,
     width: 110,
-    padding:6,
-    paddingLeft:8,
-    paddingRight:8,
+    padding: 6,
+    paddingLeft: 8,
+    paddingRight: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -333,9 +348,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F1F6FD',
     padding: 10,
     borderRadius: 20,
+    backgroundColor: '#E1E6EC',
+  },
+  accordionHeaderOpen: {
+    backgroundColor: '#E1E6EC',
+  },
+  accordionHeaderClosed: {
+    borderColor: '#DEECFF',
+    borderWidth: 1,
+    borderStyle: 'solid',
   },
   accordionTitle: {
     fontSize: 16,
@@ -355,20 +378,20 @@ const styles = StyleSheet.create({
   },
   even: {
     backgroundColor: '#F1F6FD',
-    marginBottom: 5, 
+    marginBottom: 5,
     paddingBottom: 2,
     paddingTop: 2,
   },
   lbl: {
-    fontSize: 16,  
-    color: '#000000',  
-    paddingLeft:12,
+    fontSize: 16,
+    color: '#000000',
+    paddingLeft: 12,
   },
   vlue: {
     fontSize: 16,
     fontWeight: '600',
     color: '#000000',
-    paddingLeft:12,
+    paddingLeft: 12,
   },
   loadingContainer: {
     flex: 1,

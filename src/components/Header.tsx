@@ -8,6 +8,7 @@ import UserStorage from '../utils/userStorage';
 import { getFileUrl } from '../config/apiConfig';
 import { useDrawer } from '../context/DrawerContext';
 
+
 const Header = ({ navigation, route }: DrawerHeaderProps) => {
   const [userData, setUserData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -120,14 +121,16 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
+    paddingBottom: 10,
   },
   hdrcontainer: {
     backgroundColor: '#133F7C',
+    // backgroundColor: 'pink',
     padding: 2,
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginTop: 5,
+    marginTop: 30,
   },
   Iconnotfction: {
     backgroundColor: '#ffffff',
@@ -167,11 +170,12 @@ const styles = StyleSheet.create({
   },
   title: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 12,
     fontWeight: 'bold',
     flex: 1,
     textAlign: 'left',
-    marginLeft: 20,
+    marginLeft: 15,
+    marginTop: 3,
   },
   profileContainer: {
     marginTop: 8,

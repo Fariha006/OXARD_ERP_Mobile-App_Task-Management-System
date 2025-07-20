@@ -76,15 +76,18 @@ export default function DocumentsScreen({ navigation }: { navigation?: any }) {
               style={styles.backiconimg} resizeMode="contain" />
           </View>
         </TouchableOpacity>
-        <Text style={styles.pagetitle}>Documents</Text>
-        <TouchableOpacity  style={styles.rightclick}></TouchableOpacity>
+        <View style={styles.pagewrap}>
+          <Text style={styles.pagetitle}>Documents</Text>
+        </View>
+        <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {ACCORDIONS.map(({ key, label, item }) => (
           <View key={key} style={styles.accordion}>
-            <TouchableOpacity style={styles.accordionHeader} onPress={() => toggleAccordion(key)}>
+            <TouchableOpacity style={[styles.accordionHeader, openIndexes.includes(key) ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]} 
+            onPress={() => toggleAccordion(key)}>
               <View style={styles.hdrltficn}>
-                <Image source={require('../../assets/images/innerpage/star.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
+                <Image source={require('../../assets/images/innerpage/ntionalid.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
                 <Text style={styles.accordionTitle}>{label}</Text>
               </View>
               <Text>{openIndexes.includes(key) ? '▲' : '▼'}</Text>
@@ -269,8 +272,14 @@ const styles = StyleSheet.create({
   toptitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center', 
+    alignItems: 'center',
     paddingRight: 10,
+  },
+  pagewrap: {
+    width: '100%',
+    paddingRight: 50,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   pagetitle: {
     fontSize: 22,
@@ -312,9 +321,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F1F6FD',
     padding: 10,
     borderRadius: 20,
+  },
+  accordionHeaderOpen: {
+    backgroundColor: '#E1E6EC',
+  },
+  accordionHeaderClosed: {
+    borderColor: '#DEECFF',
+    borderWidth: 1,
+    borderStyle: 'solid',
   },
   accordionTitle: {
     fontSize: 16,
@@ -334,20 +350,20 @@ const styles = StyleSheet.create({
   },
   even: {
     backgroundColor: '#F1F6FD',
-    marginBottom: 5, 
+    marginBottom: 5,
     paddingBottom: 2,
     paddingTop: 2,
   },
   lbl: {
-    fontSize: 16,  
-    color: '#000000',  
-    paddingLeft:12,
+    fontSize: 16,
+    color: '#000000',
+    paddingLeft: 12,
   },
   vlue: {
     fontSize: 16,
     fontWeight: '600',
     color: '#000000',
-    paddingLeft:12,
+    paddingLeft: 12,
   },
   loadingContainer: {
     flex: 1,

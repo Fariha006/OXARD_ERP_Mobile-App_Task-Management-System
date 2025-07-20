@@ -46,7 +46,9 @@ export default function DependentScreen({ navigation }: { navigation: any }) {
               style={styles.backiconimg} resizeMode="contain" />
           </View>
         </TouchableOpacity>
-        <Text style={styles.pagetitle}>Dependents</Text>
+        <View style={styles.pagewrap}>
+          <Text style={styles.pagetitle}>Dependents</Text>
+        </View>
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -65,9 +67,13 @@ export default function DependentScreen({ navigation }: { navigation: any }) {
         ) : (
           dependents.map((dep, idx) => (
             <View key={idx} style={styles.accordion}>
-              <TouchableOpacity style={styles.accordionHeader} onPress={() => toggleAccordion(idx)}>
+              <TouchableOpacity
+                style={[styles.accordionHeader,
+                openIndexes.includes(idx) ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
+                onPress={() => toggleAccordion(idx)}>
                 <View style={styles.hdrltficn}>
-                  <Image source={require('../../assets/images/innerpage/star.png')}
+                  <Image
+                    source={require('../../assets/images/innerpage/depend.png')}
                     style={[styles.ltficn, styles.star]} resizeMode="contain" />
                   <Text style={styles.accordionTitle}>{dep.DependentName}</Text>
                 </View>
@@ -171,8 +177,14 @@ const styles = StyleSheet.create({
   toptitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center', 
+    alignItems: 'center',
     paddingRight: 10,
+  },
+  pagewrap: {
+    width: '100%',
+    paddingRight: 50,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   pagetitle: {
     fontSize: 22,
@@ -193,9 +205,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#E2EDFC',
     borderRadius: 20,
     width: 110,
-    padding:6,
-    paddingLeft:8,
-    paddingRight:8,
+    padding: 6,
+    paddingLeft: 8,
+    paddingRight: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -235,9 +247,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F1F6FD',
     padding: 10,
     borderRadius: 20,
+  },
+  accordionHeaderOpen: {
+    backgroundColor: '#E1E6EC',
+  },
+  accordionHeaderClosed: {
+    borderColor: '#DEECFF',
+    borderWidth: 1,
+    borderStyle: 'solid',
   },
   accordionTitle: {
     fontSize: 16,
@@ -257,20 +276,20 @@ const styles = StyleSheet.create({
   },
   even: {
     backgroundColor: '#F1F6FD',
-    marginBottom: 5, 
+    marginBottom: 5,
     paddingBottom: 2,
     paddingTop: 2,
   },
   lbl: {
-    fontSize: 16,  
-    color: '#000000',  
-    paddingLeft:12,
+    fontSize: 16,
+    color: '#000000',
+    paddingLeft: 12,
   },
   vlue: {
     fontSize: 16,
     fontWeight: '600',
     color: '#000000',
-    paddingLeft:12,
+    paddingLeft: 12,
   },
   loadingContainer: {
     flex: 1,

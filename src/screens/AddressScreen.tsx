@@ -1,17 +1,18 @@
-import React, { useState, useEffect }  from 'react';
-import { View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList, 
-  SafeAreaView, Alert} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList,
+  SafeAreaView, Alert, Platform, UIManager, LayoutAnimation
+} from 'react-native';
 
 import { StackScreenProps } from '@react-navigation/stack';
 import { getAddressInfo, AddressInfo } from '../api/api';
 import UserStorage from '../utils/userStorage';
-
 type Props = StackScreenProps<any, 'Address'>;
 
 export default function AddressScreen({ navigation }: Props) {
-  const [currentaccordionOpen, setCurrentaccordionOpen] = useState(true);
-  const [permanentaccordionOpen, setPermanentAccordionOpen] = useState(true);
-  const [emergencyaccordionOpen, setEmergencyAccordionOpen] = useState(true);
+  const [currentaccordionOpen, setCurrentaccordionOpen] = useState(false);
+  const [permanentaccordionOpen, setPermanentAccordionOpen] = useState(false);
+  const [emergencyaccordionOpen, setEmergencyAccordionOpen] = useState(false);
   const [addressInfo, setAddressInfo] = useState<AddressInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -23,7 +24,7 @@ export default function AddressScreen({ navigation }: Props) {
     try {
       setLoading(true);
       const token = await UserStorage.getToken();
-      
+
       if (!token) {
         Alert.alert('Error', 'No authentication token found. Please login again.');
         navigation.navigate('Login');
@@ -31,7 +32,7 @@ export default function AddressScreen({ navigation }: Props) {
       }
 
       const response = await getAddressInfo(token);
-      
+
       if (response.success && response.addressInfo) {
         setAddressInfo(response.addressInfo);
       } else {
@@ -54,10 +55,10 @@ export default function AddressScreen({ navigation }: Props) {
               style={styles.backiconimg} resizeMode="contain" />
           </View>
         </TouchableOpacity>
-        <Text style={styles.pagetitle}>Address</Text>
-        <TouchableOpacity  style={styles.rightclick}>
-   
-        </TouchableOpacity>
+        <View style={styles.pagewrap}>
+          <Text style={styles.pagetitle}>Address</Text>
+        </View>
+        <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {loading ? (
@@ -68,18 +69,20 @@ export default function AddressScreen({ navigation }: Props) {
           <>
             {/* Current Address Accordion */}
             <View style={styles.accordion}>
-              <TouchableOpacity style={styles.accordionHeader}
+
+              <TouchableOpacity
+                style={[styles.accordionHeader, currentaccordionOpen ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
                 onPress={() => setCurrentaccordionOpen(!currentaccordionOpen)}>
                 <View style={styles.hdrltficn}>
-                  <Image source={require('../../assets/images/innerpage/star.png')}
+                  <Image source={require('../../assets/images/innerpage/location1.png')}
                     style={[styles.ltficn, styles.star]} resizeMode="contain" />
                   <Text style={styles.accordionTitle}>Current Address</Text>
                 </View>
-                <Text>{currentaccordionOpen ? '▲' : '▼'}</Text>
+                <Text>{permanentaccordionOpen ? '▲' : '▼'}</Text>
               </TouchableOpacity>
               {currentaccordionOpen && (
                 <View style={styles.accordionContent}>
-            
+
                   <View style={styles.odd}>
                     <Text style={styles.lbl}>Address :</Text>
                     <Text style={styles.vlue}>{addressInfo.AddressC}</Text>
@@ -132,17 +135,18 @@ export default function AddressScreen({ navigation }: Props) {
                     <Text style={styles.lbl}>Email(P) :</Text>
                     <Text style={styles.vlue}>{addressInfo.PersonalEmailId}</Text>
                   </View>
-                  
+
                 </View>
               )}
             </View>
 
             {/* Permanent Address Accordion */}
             <View style={styles.accordion}>
-              <TouchableOpacity style={styles.accordionHeader}
+              <TouchableOpacity
+                style={[styles.accordionHeader, permanentaccordionOpen ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
                 onPress={() => setPermanentAccordionOpen(!permanentaccordionOpen)}>
                 <View style={styles.hdrltficn}>
-                  <Image source={require('../../assets/images/innerpage/star.png')}
+                  <Image source={require('../../assets/images/innerpage/location2.png')}
                     style={[styles.ltficn, styles.star]} resizeMode="contain" />
                   <Text style={styles.accordionTitle}>Permanent Address</Text>
                 </View>
@@ -166,7 +170,7 @@ export default function AddressScreen({ navigation }: Props) {
                     <Text style={styles.lbl}>City :</Text>
                     <Text style={styles.vlue}>{addressInfo.CityNamP}</Text>
                   </View>
-                 
+
                   <View style={styles.odd}>
                     <Text style={styles.lbl}>Zip Code :</Text>
                     <Text style={styles.vlue}>{addressInfo.ZipCodeP}</Text>
@@ -184,10 +188,11 @@ export default function AddressScreen({ navigation }: Props) {
             </View>
             {/* Emergency Address Accordion */}
             <View style={styles.accordion}>
-              <TouchableOpacity style={styles.accordionHeader}
+              <TouchableOpacity
+                style={[styles.accordionHeader, emergencyaccordionOpen ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
                 onPress={() => setEmergencyAccordionOpen(!emergencyaccordionOpen)}>
                 <View style={styles.hdrltficn}>
-                  <Image source={require('../../assets/images/innerpage/star.png')}
+                  <Image source={require('../../assets/images/innerpage/location1.png')}
                     style={[styles.ltficn, styles.star]} resizeMode="contain" />
                   <Text style={styles.accordionTitle}>Emergency Contact</Text>
                 </View>
@@ -211,7 +216,7 @@ export default function AddressScreen({ navigation }: Props) {
                     <Text style={styles.lbl}>State :</Text>
                     <Text style={styles.vlue}>{addressInfo.StateNamE}</Text>
                   </View>
-                 
+
                   <View style={styles.odd}>
                     <Text style={styles.lbl}>City :</Text>
                     <Text style={styles.vlue}>{addressInfo.CityNamE}</Text>
@@ -241,6 +246,8 @@ export default function AddressScreen({ navigation }: Props) {
     </SafeAreaView>
   );
 
+
+
 }
 
 const styles = StyleSheet.create({
@@ -257,8 +264,14 @@ const styles = StyleSheet.create({
   toptitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center', 
+    alignItems: 'center',
     paddingRight: 10,
+  },
+  pagewrap: {
+    width: '100%',
+    paddingRight: 50,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   pagetitle: {
     fontSize: 22,
@@ -279,9 +292,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#E2EDFC',
     borderRadius: 20,
     width: 110,
-    padding:6,
-    paddingLeft:8,
-    paddingRight:8,
+    padding: 6,
+    paddingLeft: 8,
+    paddingRight: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -321,10 +334,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F1F6FD',
     padding: 10,
     borderRadius: 20,
   },
+
+  accordionHeaderOpen: {
+    backgroundColor: '#E1E6EC',
+  },
+  accordionHeaderClosed: {
+    borderColor: '#DEECFF',
+    borderWidth: 1,
+    borderStyle: 'solid',
+  },
+
   accordionTitle: {
     fontSize: 16,
     fontWeight: '600',
@@ -343,20 +365,20 @@ const styles = StyleSheet.create({
   },
   even: {
     backgroundColor: '#F1F6FD',
-    marginBottom: 5, 
+    marginBottom: 5,
     paddingBottom: 2,
     paddingTop: 2,
   },
   lbl: {
-    fontSize: 16,  
-    color: '#000000',  
-    paddingLeft:12,
+    fontSize: 16,
+    color: '#000000',
+    paddingLeft: 12,
   },
   vlue: {
     fontSize: 16,
     fontWeight: '600',
     color: '#000000',
-    paddingLeft:12,
+    paddingLeft: 12,
   },
   loadingContainer: {
     flex: 1,
