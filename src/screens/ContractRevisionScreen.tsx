@@ -93,6 +93,27 @@ export default function ContractRevisionScreen({ navigation }: { navigation?: an
                   <Text style={styles.vlue}>{item['DesgNam']}</Text>
                 </View>
               ))}
+              
+                        <View style={styles.mydeskbtnfirstraw}>
+                          <View style={styles.tile}>
+                            <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Salary' })}>
+                              <Image source={require('../../assets/images/innerpage/cntractinfo.png')} style={styles.image} />
+                              <Text style={styles.title}>Contract Info</Text>
+                            </TouchableOpacity>
+                          </View>
+                          <View style={styles.tile}>
+                            <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Eligibilities' })}>
+                              <Image source={require('../../assets/images/innerpage/salary.png')} style={styles.image} />
+                              <Text style={styles.title}>Salary</Text>
+                            </TouchableOpacity>
+                          </View>
+                          <View style={styles.tile}>
+                            <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'ContractRevision' })}>
+                              <Image source={require('../../assets/images/innerpage/eligibility.png')} style={styles.image} />
+                              <Text style={styles.title}>Eligibilities</Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
             </View>
           )}
         </View>
@@ -230,5 +251,63 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#FF0000',
     textAlign: 'center',
+  },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  mydeskbtnfirstraw: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingLeft: 2,
+    paddingRight: 2,
+    paddingTop: 25,
+    paddingBottom: 5,
+  },
+  tile: {
+    height: 32,
+    borderRadius: 20,
+    marginBottom: 0,
+    backgroundColor: '#002F63',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+    paddingLeft: 18,
+    paddingRight: 18,
+  },
+
+  algnbtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  title: {
+    fontSize: 12,
+    textAlign: 'center',
+    color: '#ffffff',
+    marginLeft: 6,
+  },
+  image: {
+    width: 16,
+    height: 16,
+    marginBottom: 0,
+    resizeMode: 'contain',
+    alignItems: 'center'
   },
 });
