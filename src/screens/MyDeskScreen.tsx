@@ -198,8 +198,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   profilepic: {
-    borderRadius: 50,
+    borderRadius: 100,
     marginBottom: 13,
+    width: 120,
+    height: 120,
+    backgroundColor: '#07478D',
   },
   logo: {
     width: 120,

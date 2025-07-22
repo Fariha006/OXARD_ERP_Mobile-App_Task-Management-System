@@ -252,21 +252,6 @@ const styles = StyleSheet.create({
     color: '#FF0000',
     textAlign: 'center',
   },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
   mydeskbtnfirstraw: {
     flexDirection: 'row',
     justifyContent: 'space-between',
