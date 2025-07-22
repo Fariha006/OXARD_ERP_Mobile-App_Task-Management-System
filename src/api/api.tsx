@@ -534,6 +534,25 @@ class ApiService {
     });
     return response.data;
   }
+
+  // Get notifications (My Desk) API call
+  async getNotifications(token: string): Promise<any> {
+    try {
+      const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+      const requestBody = { "Mode": "Fifteen" };
+      const response = await axios.post<any>(apiurl, requestBody, {
+        headers: {
+          ...API_CONFIG.DEFAULT_HEADERS,
+          'Authorization': `Bearer ${token}`,
+        },
+        timeout: API_CONFIG.TIMEOUT,
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Notifications API Error:', error);
+      throw error;
+    }
+  }
 }
 
 // Create and export API service instance
@@ -553,3 +572,4 @@ export const getEligibilityData = (token: string) => apiService.getEligibilityDa
 export const getContractRevisionData = (token: string) => apiService.getContractRevisionData(token);
 export const getAssetsData = (token: string) => apiService.getAssetsData(token);
 export const getLeaveHistoryData = (token: string) => apiService.getLeaveHistoryData(token);
+export const getNotifications = (token: string) => apiService.getNotifications(token);

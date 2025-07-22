@@ -76,9 +76,13 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
           {userData?.CompNam
             }
         </Text>
-        <View style={styles.Iconnotfction}>
+        {/* Notification Icon */}
+        <TouchableOpacity
+          style={styles.Iconnotfction}
+          onPress={() => navigation.navigate('Main', { screen: 'Notification' })}
+        >
           <Image source={require('../../assets/images/notification.png')} style={styles.menuIcon} />
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* Show profile section only on the Home screen */}
