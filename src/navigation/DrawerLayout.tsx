@@ -19,6 +19,7 @@ import ContractRevisionScreen from '../screens/ContractRevisionScreen';
 import AssetsScreen from '../screens/AssetsScreen';
 import LeaveHistoryScreen from '../screens/LeaveHistoryScreen';
 import NotificationScreen from '../screens/NotificationScreen';
+import PayslipScreen from '../screens/PayslipScreen';
 
 const Stack = createStackNavigator();
 
@@ -131,6 +132,13 @@ const InnerStack = () => (
         <Stack.Screen
           name="Notification"
           component={NotificationScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
+        <Stack.Screen
+          name="Payslip"
+          component={PayslipScreen}
           options={({ navigation, route }) => ({
             header: () => <Header navigation={navigation} route={route} />
           })}

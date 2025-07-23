@@ -12,8 +12,8 @@ export default function HomeScreen({ navigation }: Props) {
 
   const tiles = [
     { id: 1, title: 'My Desk', image: require('../../assets/images/home/mydesk.png'),route:'Main',screen:'MyDesk' },
-    { id: 2, title: 'My Requests', image: require('../../assets/images/home/request.png'),route:'Main',screen:'Notification' },
-    { id: 3, title: 'Payslips', image: require('../../assets/images/home/payslip.png'),route:'Main',screen:'Payslips' },
+    { id: 2, title: 'My Requests', image: require('../../assets/images/home/request.png'),route:'Main',screen:'Payslip' },
+    { id: 3, title: 'Payslips', image: require('../../assets/images/home/payslip.png'),route:'Main',screen:'Payslip' },
     { id: 4, title: 'Approval', image: require('../../assets/images/home/aproval.png'),route:'Main',screen:'Approval' },
     { id: 5, title: 'Directory', image: require('../../assets/images/home/directory.png'),route:'Main',screen:'Directory' },
     { id: 6, title: 'Messages', image: require('../../assets/images/home/msgs.png'),route:'Main',screen:'Messages' },

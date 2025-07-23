@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { API_CONFIG, getApiUrl } from '../config/apiConfig';
 import { Alert } from 'react-native';
+import { Buffer } from 'buffer';
 
 /**
  * API Service for Oxard ERP
@@ -553,6 +554,39 @@ class ApiService {
       throw error;
     }
   }
+
+  // Get payslips data API call
+  async getPayslips(token: string): Promise<any> {
+    const apiurl = getApiUrl('/api/Mob6110/Payslips');
+    const response = await axios.post<any>(apiurl, {}, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  }
+
+  // Download payslip PDF API call
+  async downloadPayslipPdf(reportCode: string, id: string, token: string): Promise<string> {
+    const apiurl = getApiUrl('/api/Report/Download');
+    const response = await axios.post(apiurl, {
+      ReportCode: reportCode,
+      Id: id,
+    }, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      responseType: 'arraybuffer',
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    // Convert arraybuffer to base64
+    const base64 = Buffer.from(response.data).toString('base64');
+    console.log('PDF base64 preview:', base64.substring(0, 40)); // Should start with JVBERi0
+    return base64;
+  }
 }
 
 // Create and export API service instance
@@ -573,3 +607,5 @@ export const getContractRevisionData = (token: string) => apiService.getContract
 export const getAssetsData = (token: string) => apiService.getAssetsData(token);
 export const getLeaveHistoryData = (token: string) => apiService.getLeaveHistoryData(token);
 export const getNotifications = (token: string) => apiService.getNotifications(token);
+export const getPayslips = (token: string) => apiService.getPayslips(token);
+export const downloadPayslipPdf = (reportCode: string, id: string, token: string) => apiService.downloadPayslipPdf(reportCode, id, token);

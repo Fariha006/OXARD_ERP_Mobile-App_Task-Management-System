@@ -16,6 +16,9 @@ export const API_CONFIG = {
   DEFAULT_HEADERS: {
     'Content-Type': 'application/json',
   },
+  BLOB_HEADERS: {
+    'Content-Type': 'application/x-www-form-urlencoded',
+  },
   
   // File upload paths
   UPLOAD_PATHS: {
