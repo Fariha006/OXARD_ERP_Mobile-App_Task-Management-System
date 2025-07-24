@@ -5,6 +5,14 @@ import UserStorage from '../utils/userStorage';
 import RNFS from 'react-native-fs';
 import { Buffer } from 'buffer';
 
+// Add these declarations at the top for web compatibility
+// @ts-ignore
+// eslint-disable-next-line
+declare var window: any;
+// @ts-ignore
+// eslint-disable-next-line
+declare var document: any;
+
 export default function PayslipScreen({ navigation }: { navigation?: any }) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,28 +69,21 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
         });
         if (!response.ok) throw new Error('Failed to download PDF');
         const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Payslip_${referenceNo}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
+        // Type guard for window and document
+        if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Payslip_${referenceNo}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+        }
         Alert.alert('Success', `Payslip ${referenceNo} downloaded.`);
       } else {
-        // Mobile: fetch arrayBuffer, convert to base64, and save using react-native-fs
-        const response = await fetch('http://216.48.184.187:8081/api/Report/Download', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json', // removed for binary safety
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({ ReportCode: 'da6110', Id: payslipId.toString() }),
-        });
-        if (!response.ok) throw new Error('Failed to download PDF');
-        const arrayBuffer = await response.arrayBuffer();
-        const base64data = Buffer.from(arrayBuffer).toString('base64');
+        // Mobile: use downloadPayslipPdf from api.tsx
+        const base64data = await downloadPayslipPdf('da6110', payslipId.toString(), token);
         console.log('PDF base64 preview (mobile):', base64data.substring(0, 40));
         if (!base64data.startsWith('JVBERi0')) {
           Alert.alert('Warning', 'PDF base64 does not start with JVBERi0. The file may be invalid.');
