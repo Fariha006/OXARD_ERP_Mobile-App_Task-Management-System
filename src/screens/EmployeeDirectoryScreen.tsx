@@ -1,101 +1,92 @@
-import React, { useState, useEffect }  from 'react';
-import { View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList, 
-  SafeAreaView} from 'react-native';
-
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, FlatList } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { getEmployeeDirectory } from '../api/api';
+import UserStorage from '../utils/userStorage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function EmployeeDirectoryScreen({ navigation }: Props) {
-  const [accordionOpen, setAccordionOpen] = useState(true);
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const token = await UserStorage.getToken();
+        if (!token) {
+          setError('No authentication token found. Please login again.');
+          setLoading(false);
+          return;
+        }
+        const result = await getEmployeeDirectory(token);
+        setData(Array.isArray(result) ? result : []);
+      } catch (err) {
+        setError('Failed to fetch employee directory');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#133F7C" />
+          <Text style={styles.loadingText}>Loading employee directory...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={[styles.back, styles.toptitle]}>
-        <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Home' })}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <View style={styles.backicon}>
             <Image source={require('../../assets/images/backarow.png')}
               style={styles.backiconimg} resizeMode="contain" />
           </View>
         </TouchableOpacity>
-        <Text style={styles.pagetitle}>My Desk</Text>
-        <TouchableOpacity  style={styles.rightclick}>
-          {/* <View style={styles.clpsclick}>
-            <Text style={styles.clpsclicktxt}>Collapse All</Text>
-            <Image source={require('../../assets/images/dot.png')}
-              style={styles.backiconimg} resizeMode="contain" />
-          </View> */}
-        </TouchableOpacity>
+        <Text style={styles.pagetitle}>Employee Directory</Text>
+        <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Accordion Section */}
-        <View style={styles.accordion}>
-          <TouchableOpacity style={styles.accordionHeader}
-            onPress={() => setAccordionOpen(!accordionOpen)}>
-          <View style={styles.hdrltficn}>
-            <Image source={require('../../assets/images/innerpage/star.png')}
-              style={[styles.ltficn, styles.star]} resizeMode="contain" />
-            <Text style={styles.accordionTitle}>Personal Information</Text>
+      <FlatList
+        data={data}
+        keyExtractor={(item, idx) => item.empl_id?.toString() || idx.toString()}
+        contentContainerStyle={styles.listContainer}
+        ListEmptyComponent={<Text style={styles.lbl}>No employees found.</Text>}
+        renderItem={({ item, index }) => (
+          <View style={[styles.row, index % 2 === 0 ? styles.rowEven : styles.rowOdd]}>
+            <Text style={styles.rowTitle}>{item.empl_name}</Text>
+            <Text style={styles.rowLabel}>Employee No: <Text style={styles.rowValue}>{item.empl_no}</Text></Text>
+            <Text style={styles.rowLabel}>Designation: <Text style={styles.rowValue}>{item.desg_nam}</Text></Text>
+            <Text style={styles.rowLabel}>Branch: <Text style={styles.rowValue}>{item.branch_nam}</Text></Text>
+            <Text style={styles.rowLabel}>Cost Center: <Text style={styles.rowValue}>{item.cost_center}</Text></Text>
+            <Text style={styles.rowLabel}>Phone: <Text style={styles.rowValue}>{item.phone || '-'}</Text></Text>
+            <Text style={styles.rowLabel}>Mobile: <Text style={styles.rowValue}>{item.mobile || '-'}</Text></Text>
+            <Text style={styles.rowLabel}>Email: <Text style={styles.rowValue}>{item.email || '-'}</Text></Text>
           </View>
-            <Text>{accordionOpen ? '▲' : '▼'}</Text>
-          </TouchableOpacity>
-          {accordionOpen && (
-            <View style={styles.accordionContent}>
-              <View style={styles.odd}>
-                <Text style={styles.lbl}>Employee Id :</Text>
-                <Text style={styles.vlue}>UNS78325</Text>
-              </View>
-              <View style={styles.even}>
-                <Text style={styles.lbl}>Employee Name :</Text>
-                <Text style={styles.vlue}>James Jacob</Text>
-              </View>
-              <View style={styles.odd}>
-                <Text style={styles.lbl}>Nationality :</Text>
-                <Text style={styles.vlue}>Indian</Text>
-              </View>
-              <View style={styles.even}>
-                <Text style={styles.lbl}>Gender :</Text>
-                <Text style={styles.vlue}>Male</Text>
-              </View>
-              <View style={styles.odd}>
-                <Text style={styles.lbl}>Religion :</Text>
-                <Text style={styles.vlue}>Christian</Text>
-              </View>
-              <View style={styles.even}>
-                <Text style={styles.lbl}>Caste :</Text>
-                <Text style={styles.vlue}>Roman Catholic</Text>
-              </View>
-              <View style={styles.odd}>
-                <Text style={styles.lbl}>Place of Birth :</Text>
-                <Text style={styles.vlue}>Kochi</Text>
-              </View>
-              <View style={styles.even}>
-                <Text style={styles.lbl}>Date of Birth :</Text>
-                <Text style={styles.vlue}>10 - November - 1996</Text>
-              </View>
-              <View style={styles.odd}>
-                <Text style={styles.lbl}>Marital Status :</Text>
-                <Text style={styles.vlue}>Single</Text>
-              </View>
-              <View style={styles.even}>
-                <Text style={styles.lbl}>Blood Group :</Text>
-                <Text style={styles.vlue}>O+ve</Text>
-              </View>
-              <View style={styles.odd}>
-                <Text style={styles.lbl}>Mother Tongue :</Text>
-                <Text style={styles.vlue}>Malayalam</Text>
-              </View>
-              <View style={styles.even}>
-                <Text style={styles.lbl}>Family Status :</Text>
-                <Text style={styles.vlue}>With Dependent</Text>
-              </View>
-            </View>
-          )}
-        </View>
-      </ScrollView>
+        )}
+      />
     </SafeAreaView>
   );
-
 }
 
 const styles = StyleSheet.create({
@@ -112,7 +103,7 @@ const styles = StyleSheet.create({
   toptitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center', 
+    alignItems: 'center',
     paddingRight: 10,
   },
   pagetitle: {
@@ -130,87 +121,96 @@ const styles = StyleSheet.create({
   rightclick: {
     width: 110,
   },
-  clpsclick: {
-    backgroundColor: '#E2EDFC',
-    borderRadius: 20,
-    width: 110,
-    padding:6,
-    paddingLeft:8,
-    paddingRight:8,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  clpsclicktxt: {
-    color: '#000000',
-    fontSize: 14,
-  },
   scrollContainer: {
     padding: 16,
   },
-  header: {
-    fontSize: 22,
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  cardTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 20,
+    color: '#133F7C',
+    marginBottom: 6,
+  },
+  cardLabel: {
+    fontSize: 15,
     color: '#333',
+    marginBottom: 2,
   },
-  accordion: {
-    borderRadius: 8,
-    padding: 0,
-    marginBottom: 10,
-  },
-  hdrltficn: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  ltficn: {
-    width: 15,
-    height: 22,
-  },
-  star: {
-    width: 20,
-    height: 22,
-  },
-  accordionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#F1F6FD',
-    padding: 10,
-    borderRadius: 20,
-  },
-  accordionTitle: {
-    fontSize: 16,
+  cardValue: {
     fontWeight: '600',
-    marginLeft: 12,
-  },
-  accordionContent: {
-    marginTop: 10,
-    paddingLeft: 6,
-    paddingRight: 6,
-  },
-  odd: {
-    backgroundColor: '#ffffff',
-    marginBottom: 5,
-    paddingBottom: 2,
-    paddingTop: 2,
-  },
-  even: {
-    backgroundColor: '#F1F6FD',
-    marginBottom: 5, 
-    paddingBottom: 2,
-    paddingTop: 2,
+    color: '#000',
   },
   lbl: {
-    fontSize: 16,  
-    color: '#000000',  
-    paddingLeft:12,
-  },
-  vlue: {
     fontSize: 16,
-    fontWeight: '600',
     color: '#000000',
-    paddingLeft:12,
-  }
+    paddingLeft: 12,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 18,
+    color: '#133F7C',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+  },
+  errorText: {
+    fontSize: 18,
+    color: '#FF0000',
+    textAlign: 'center',
+  },
+  listContainer: {
+    padding: 16,
+  },
+  row: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    backgroundColor: '#fff',
+  },
+  rowEven: {
+    backgroundColor: '#F1F6FD',
+  },
+  rowOdd: {
+    backgroundColor: '#fff',
+  },
+  rowTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#133F7C',
+    marginBottom: 2,
+  },
+  rowDetails: {
+    fontSize: 14,
+    color: '#333',
+    flexWrap: 'wrap',
+  },
+  rowValue: {
+    fontWeight: '600',
+    color: '#000',
+  },
+  rowLabel: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 1,
+  },
 });

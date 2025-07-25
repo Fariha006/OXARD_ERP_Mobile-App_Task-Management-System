@@ -634,6 +634,20 @@ class ApiService {
     });
     return response.data;
   }
+
+  // Get employee directory API call
+  async getEmployeeDirectory(token: string): Promise<any[]> {
+    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const requestBody = { "Mode": "Sixteen" };
+    const response = await axios.post<any[]>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  }
 }
 
 // Create and export API service instance
@@ -659,3 +673,4 @@ export const downloadPayslipPdf = (reportCode: string, id: string, token: string
 export const downloadLeaveOutstandingPdf = (reportCode: string, dateAsOn: string, token: string) => apiService.downloadLeaveOutstandingPdf(reportCode, dateAsOn, token);
 export const getCertificateRequests = (token: string) => apiService.getCertificateRequests(token);
 export const getApprovals = (token: string) => apiService.getApprovals(token);
+export const getEmployeeDirectory = (token: string) => apiService.getEmployeeDirectory(token);
