@@ -143,7 +143,7 @@ export default function HomeScreen({ navigation }: Props) {
               </TouchableOpacity>
             </View>
             <View style={[styles.tile, styles.lightblue]}>
-              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: '' })}>
+              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'CertificateRequest' })}>
                 <Image source={require('../../assets/images/mydesk/crtfctrqst.png')} style={styles.image} />
                 <Text style={styles.title}>Certificates Requests</Text>
               </TouchableOpacity>

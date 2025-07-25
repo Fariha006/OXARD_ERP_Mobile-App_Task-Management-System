@@ -20,6 +20,7 @@ import AssetsScreen from '../screens/AssetsScreen';
 import LeaveHistoryScreen from '../screens/LeaveHistoryScreen';
 import NotificationScreen from '../screens/NotificationScreen';
 import PayslipScreen from '../screens/PayslipScreen';
+import CertificateRequestScreen from '../screens/CertificateRequestScreen';
 
 const Stack = createStackNavigator();
 
@@ -139,6 +140,13 @@ const InnerStack = () => (
         <Stack.Screen
           name="Payslip"
           component={PayslipScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
+        <Stack.Screen
+          name="CertificateRequest"
+          component={CertificateRequestScreen}
           options={({ navigation, route }) => ({
             header: () => <Header navigation={navigation} route={route} />
           })}

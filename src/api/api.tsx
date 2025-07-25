@@ -587,6 +587,20 @@ class ApiService {
     console.log('PDF base64 preview:', base64.substring(0, 40)); // Should start with JVBERi0
     return base64;
   }
+
+  // Certificate Request API call
+  async getCertificateRequests(token: string): Promise<any[]> {
+    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const requestBody = { "Mode": "Thirteen" };
+    const response = await axios.post<any[]>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  }
 }
 
 // Create and export API service instance
@@ -609,3 +623,4 @@ export const getLeaveHistoryData = (token: string) => apiService.getLeaveHistory
 export const getNotifications = (token: string) => apiService.getNotifications(token);
 export const getPayslips = (token: string) => apiService.getPayslips(token);
 export const downloadPayslipPdf = (reportCode: string, id: string, token: string) => apiService.downloadPayslipPdf(reportCode, id, token);
+export const getCertificateRequests = (token: string) => apiService.getCertificateRequests(token);
