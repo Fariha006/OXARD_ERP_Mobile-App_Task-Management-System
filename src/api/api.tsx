@@ -588,11 +588,44 @@ class ApiService {
     return base64;
   }
 
+  // Download Leave Outstanding PDF API call
+  async downloadLeaveOutstandingPdf(reportCode: string, dateAsOn: string, token: string): Promise<string> {
+    const apiurl = getApiUrl('/api/Report/Download');
+    const response = await axios.post(apiurl, {
+      ReportCode: reportCode,
+      DateAsOn: dateAsOn,
+    }, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      responseType: 'arraybuffer',
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    // Convert arraybuffer to base64
+    const base64 = Buffer.from(response.data).toString('base64');
+    return base64;
+  }
+
   // Certificate Request API call
   async getCertificateRequests(token: string): Promise<any[]> {
     const apiurl = getApiUrl('/api/Mob1010/MyDesk');
     const requestBody = { "Mode": "Thirteen" };
     const response = await axios.post<any[]>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  }
+
+  // Get approvals data API call
+  async getApprovals(token: string): Promise<any> {
+    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const requestBody = { "Mode": "Fourteen" };
+    const response = await axios.post<any>(apiurl, requestBody, {
       headers: {
         ...API_CONFIG.DEFAULT_HEADERS,
         'Authorization': `Bearer ${token}`,
@@ -623,4 +656,6 @@ export const getLeaveHistoryData = (token: string) => apiService.getLeaveHistory
 export const getNotifications = (token: string) => apiService.getNotifications(token);
 export const getPayslips = (token: string) => apiService.getPayslips(token);
 export const downloadPayslipPdf = (reportCode: string, id: string, token: string) => apiService.downloadPayslipPdf(reportCode, id, token);
+export const downloadLeaveOutstandingPdf = (reportCode: string, dateAsOn: string, token: string) => apiService.downloadLeaveOutstandingPdf(reportCode, dateAsOn, token);
 export const getCertificateRequests = (token: string) => apiService.getCertificateRequests(token);
+export const getApprovals = (token: string) => apiService.getApprovals(token);

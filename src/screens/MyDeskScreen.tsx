@@ -149,7 +149,7 @@ export default function HomeScreen({ navigation }: Props) {
               </TouchableOpacity>
             </View>
             <View style={[styles.tile, styles.whitebg]}>
-              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: '' })}>
+              <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Approvals' })}>
                 <Image source={require('../../assets/images/mydesk/aprov.png')} style={styles.image} />
                 <Text style={styles.title}>Approvals</Text>
               </TouchableOpacity>

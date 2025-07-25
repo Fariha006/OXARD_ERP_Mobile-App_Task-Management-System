@@ -21,6 +21,9 @@ import LeaveHistoryScreen from '../screens/LeaveHistoryScreen';
 import NotificationScreen from '../screens/NotificationScreen';
 import PayslipScreen from '../screens/PayslipScreen';
 import CertificateRequestScreen from '../screens/CertificateRequestScreen';
+import ApprovalsScreen from '../screens/ApprovalsScreen';
+import LeaveOutstandingScreen from '../screens/LeaveOutstandingScreen';
+import EmployeeDirectoryScreen from '../screens/EmployeeDirectoryScreen';
 
 const Stack = createStackNavigator();
 
@@ -151,6 +154,27 @@ const InnerStack = () => (
             header: () => <Header navigation={navigation} route={route} />
           })}
         /> 
+        <Stack.Screen
+          name="Approvals"
+          component={ApprovalsScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
+        <Stack.Screen
+          name="LeaveOutstanding"
+          component={LeaveOutstandingScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
+        <Stack.Screen
+          name="EmployeeDirectory"
+          component={EmployeeDirectoryScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
 
   </Stack.Navigator>
 );
@@ -174,14 +198,14 @@ const Footer = () => {
         <Text style={styles.label}>Messeges</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.btmmenu} onPress={() => navigation.navigate('Profile')}>
+      <TouchableOpacity style={styles.btmmenu} onPress={() => navigation.navigate('Main', { screen: 'LeaveHistory' })}>
         <View><Image source={require('../../assets/images/btmleave.png')}
           style={styles.btmicon} resizeMode="contain" />
         </View>
         <Text style={styles.label}>Leaves</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.btmmenu} onPress={() => navigation.navigate('Settings')}>
+    <TouchableOpacity style={styles.btmmenu} onPress={() => navigation.navigate('Main', { screen: 'Approvals' })}>
         <View><Image source={require('../../assets/images/btmaprov.png')}
           style={styles.btmicon} resizeMode="contain" />
         </View>

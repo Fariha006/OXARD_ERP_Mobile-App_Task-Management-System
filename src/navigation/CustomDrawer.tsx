@@ -61,21 +61,21 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
       text: 'My Requests',
       icon: require('../../assets/images/requst.png'),
       screen: 'Home',
-      navigationParams: { screen: 'Home' }
+      navigationParams: { screen: 'CertificateRequest' }
     },
     {
       id: 'payslips',
       text: 'Payslips',
       icon: require('../../assets/images/payslip.png'),
-      screen: 'Details',
-      navigationParams: { screen: 'Details' }
+      screen: 'Home',
+      navigationParams: { screen: 'Payslip' }
     },
     {
       id: 'approval',
       text: 'Approval',
       icon: require('../../assets/images/aproval.png'),
-      screen: 'Details',
-      navigationParams: { screen: 'Details' }
+      screen: 'Home',
+      navigationParams: { screen: 'Approvals' }
     },
     {
       id: 'directory',
@@ -131,7 +131,7 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
           {/* <Text style={styles.Username}>George Fernandes</Text>
           <Text style={styles.Useremail}>georgefernandes88@gmail.com</Text> */}
           <Text style={styles.Username}>{userData?.EmployeeName || 'User Name'}</Text>
-          <Text style={styles.Useremail}>{userData?.UserNam || 'email@email.com'}</Text>
+          <Text style={styles.Useremail}>{userData?.DesgNam || ''}</Text>
         </View>
         <View style={styles.downarows}>
           <Image source={require('../../assets/images/arrowdown.png')} />

@@ -108,7 +108,7 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
               {userData?.EmployeeName || (isLoading ? 'Loading...' : 'User Name')}
             </Text>
             <Text style={styles.userRole}>
-              {userData?.UserNam || (isLoading ? 'Loading...' : 'email@email.com')}
+              {userData?.DesgNam || (isLoading ? 'Loading...' : '')}
             </Text>
           </View>
         </View>
