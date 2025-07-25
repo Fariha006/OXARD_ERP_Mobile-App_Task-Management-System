@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Platform, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Platform, Alert, ActivityIndicator, Image } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import RNFS from 'react-native-fs';
 import { Buffer } from 'buffer';
 import { downloadLeaveOutstandingPdf } from '../api/api';
 import UserStorage from '../utils/userStorage';
 
-const LeaveOutstandingScreen: React.FC = () => {
+const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -54,6 +54,17 @@ const LeaveOutstandingScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={[styles.back, styles.toptitle]}>
+        <TouchableOpacity onPress={() => navigation?.goBack && navigation.goBack()}>
+          <View style={styles.backicon}>
+            <Image source={require('../../assets/images/backarow.png')} style={styles.backiconimg} resizeMode="contain" />
+          </View>
+        </TouchableOpacity>
+        <View style={styles.pagewrap}>
+          <Text style={styles.pagetitle}>Leave Outstanding</Text>
+        </View>
+        <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
+      </View>
       <View style={styles.formGroup}>
         <Text style={styles.label}>As on Date</Text>
         <TouchableOpacity style={styles.dateInput} onPress={() => setShowPicker(true)}>
@@ -77,18 +88,52 @@ const LeaveOutstandingScreen: React.FC = () => {
       </TouchableOpacity>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f9f9f9',
-    justifyContent: 'center',
     alignItems: 'center',
+  },
+  back: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    marginTop: 10,
+  },
+  toptitle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingRight: 10,
+    width: '100%',
+  },
+  pagewrap: {
+    width: '100%',
+    paddingRight: 50,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  pagetitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#133F7C',
+  },
+  backicon: {
+    marginLeft: 15,
+  },
+  backiconimg: {
+    width: 13,
+    height: 20,
+  },
+  rightclick: {
+    width: 110,
   },
   formGroup: {
     width: '90%',
     marginBottom: 24,
+    marginTop: 40,
   },
   label: {
     fontSize: 16,
