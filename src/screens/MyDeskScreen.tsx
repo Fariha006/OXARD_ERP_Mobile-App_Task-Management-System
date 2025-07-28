@@ -67,8 +67,10 @@ export default function HomeScreen({ navigation }: Props) {
               </TouchableOpacity>
             </View>
             <View style={styles.userdetail}>
-              <Text style={styles.userdesig}>{userData?.DesgNam}</Text>
-              <Text style={styles.userdesig}>{userData?.DeptDesc}</Text>
+              <Text style={[styles.userdesig, styles.desig]}>{userData?.DesgNam}</Text>
+              <Text style={[styles.userdesig, styles.depsec]}>{userData?.DeptDesc}</Text>
+              {/* <Text style={styles.userdesig}>Development Department of Unisis</Text>
+              <Text style={styles.userdesig}>Manager</Text> */}
             </View>
             <View style={[styles.tile, styles.lightpink]}>
               <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Address' })}>
@@ -225,11 +227,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     flexDirection: 'column',
     justifyContent: 'flex-start',
+    height: 38,
+    alignContent: 'flex-start',
+    alignItems: 'center',
   },
   userdesig: {
-    color: '232323',
-    fontSize: 16,
     textAlign: 'center',
+    maxWidth: 160,
+    overflow: 'hidden',
+  },
+  desig: {
+    color: '#000000ff',
+    fontSize: 16,
+  },
+  depsec: {
+    color: '#5d5d5dff',
+    fontSize: 15,
   },
   usernametext: {
     fontSize: 19,

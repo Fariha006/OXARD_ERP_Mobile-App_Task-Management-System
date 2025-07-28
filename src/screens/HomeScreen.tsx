@@ -221,7 +221,8 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingRight: 5, paddingLeft: 6,
+    paddingRight: 15, paddingLeft: 6,
+    marginRight: 10,
   },
   image: {
     marginBottom: 1,
@@ -245,8 +246,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   title: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 11,
     textAlign: 'center',
   },
 
