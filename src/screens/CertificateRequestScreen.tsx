@@ -780,8 +780,10 @@ const styles = StyleSheet.create({
   dropdownList: {
     borderRadius: 8,
     marginTop: 0,
-    padding: 4,
+    padding: 2,
     paddingTop: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
   dropdownItem: {
     padding: 0,
@@ -791,7 +793,7 @@ const styles = StyleSheet.create({
   dropdownItems: {
     borderColor: '#DEECFF',
     padding: 10,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0,
     borderLeftWidth: 1,
     borderRightWidth: 1,
   },
