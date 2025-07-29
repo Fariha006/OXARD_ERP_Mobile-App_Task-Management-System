@@ -247,7 +247,7 @@ class ApiService {
   // Get personal information API call
   async getPersonalInfo(token: string): Promise<PersonalInfoResponse> {
     try {
-      const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+      const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
       console.log('Personal Info API URL:', apiurl);
       console.log('Personal Info Token:', token ? `Bearer ${token.substring(0, 20)}...` : 'No token provided');
       
@@ -323,7 +323,7 @@ class ApiService {
   // Get address information API call
   async getAddressInfo(token: string): Promise<AddressInfoResponse> {
     try {
-      const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+      const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
       console.log('Address Info API URL:', apiurl);
       console.log('Address Info Token:', token ? `Bearer ${token.substring(0, 20)}...` : 'No token provided');
       
@@ -398,7 +398,7 @@ class ApiService {
 
   // Get dependents API call
   async getDependents(token: string): Promise<DependentInfo[]> {
-    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
     const requestBody = { "Mode": "Three" };
     const response = await axios.post<DependentInfo[]>(apiurl, requestBody, {
       headers: {
@@ -412,7 +412,7 @@ class ApiService {
 
   // Get payments API call
   async getPayments(token: string): Promise<PaymentInfo[]> {
-    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
     const requestBody = { "Mode": "Four" };
     const response = await axios.post<PaymentInfo[]>(apiurl, requestBody, {
       headers: {
@@ -426,7 +426,7 @@ class ApiService {
 
   // Get qualification data API call
   async getQualificationData(token: string): Promise<any> {
-    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
     const requestBody = { "Mode": "Five" };
     const response = await axios.post<any>(apiurl, requestBody, {
       headers: {
@@ -440,7 +440,7 @@ class ApiService {
 
   // Get document data API call
   async getDocumentData(token: string): Promise<any> {
-    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
     const requestBody = { "Mode": "Six" };
     const response = await axios.post<any>(apiurl, requestBody, {
       headers: {
@@ -454,7 +454,7 @@ class ApiService {
 
   // Get contact info data API call
   async getContactInfoData(token: string): Promise<any> {
-    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
     const requestBody = { "Mode": "Seven" };
     const response = await axios.post<any>(apiurl, requestBody, {
       headers: {
@@ -468,7 +468,7 @@ class ApiService {
 
   // Get salary data API call
   async getSalaryData(token: string): Promise<any> {
-    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
     const requestBody = { "Mode": "Eight" };
     const response = await axios.post<any>(apiurl, requestBody, {
       headers: {
@@ -482,7 +482,7 @@ class ApiService {
 
   // Get eligibility data API call
   async getEligibilityData(token: string): Promise<any> {
-    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
     const requestBody = { "Mode": "Nine" };
     const response = await axios.post<any>(apiurl, requestBody, {
       headers: {
@@ -496,7 +496,7 @@ class ApiService {
 
   // Get contract revision data API call
   async getContractRevisionData(token: string): Promise<any> {
-    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
     const requestBody = { "Mode": "Ten" };
     const response = await axios.post<any>(apiurl, requestBody, {
       headers: {
@@ -510,7 +510,7 @@ class ApiService {
 
   // Get assets data API call
   async getAssetsData(token: string): Promise<any> {
-    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
     const requestBody = { "Mode": "Eleven" };
     const response = await axios.post<any>(apiurl, requestBody, {
       headers: {
@@ -524,7 +524,7 @@ class ApiService {
 
   // Get leave history data API call
   async getLeaveHistoryData(token: string): Promise<any> {
-    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
     const requestBody = { "Mode": "Twelve" };
     const response = await axios.post<any>(apiurl, requestBody, {
       headers: {
@@ -539,7 +539,7 @@ class ApiService {
   // Get notifications (My Desk) API call
   async getNotifications(token: string): Promise<any> {
     try {
-      const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+      const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
       const requestBody = { "Mode": "Fifteen" };
       const response = await axios.post<any>(apiurl, requestBody, {
         headers: {
@@ -557,7 +557,7 @@ class ApiService {
 
   // Get payslips data API call
   async getPayslips(token: string): Promise<any> {
-    const apiurl = getApiUrl('/api/Mob6110/Payslips');
+    const apiurl = getApiUrl('/api/MobDa6110/Payslips');
     const response = await axios.post<any>(apiurl, {}, {
       headers: {
         ...API_CONFIG.DEFAULT_HEADERS,
@@ -609,7 +609,7 @@ class ApiService {
 
   // Certificate Request API call
   async getCertificateRequests(token: string): Promise<any[]> {
-    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
     const requestBody = { "Mode": "Thirteen" };
     const response = await axios.post<any[]>(apiurl, requestBody, {
       headers: {
@@ -623,7 +623,7 @@ class ApiService {
 
   // Get approvals data API call
   async getApprovals(token: string): Promise<any> {
-    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
     const requestBody = { "Mode": "Fourteen" };
     const response = await axios.post<any>(apiurl, requestBody, {
       headers: {
@@ -637,7 +637,7 @@ class ApiService {
 
   // Get employee directory API call
   async getEmployeeDirectory(token: string): Promise<any[]> {
-    const apiurl = getApiUrl('/api/Mob1010/MyDesk');
+    const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
     const requestBody = { "Mode": "Sixteen" };
     const response = await axios.post<any[]>(apiurl, requestBody, {
       headers: {
@@ -652,7 +652,7 @@ class ApiService {
   // Get certificate types API call
   async getCertificateTypes(token: string): Promise<any[]> {
     try {
-      const apiurl = getApiUrl('/api/Mob6700/LO_Mode');
+      const apiurl = getApiUrl('/api/MobDa6700/LO_Mode');
       const response = await axios.post<any[]>(apiurl, {}, {
         headers: {
           ...API_CONFIG.DEFAULT_HEADERS,
@@ -670,7 +670,7 @@ class ApiService {
   // Get certificate details by ID API call
   async getCertificateDetails(certificateId: string, token: string): Promise<any[]> {
     try {
-      const apiurl = getApiUrl('/api/Mob6700/SE_Mode');
+      const apiurl = getApiUrl('/api/MobDa6700/SE_Mode');
       const requestBody = {
         "Mode": "I",
         "CertificateId": certificateId
@@ -692,7 +692,7 @@ class ApiService {
   // Save or update certificate request API call
   async saveCertificateRequest(mode: string, certificateId: string, certificateTypeId: string, requestedDate: string, token: string): Promise<any[]> {
     try {
-      const apiurl = getApiUrl('/api/Mob6700/I_U_D_Mode');
+      const apiurl = getApiUrl('/api/MobDa6700/I_U_D_Mode');
       const requestBody = {
         "Mode": mode,
         "CertificateId": certificateId,
