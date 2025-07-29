@@ -1,6 +1,8 @@
-import React, { useState, useEffect }  from 'react';
-import { View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList, 
-  SafeAreaView, ActivityIndicator, Alert, Modal, TextInput, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList,
+  SafeAreaView, ActivityIndicator, Alert, Modal, TextInput, Platform
+} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -109,7 +111,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
         Alert.alert('Success', message);
         setModalVisible(false);
         resetForm();
-        
+
         // Refresh the certificate requests list
         const fetchData = async () => {
           setLoading(true);
@@ -175,7 +177,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                   Alert.alert('Success', 'Certificate request deleted successfully!');
                   setModalVisible(false);
                   resetForm();
-                  
+
                   // Refresh the certificate requests list
                   const fetchData = async () => {
                     setLoading(true);
@@ -218,10 +220,10 @@ export default function CertificateRequestScreen({ navigation }: Props) {
   };
 
   const resetForm = () => {
-    setNewRequest({ 
-      referenceNo: '', 
-      requestedDate: new Date(), 
-      certificateType: '' 
+    setNewRequest({
+      referenceNo: '',
+      requestedDate: new Date(),
+      certificateType: ''
     });
     setSelectedCertificateType('');
     setIsEditMode(false);
@@ -231,13 +233,13 @@ export default function CertificateRequestScreen({ navigation }: Props) {
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate) {
-      setNewRequest({...newRequest, requestedDate: selectedDate});
+      setNewRequest({ ...newRequest, requestedDate: selectedDate });
     }
   };
 
   const handleCertificateTypeSelect = (type: any) => {
     setSelectedCertificateType(type.CertificateName);
-    setNewRequest({...newRequest, certificateType: type.ReportId.toString()});
+    setNewRequest({ ...newRequest, certificateType: type.ReportId.toString() });
     setShowCertificateDropdown(false);
   };
 
@@ -251,45 +253,45 @@ export default function CertificateRequestScreen({ navigation }: Props) {
 
       // Fetch certificate details
       const certificateDetails = await getCertificateDetails(item.CertificateId.toString(), token);
-      
+
       if (certificateDetails && certificateDetails.length > 0) {
         const details = certificateDetails[0];
-        
+
         // Parse the date string to Date object (dd-MMM-yyyy format)
         const dateParts = details.RequestedDate.split('-');
         const day = parseInt(dateParts[0]);
         const monthStr = dateParts[1]; // e.g., "Jul"
         const year = parseInt(dateParts[2]);
-        
+
         // Convert month abbreviation to month number (0-indexed)
         const monthMap: { [key: string]: number } = {
           'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
           'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
         };
         const month = monthMap[monthStr] || 0;
-        
+
         const requestedDate = new Date(year, month, day);
-        
+
         // Set form data
         setNewRequest({
           referenceNo: item.ReferenceNo,
           requestedDate: requestedDate,
           certificateType: details.CertificateTypeId.toString()
         });
-        
+
         // Find and set the certificate type name for display
         const certificateType = certificateTypes.find(type => type.ReportId === details.CertificateTypeId);
         if (certificateType) {
           setSelectedCertificateType(certificateType.CertificateName);
         }
-        
+
         // Store the certificate ID for update operations
         setEditingCertificateId(item.CertificateId.toString());
-        
+
         // Open modal in edit mode
         setIsEditMode(true);
         setModalVisible(true);
-        
+
         // Fetch certificate types if not already loaded
         if (certificateTypes.length === 0) {
           fetchCertificateTypes();
@@ -312,7 +314,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
         setCertificateTypes([]);
         return;
       }
-      
+
       const data = await getCertificateTypes(token);
       setCertificateTypes(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -353,12 +355,12 @@ export default function CertificateRequestScreen({ navigation }: Props) {
               style={styles.backiconimg} resizeMode="contain" />
           </View>
         </TouchableOpacity>
-          <View style={styles.pagewrap}>
-            <Text style={styles.pagetitle}>Certificate Requests</Text>
-          </View>
+        <View style={styles.pagewrap}>
+          <Text style={styles.pagetitle}>Certificate Requests</Text>
+        </View>
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
-      
+
       {/* New Request Button */}
       <View style={styles.newRequestContainer}>
         <TouchableOpacity style={styles.newRequestButton} onPress={handleNewRequest}>
@@ -374,7 +376,8 @@ export default function CertificateRequestScreen({ navigation }: Props) {
               onPress={() => toggleAccordion(idx)}>
               <View style={styles.hdrltficn}>
                 <Image source={require('../../assets/images/innerpage/star.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
-                <Text style={styles.accordionTitle}>{item.ReferenceNo} {item.RequestedDate}</Text>
+                <Text style={styles.accordionTitle}>{item.ReferenceNo}</Text>
+                <Text style={styles.accordiondate}>{item.RequestedDate}</Text>
               </View>
               <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text>
             </TouchableOpacity>
@@ -399,7 +402,6 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                 <View style={styles.editButtonContainer}>
                   <TouchableOpacity style={styles.editButton} onPress={() => handleEditRequest(item)}>
                     <Text style={styles.editIcon}>✏️</Text>
-                    <Text style={styles.editButtonText}>Edit</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -425,7 +427,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                 <Text style={styles.closeButton}>✕</Text>
               </TouchableOpacity>
             </View>
-            
+
             <View style={styles.modalBody}>
               <View style={styles.inputContainer}>
                 <Text style={styles.inputLabel}>Reference No:</Text>
@@ -437,10 +439,10 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                   placeholderTextColor="#999"
                 />
               </View>
-              
+
               <View style={styles.inputContainer}>
                 <Text style={styles.inputLabel}>Requested Date:</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.datePickerButton}
                   onPress={() => setShowDatePicker(true)}
                 >
@@ -457,10 +459,10 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                   />
                 )}
               </View>
-              
+
               <View style={styles.inputContainer}>
                 <Text style={styles.inputLabel}>Certificate Type:</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.dropdownButton}
                   onPress={() => setShowCertificateDropdown(!showCertificateDropdown)}
                   disabled={loadingCertificateTypes}
@@ -494,10 +496,10 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                   </View>
                 )}
               </View>
-              
+
 
             </View>
-            
+
             <View style={styles.modalFooter}>
               <TouchableOpacity style={styles.cancelButton} onPress={handleCancelRequest}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -534,7 +536,7 @@ const styles = StyleSheet.create({
   toptitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center', 
+    alignItems: 'center',
     paddingRight: 10,
   },
   pagewrap: {
@@ -561,9 +563,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#E2EDFC',
     borderRadius: 20,
     width: 110,
-    padding:6,
-    paddingLeft:8,
-    paddingRight:8,
+    padding: 6,
+    paddingLeft: 8,
+    paddingRight: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -616,8 +618,12 @@ const styles = StyleSheet.create({
   },
   accordionTitle: {
     fontSize: 16,
-    fontWeight: '600',
     marginLeft: 12,
+  },
+  accordiondate: {
+    fontSize: 16,
+    marginLeft: 12,
+    color: '#133F7C',
   },
   accordionContent: {
     marginTop: 2,
@@ -632,20 +638,20 @@ const styles = StyleSheet.create({
   },
   even: {
     backgroundColor: '#F1F6FD',
-    marginBottom: 5, 
+    marginBottom: 5,
     paddingBottom: 2,
     paddingTop: 2,
   },
   lbl: {
-    fontSize: 16,  
-    color: '#000000',  
-    paddingLeft:12,
+    fontSize: 16,
+    color: '#000000',
+    paddingLeft: 12,
   },
   vlue: {
     fontSize: 16,
     fontWeight: '600',
     color: '#000000',
-    paddingLeft:12,
+    paddingLeft: 12,
   },
   loadingContainer: {
     flex: 1,
@@ -676,15 +682,15 @@ const styles = StyleSheet.create({
     paddingRight: 16,
   },
   newRequestButton: {
-    backgroundColor: '#133F7C',
-    paddingVertical: 10,
+    paddingVertical: 6,
     paddingHorizontal: 20,
     borderRadius: 8,
+    borderWidth: .5,
+    borderColor: '#90a4c3ff',
   },
   newRequestButtonText: {
-    color: '#FFFFFF',
+    color: '#133F7C',
     fontSize: 16,
-    fontWeight: 'bold',
   },
   modalOverlay: {
     flex: 1,
@@ -708,12 +714,11 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
     color: '#133F7C',
   },
   closeButton: {
-    fontSize: 24,
-    color: '#133F7C',
+    fontSize: 20,
+    color: '#930606ff',
   },
   modalBody: {
     width: '100%',
@@ -745,13 +750,13 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   cancelButton: {
-    backgroundColor: '#E2EDFC',
+    backgroundColor: '#fce2e5ff',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
   cancelButtonText: {
-    color: '#133F7C',
+    color: '#7c1313ff',
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -826,9 +831,15 @@ const styles = StyleSheet.create({
     padding: 8,
     paddingHorizontal: 12,
     borderRadius: 4,
-    backgroundColor: '#E2EDFC',
+    backgroundColor: '#bdd8fdff',
     flexDirection: 'row',
     alignItems: 'center',
+
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
   },
   editIcon: {
     fontSize: 16,

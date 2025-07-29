@@ -83,7 +83,9 @@ const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
         {downloading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.downloadBtnText}>Download</Text>
+          <Image source={require('../../assets/images/innerpage/download.png')} resizeMode="contain" />
+          // <Text style={styles.downloadBtnText}>Download</Text>
+
         )}
       </TouchableOpacity>
     </SafeAreaView>
@@ -136,13 +138,12 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: '#133F7C',
+    color: '#343434ff',
     marginBottom: 8,
-    fontWeight: 'bold',
   },
   dateInput: {
-    borderWidth: 1,
-    borderColor: '#133F7C',
+    borderWidth: .5,
+    borderColor: '#637b9cff',
     borderRadius: 8,
     padding: 12,
     backgroundColor: '#fff',
@@ -152,17 +153,13 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   downloadBtn: {
-    backgroundColor: '#133F7C',
-    paddingVertical: 12,
-    paddingHorizontal: 32,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
     borderRadius: 8,
     alignItems: 'center',
-  },
-  downloadBtnText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+    borderWidth: 1,
+    borderColor: '#cacacaff',
+  }
 });
 
 export default LeaveOutstandingScreen;

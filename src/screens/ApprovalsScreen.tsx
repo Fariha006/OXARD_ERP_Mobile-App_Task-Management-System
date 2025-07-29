@@ -223,7 +223,6 @@ const styles = StyleSheet.create({
   },
   accordionTitle: {
     fontSize: 16,
-    fontWeight: '600',
     marginLeft: 12,
   },
   accordionContent: {
