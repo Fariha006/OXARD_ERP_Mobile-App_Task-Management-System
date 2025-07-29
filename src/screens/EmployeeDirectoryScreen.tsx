@@ -64,7 +64,9 @@ export default function EmployeeDirectoryScreen({ navigation }: Props) {
               style={styles.backiconimg} resizeMode="contain" />
           </View>
         </TouchableOpacity>
-        <Text style={styles.pagetitle}>Employee Directory</Text>
+        <View style={styles.pagewrap}>
+          <Text style={styles.pagetitle}>Employee Directory</Text>
+        </View>
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
       <FlatList
@@ -106,9 +108,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingRight: 10,
   },
+  pagewrap: {
+    width: '100%',
+    paddingRight: 50,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
   pagetitle: {
     fontSize: 22,
-    fontWeight: 'bold',
     color: '#133F7C',
   },
   backicon: {

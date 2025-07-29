@@ -147,17 +147,19 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
               <View style={styles.hdrltficn}>
                 <Image source={require('../../assets/images/innerpage/star.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
                 <Text style={styles.accordionTitle}>{item.ReferenceNo} {item.TransactionDate}</Text>
+              </View>
+              <View style={styles.rightbtn}>
                 <TouchableOpacity
                   style={styles.downloadBtn}
                   onPress={() => handleDownload(item.PayslipId, item.ReferenceNo)}
-                  disabled={downloadingId === item.PayslipId}
-                >
-                  <Text style={styles.downloadBtnText}>
-                    {downloadingId === item.PayslipId ? 'Downloading...' : 'Download'}
-                  </Text>
+                  disabled={downloadingId === item.PayslipId}>
+                  <View style={styles.dwnloadicon}>
+                    <Image source={require('../../assets/images/innerpage/download.png')} style={styles.downloadimage} resizeMode="contain" />
+                    {/* <Text style={styles.downloadBtnText}> {downloadingId === item.PayslipId ? 'Downloading...' : 'Download'}</Text> */}
+                  </View>
                 </TouchableOpacity>
+                <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text>
               </View>
-              <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text>
             </TouchableOpacity>
             {openIndexes.includes(idx) && (
               <View style={styles.accordionContent}>
@@ -231,7 +233,6 @@ const styles = StyleSheet.create({
   },
   pagetitle: {
     fontSize: 22,
-    fontWeight: 'bold',
     color: '#133F7C',
   },
   backicon: {
@@ -272,7 +273,14 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
   },
-  accordionHeaderOpen: {
+  rightbtn: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dwnloadicon: {},
+    downloadimage: {},
+    accordionHeaderOpen: {
     backgroundColor: '#E1E6EC',
   },
   accordionHeaderClosed: {
@@ -336,15 +344,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   downloadBtn: {
-    backgroundColor: '#133F7C',
-    paddingVertical: 6,
-    paddingHorizontal: 14,
     borderRadius: 8,
-    marginLeft: 10,
-  },
-  downloadBtnText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
+    marginRight: 10,
+  }
 });

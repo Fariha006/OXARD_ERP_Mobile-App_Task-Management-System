@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     height: 38,
     alignContent: 'flex-start',
-    alignItems: 'center',
+    alignItems: 'center',  
   },
   userdesig: {
     textAlign: 'center',

@@ -1,6 +1,8 @@
-import React, { useState, useEffect }  from 'react';
-import { View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList, 
-  SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList,
+  SafeAreaView, ActivityIndicator, Alert
+} from 'react-native';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -73,7 +75,9 @@ export default function ApprovalsScreen({ navigation }: Props) {
               style={styles.backiconimg} resizeMode="contain" />
           </View>
         </TouchableOpacity>
-        <Text style={styles.pagetitle}>Approvals</Text>
+        <View style={styles.pagewrap}>
+          <Text style={styles.pagetitle}>Approvals</Text>
+        </View>
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -95,14 +99,21 @@ export default function ApprovalsScreen({ navigation }: Props) {
                 )}
                 {Array.isArray(data?.Item2) && data.Item2.filter((item2: any) => item2.PageName === item1.PageName).map((item2: any, jdx: number) => (
                   <View key={jdx} style={jdx % 2 === 0 ? styles.odd : styles.even}>
-                    <Text style={styles.lbl}>Reference No: <Text style={styles.vlue}>{item2.ReferenceNo || '-'}</Text></Text>
-                    <Text style={styles.lbl}>Transaction Date: <Text style={styles.vlue}>{item2.TransactionDate ? item2.TransactionDate.split('T')[0] : '-'}</Text></Text>
-                    <Text style={styles.lbl}>Decision Level: <Text style={styles.vlue}>{item2.DecisionLevel ?? '-'}</Text></Text>
+                    <View>
+                      <Text style={styles.lbl}>Reference No: <Text style={styles.vlue}>{item2.ReferenceNo || '-'}</Text></Text>
+                      <Text style={styles.lbl}>Transaction Date: <Text style={styles.vlue}>{item2.TransactionDate ? item2.TransactionDate.split('T')[0] : '-'}</Text></Text>
+                      <Text style={styles.lbl}>Decision Level: <Text style={styles.vlue}>{item2.DecisionLevel ?? '-'}</Text></Text>
+                    </View>
+                    <View>
                     {item2.ReportFlag === 1 && (
-                      <TouchableOpacity style={styles.downloadBtn} onPress={() => {/* TODO: implement download logic */}}>
-                        <Text style={styles.downloadBtnText}>Download</Text>
+                      <TouchableOpacity style={styles.downloadBtn} onPress={() => {/* TODO: implement download logic */ }}>
+                        <View style={styles.dwnloadicon}>
+                          <Image source={require('../../assets/images/innerpage/download.png')} style={styles.downloadimage} resizeMode="contain" />
+                          {/* <Text style={styles.downloadBtnText}> {downloadingId === item.PayslipId ? 'Downloading...' : 'Download'}</Text> */}
+                        </View>
                       </TouchableOpacity>
                     )}
+                    </View>
                   </View>
                 ))}
               </View>
@@ -128,12 +139,17 @@ const styles = StyleSheet.create({
   toptitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center', 
+    alignItems: 'center',
     paddingRight: 10,
+  },
+  pagewrap: {
+    width: '100%',
+    paddingRight: 50,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   pagetitle: {
     fontSize: 22,
-    fontWeight: 'bold',
     color: '#133F7C',
   },
   backicon: {
@@ -150,9 +166,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#E2EDFC',
     borderRadius: 20,
     width: 110,
-    padding:6,
-    paddingLeft:8,
-    paddingRight:8,
+    padding: 6,
+    paddingLeft: 8,
+    paddingRight: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -192,15 +208,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F1F6FD',
     padding: 10,
     borderRadius: 20,
   },
   accordionHeaderOpen: {
     backgroundColor: '#E2EDFC',
   },
+  dwnloadicon: {},
+  downloadimage: {},
   accordionHeaderClosed: {
-    backgroundColor: '#F1F6FD',
+    borderColor: '#DEECFF',
+    borderWidth: 1,
+    borderStyle: 'solid',
   },
   accordionTitle: {
     fontSize: 16,
@@ -217,23 +236,29 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     paddingBottom: 2,
     paddingTop: 2,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   even: {
     backgroundColor: '#F1F6FD',
-    marginBottom: 5, 
+    marginBottom: 5,
     paddingBottom: 2,
     paddingTop: 2,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   lbl: {
-    fontSize: 16,  
-    color: '#000000',  
-    paddingLeft:12,
+    fontSize: 16,
+    color: '#000000',
+    paddingLeft: 12,
   },
   vlue: {
     fontSize: 16,
     fontWeight: '600',
     color: '#000000',
-    paddingLeft:12,
+    paddingLeft: 12,
   },
   loadingContainer: {
     flex: 1,
@@ -258,16 +283,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   downloadBtn: {
-    backgroundColor: '#133F7C',
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 8,
-    marginTop: 8,
-    alignSelf: 'flex-start',
-  },
-  downloadBtnText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
+
   },
 });

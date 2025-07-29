@@ -648,6 +648,70 @@ class ApiService {
     });
     return response.data;
   }
+
+  // Get certificate types API call
+  async getCertificateTypes(token: string): Promise<any[]> {
+    try {
+      const apiurl = getApiUrl('/api/Mob6700/LO_Mode');
+      const response = await axios.post<any[]>(apiurl, {}, {
+        headers: {
+          ...API_CONFIG.DEFAULT_HEADERS,
+          'Authorization': `Bearer ${token}`,
+        },
+        timeout: API_CONFIG.TIMEOUT,
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Certificate Types API Error:', error);
+      throw error;
+    }
+  }
+
+  // Get certificate details by ID API call
+  async getCertificateDetails(certificateId: string, token: string): Promise<any[]> {
+    try {
+      const apiurl = getApiUrl('/api/Mob6700/SE_Mode');
+      const requestBody = {
+        "Mode": "I",
+        "CertificateId": certificateId
+      };
+      const response = await axios.post<any[]>(apiurl, requestBody, {
+        headers: {
+          ...API_CONFIG.DEFAULT_HEADERS,
+          'Authorization': `Bearer ${token}`,
+        },
+        timeout: API_CONFIG.TIMEOUT,
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Certificate Details API Error:', error);
+      throw error;
+    }
+  }
+
+  // Save or update certificate request API call
+  async saveCertificateRequest(mode: string, certificateId: string, certificateTypeId: string, requestedDate: string, token: string): Promise<any[]> {
+    try {
+      const apiurl = getApiUrl('/api/Mob6700/I_U_D_Mode');
+      const requestBody = {
+        "Mode": mode,
+        "CertificateId": certificateId,
+        "CertificateTypeId": certificateTypeId,
+        "RequestedDate": requestedDate
+      };
+      const response = await axios.post<any[]>(apiurl, requestBody, {
+        headers: {
+          ...API_CONFIG.DEFAULT_HEADERS,
+          'Authorization': `Bearer ${token}`,
+        },
+        timeout: API_CONFIG.TIMEOUT,
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Save Certificate Request API Error:', error);
+      throw error;
+    }
+  }
 }
 
 // Create and export API service instance
@@ -674,3 +738,6 @@ export const downloadLeaveOutstandingPdf = (reportCode: string, dateAsOn: string
 export const getCertificateRequests = (token: string) => apiService.getCertificateRequests(token);
 export const getApprovals = (token: string) => apiService.getApprovals(token);
 export const getEmployeeDirectory = (token: string) => apiService.getEmployeeDirectory(token);
+export const getCertificateTypes = (token: string) => apiService.getCertificateTypes(token);
+export const getCertificateDetails = (certificateId: string, token: string) => apiService.getCertificateDetails(certificateId, token);
+export const saveCertificateRequest = (mode: string, certificateId: string, certificateTypeId: string, requestedDate: string, token: string) => apiService.saveCertificateRequest(mode, certificateId, certificateTypeId, requestedDate, token);

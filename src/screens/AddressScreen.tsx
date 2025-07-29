@@ -275,7 +275,6 @@ const styles = StyleSheet.create({
   },
   pagetitle: {
     fontSize: 22,
-    fontWeight: 'bold',
     color: '#133F7C',
   },
   backicon: {

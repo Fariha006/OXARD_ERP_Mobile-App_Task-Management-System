@@ -1,11 +1,12 @@
 import React, { useState, useEffect }  from 'react';
 import { View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList, 
-  SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+  SafeAreaView, ActivityIndicator, Alert, Modal, TextInput, Platform } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import UserStorage from '../utils/userStorage';
-import { getCertificateRequests } from '../api/api';
+import { getCertificateRequests, getCertificateTypes, getCertificateDetails, saveCertificateRequest } from '../api/api';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -14,6 +15,19 @@ export default function CertificateRequestScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openIndexes, setOpenIndexes] = useState<number[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingCertificateId, setEditingCertificateId] = useState<string>('');
+  const [newRequest, setNewRequest] = useState({
+    referenceNo: '',
+    requestedDate: new Date(),
+    certificateType: ''
+  });
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCertificateDropdown, setShowCertificateDropdown] = useState(false);
+  const [selectedCertificateType, setSelectedCertificateType] = useState('');
+  const [certificateTypes, setCertificateTypes] = useState<any[]>([]);
+  const [loadingCertificateTypes, setLoadingCertificateTypes] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,6 +55,272 @@ export default function CertificateRequestScreen({ navigation }: Props) {
     setOpenIndexes(openIndexes.includes(idx)
       ? openIndexes.filter(i => i !== idx)
       : [...openIndexes, idx]);
+  };
+
+  const handleNewRequest = () => {
+    setIsEditMode(false);
+    // Generate new reference number for new requests
+    setNewRequest({
+      referenceNo: '',
+      requestedDate: new Date(),
+      certificateType: ''
+    });
+    setSelectedCertificateType('');
+    setModalVisible(true);
+    fetchCertificateTypes(); // Fetch certificate types when modal opens
+  };
+
+  const handleSubmitRequest = async () => {
+    try {
+      // Validate form data
+      if (!newRequest.certificateType) {
+        Alert.alert('Error', 'Please select a certificate type.');
+        return;
+      }
+
+      const token = await UserStorage.getToken();
+      if (!token) {
+        Alert.alert('Error', 'No authentication token found. Please login again.');
+        return;
+      }
+
+      // Format date to YYYY-MM-DD format
+      const year = newRequest.requestedDate.getFullYear();
+      const month = String(newRequest.requestedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(newRequest.requestedDate.getDate()).padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day}`;
+
+      // Determine mode and certificate ID
+      const mode = isEditMode ? 'U' : 'I';
+      const certificateId = isEditMode ? editingCertificateId : '0';
+
+      // Make API call
+      const response = await saveCertificateRequest(
+        mode,
+        certificateId,
+        newRequest.certificateType,
+        formattedDate,
+        token
+      );
+
+      // Check response
+      if (response && response.length > 0 && response[0].Status === 'Success') {
+        const message = isEditMode ? 'Certificate request updated successfully!' : 'Certificate request submitted successfully!';
+        Alert.alert('Success', message);
+        setModalVisible(false);
+        resetForm();
+        
+        // Refresh the certificate requests list
+        const fetchData = async () => {
+          setLoading(true);
+          setError(null);
+          try {
+            const token = await UserStorage.getToken();
+            if (!token) {
+              setError('No authentication token found. Please login again.');
+              setLoading(false);
+              return;
+            }
+            const result = await getCertificateRequests(token);
+            setData(Array.isArray(result) ? result : []);
+          } catch (err) {
+            setError('Failed to fetch certificate requests');
+          } finally {
+            setLoading(false);
+          }
+        };
+        fetchData();
+      } else {
+        Alert.alert('Error', 'Failed to save certificate request. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error saving certificate request:', error);
+      Alert.alert('Error', 'Failed to save certificate request. Please try again.');
+    }
+  };
+
+  const handleDeleteRequest = async () => {
+    try {
+      // Show confirmation dialog
+      Alert.alert(
+        'Confirm Delete',
+        'Are you sure you want to delete this certificate request?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                const token = await UserStorage.getToken();
+                if (!token) {
+                  Alert.alert('Error', 'No authentication token found. Please login again.');
+                  return;
+                }
+
+                // Make API call with Mode "D"
+                const response = await saveCertificateRequest(
+                  'D',
+                  editingCertificateId,
+                  newRequest.certificateType,
+                  '2025-01-01', // Dummy date for delete operation
+                  token
+                );
+
+                // Check response
+                if (response && response.length > 0 && response[0].Status === 'Success') {
+                  Alert.alert('Success', 'Certificate request deleted successfully!');
+                  setModalVisible(false);
+                  resetForm();
+                  
+                  // Refresh the certificate requests list
+                  const fetchData = async () => {
+                    setLoading(true);
+                    setError(null);
+                    try {
+                      const token = await UserStorage.getToken();
+                      if (!token) {
+                        setError('No authentication token found. Please login again.');
+                        setLoading(false);
+                        return;
+                      }
+                      const result = await getCertificateRequests(token);
+                      setData(Array.isArray(result) ? result : []);
+                    } catch (err) {
+                      setError('Failed to fetch certificate requests');
+                    } finally {
+                      setLoading(false);
+                    }
+                  };
+                  fetchData();
+                } else {
+                  Alert.alert('Error', 'Failed to delete certificate request. Please try again.');
+                }
+              } catch (error) {
+                console.error('Error deleting certificate request:', error);
+                Alert.alert('Error', 'Failed to delete certificate request. Please try again.');
+              }
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.error('Error in delete confirmation:', error);
+    }
+  };
+
+  const handleCancelRequest = () => {
+    setModalVisible(false);
+    resetForm();
+  };
+
+  const resetForm = () => {
+    setNewRequest({ 
+      referenceNo: '', 
+      requestedDate: new Date(), 
+      certificateType: '' 
+    });
+    setSelectedCertificateType('');
+    setIsEditMode(false);
+    setEditingCertificateId('');
+  };
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setNewRequest({...newRequest, requestedDate: selectedDate});
+    }
+  };
+
+  const handleCertificateTypeSelect = (type: any) => {
+    setSelectedCertificateType(type.CertificateName);
+    setNewRequest({...newRequest, certificateType: type.ReportId.toString()});
+    setShowCertificateDropdown(false);
+  };
+
+  const handleEditRequest = async (item: any) => {
+    try {
+      const token = await UserStorage.getToken();
+      if (!token) {
+        Alert.alert('Error', 'No authentication token found. Please login again.');
+        return;
+      }
+
+      // Fetch certificate details
+      const certificateDetails = await getCertificateDetails(item.CertificateId.toString(), token);
+      
+      if (certificateDetails && certificateDetails.length > 0) {
+        const details = certificateDetails[0];
+        
+        // Parse the date string to Date object (dd-MMM-yyyy format)
+        const dateParts = details.RequestedDate.split('-');
+        const day = parseInt(dateParts[0]);
+        const monthStr = dateParts[1]; // e.g., "Jul"
+        const year = parseInt(dateParts[2]);
+        
+        // Convert month abbreviation to month number (0-indexed)
+        const monthMap: { [key: string]: number } = {
+          'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+          'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+        };
+        const month = monthMap[monthStr] || 0;
+        
+        const requestedDate = new Date(year, month, day);
+        
+        // Set form data
+        setNewRequest({
+          referenceNo: item.ReferenceNo,
+          requestedDate: requestedDate,
+          certificateType: details.CertificateTypeId.toString()
+        });
+        
+        // Find and set the certificate type name for display
+        const certificateType = certificateTypes.find(type => type.ReportId === details.CertificateTypeId);
+        if (certificateType) {
+          setSelectedCertificateType(certificateType.CertificateName);
+        }
+        
+        // Store the certificate ID for update operations
+        setEditingCertificateId(item.CertificateId.toString());
+        
+        // Open modal in edit mode
+        setIsEditMode(true);
+        setModalVisible(true);
+        
+        // Fetch certificate types if not already loaded
+        if (certificateTypes.length === 0) {
+          fetchCertificateTypes();
+        }
+      } else {
+        Alert.alert('Error', 'No certificate details found.');
+      }
+    } catch (error) {
+      console.error('Error fetching certificate details:', error);
+      Alert.alert('Error', 'Failed to fetch certificate details.');
+    }
+  };
+
+  const fetchCertificateTypes = async () => {
+    setLoadingCertificateTypes(true);
+    try {
+      const token = await UserStorage.getToken();
+      if (!token) {
+        console.error('No authentication token found');
+        setCertificateTypes([]);
+        return;
+      }
+      
+      const data = await getCertificateTypes(token);
+      setCertificateTypes(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching certificate types:', error);
+      setCertificateTypes([]);
+    } finally {
+      setLoadingCertificateTypes(false);
+    }
   };
 
   if (loading) {
@@ -73,9 +353,19 @@ export default function CertificateRequestScreen({ navigation }: Props) {
               style={styles.backiconimg} resizeMode="contain" />
           </View>
         </TouchableOpacity>
-        <Text style={styles.pagetitle}>Certificate Requests</Text>
+          <View style={styles.pagewrap}>
+            <Text style={styles.pagetitle}>Certificate Requests</Text>
+          </View>
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
+      
+      {/* New Request Button */}
+      <View style={styles.newRequestContainer}>
+        <TouchableOpacity style={styles.newRequestButton} onPress={handleNewRequest}>
+          <Text style={styles.newRequestButtonText}>New Request</Text>
+        </TouchableOpacity>
+      </View>
+
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {data.length === 0 && <Text style={styles.lbl}>No certificate requests found.</Text>}
         {data.map((item, idx) => (
@@ -106,11 +396,126 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                   <Text style={styles.lbl}>Remark:</Text>
                   <Text style={styles.vlue}>{item.Remark}</Text>
                 </View>
+                <View style={styles.editButtonContainer}>
+                  <TouchableOpacity style={styles.editButton} onPress={() => handleEditRequest(item)}>
+                    <Text style={styles.editIcon}>✏️</Text>
+                    <Text style={styles.editButtonText}>Edit</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             )}
           </View>
         ))}
       </ScrollView>
+
+      {/* New Request Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {isEditMode ? 'Edit Certificate Request' : 'New Certificate Request'}
+              </Text>
+              <TouchableOpacity onPress={handleCancelRequest}>
+                <Text style={styles.closeButton}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.modalBody}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Reference No:</Text>
+                <TextInput
+                  style={[styles.textInput, styles.readonlyInput]}
+                  value={newRequest.referenceNo}
+                  editable={false}
+                  placeholder="Auto-generated reference number"
+                  placeholderTextColor="#999"
+                />
+              </View>
+              
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Requested Date:</Text>
+                <TouchableOpacity 
+                  style={styles.datePickerButton}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Text style={styles.datePickerButtonText}>
+                    {newRequest.requestedDate.toLocaleDateString()}
+                  </Text>
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={newRequest.requestedDate}
+                    mode="date"
+                    display="default"
+                    onChange={handleDateChange}
+                  />
+                )}
+              </View>
+              
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Certificate Type:</Text>
+                <TouchableOpacity 
+                  style={styles.dropdownButton}
+                  onPress={() => setShowCertificateDropdown(!showCertificateDropdown)}
+                  disabled={loadingCertificateTypes}
+                >
+                  <Text style={styles.dropdownButtonText}>
+                    {loadingCertificateTypes ? 'Loading...' : (selectedCertificateType || 'Select certificate type')}
+                  </Text>
+                  <Text style={styles.dropdownArrow}>
+                    {showCertificateDropdown ? '▲' : '▼'}
+                  </Text>
+                </TouchableOpacity>
+                {showCertificateDropdown && (
+                  <View style={styles.dropdownList}>
+                    {certificateTypes.length === 0 ? (
+                      <View style={styles.dropdownItem}>
+                        <Text style={styles.dropdownItemText}>
+                          {loadingCertificateTypes ? 'Loading...' : 'No certificate types available'}
+                        </Text>
+                      </View>
+                    ) : (
+                      certificateTypes.map((type, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.dropdownItem}
+                          onPress={() => handleCertificateTypeSelect(type)}
+                        >
+                          <Text style={styles.dropdownItemText}>{type.CertificateName}</Text>
+                        </TouchableOpacity>
+                      ))
+                    )}
+                  </View>
+                )}
+              </View>
+              
+
+            </View>
+            
+            <View style={styles.modalFooter}>
+              <TouchableOpacity style={styles.cancelButton} onPress={handleCancelRequest}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              {isEditMode && (
+                <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteRequest}>
+                  <Text style={styles.deleteButtonText}>Delete</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity style={styles.submitButton} onPress={handleSubmitRequest}>
+                <Text style={styles.submitButtonText}>
+                  {isEditMode ? 'Update' : 'Submit'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -132,9 +537,14 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     paddingRight: 10,
   },
+  pagewrap: {
+    width: '100%',
+    paddingRight: 50,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
   pagetitle: {
     fontSize: 22,
-    fontWeight: 'bold',
     color: '#133F7C',
   },
   backicon: {
@@ -193,7 +603,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F1F6FD',
     padding: 10,
     borderRadius: 20,
   },
@@ -201,7 +610,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#E2EDFC',
   },
   accordionHeaderClosed: {
-    backgroundColor: '#F1F6FD',
+    borderColor: '#DEECFF',
+    borderWidth: 1,
+    borderStyle: 'solid',
   },
   accordionTitle: {
     fontSize: 16,
@@ -209,7 +620,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   accordionContent: {
-    marginTop: 10,
+    marginTop: 2,
     paddingLeft: 6,
     paddingRight: 6,
   },
@@ -257,5 +668,192 @@ const styles = StyleSheet.create({
     color: '#FF0000',
     fontSize: 18,
     textAlign: 'center',
+  },
+  newRequestContainer: {
+    alignItems: 'flex-end',
+    marginTop: 10,
+    marginBottom: 10,
+    paddingRight: 16,
+  },
+  newRequestButton: {
+    backgroundColor: '#133F7C',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  newRequestButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 20,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 15,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#133F7C',
+  },
+  closeButton: {
+    fontSize: 24,
+    color: '#133F7C',
+  },
+  modalBody: {
+    width: '100%',
+    marginBottom: 20,
+  },
+  inputContainer: {
+    marginBottom: 15,
+  },
+  inputLabel: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 5,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: '#DEECFF',
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+    color: '#000',
+  },
+  textArea: {
+    minHeight: 80,
+    paddingTop: 10,
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  cancelButton: {
+    backgroundColor: '#E2EDFC',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  cancelButtonText: {
+    color: '#133F7C',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  submitButton: {
+    backgroundColor: '#133F7C',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  submitButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  datePickerButton: {
+    borderWidth: 1,
+    borderColor: '#DEECFF',
+    borderRadius: 8,
+    padding: 10,
+    backgroundColor: '#FFFFFF',
+  },
+  datePickerButtonText: {
+    fontSize: 16,
+    color: '#000',
+  },
+  dropdownButton: {
+    borderWidth: 1,
+    borderColor: '#DEECFF',
+    borderRadius: 8,
+    padding: 10,
+    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dropdownButtonText: {
+    fontSize: 16,
+    color: '#000',
+    flex: 1,
+  },
+  dropdownArrow: {
+    fontSize: 16,
+    color: '#133F7C',
+  },
+  dropdownList: {
+    borderWidth: 1,
+    borderColor: '#DEECFF',
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    marginTop: 2,
+    maxHeight: 150,
+  },
+  dropdownItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  dropdownItemText: {
+    fontSize: 16,
+    color: '#000',
+  },
+  readonlyInput: {
+    backgroundColor: '#F5F5F5',
+    color: '#666',
+  },
+  accordionHeaderContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  editButton: {
+    padding: 8,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+    backgroundColor: '#E2EDFC',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  editIcon: {
+    fontSize: 16,
+  },
+  editButtonContainer: {
+    alignItems: 'flex-end',
+    marginTop: 10,
+    paddingRight: 10,
+  },
+  editButtonText: {
+    fontSize: 14,
+    color: '#133F7C',
+    marginLeft: 5,
+    fontWeight: '600',
+  },
+  deleteButton: {
+    backgroundColor: '#FF6B6B',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginHorizontal: 5,
+  },
+  deleteButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
