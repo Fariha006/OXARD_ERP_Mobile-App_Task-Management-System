@@ -687,7 +687,7 @@ class ApiService {
       console.error('Certificate Details API Error:', error);
       throw error;
     }
-  }
+  }  
 
   // Save or update certificate request API call
   async saveCertificateRequest(mode: string, certificateId: string, certificateTypeId: string, requestedDate: string, token: string): Promise<any[]> {
