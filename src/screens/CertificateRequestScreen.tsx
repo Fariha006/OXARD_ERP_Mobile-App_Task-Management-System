@@ -486,7 +486,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                       certificateTypes.map((type, index) => (
                         <TouchableOpacity
                           key={index}
-                          style={styles.dropdownItem}
+                          style={[styles.dropdownItem, styles.dropdownItems]}
                           onPress={() => handleCertificateTypeSelect(type)}
                         >
                           <Text style={styles.dropdownItemText}>{type.CertificateName}</Text>
@@ -496,8 +496,6 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                   </View>
                 )}
               </View>
-
-
             </View>
 
             <View style={styles.modalFooter}>
@@ -701,7 +699,7 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
-    padding: 20,
+    padding: 10,
     width: '80%',
     alignItems: 'center',
   },
@@ -746,30 +744,8 @@ const styles = StyleSheet.create({
   },
   modalFooter: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     width: '100%',
-  },
-  cancelButton: {
-    backgroundColor: '#fce2e5ff',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  cancelButtonText: {
-    color: '#7c1313ff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  submitButton: {
-    backgroundColor: '#133F7C',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  submitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   datePickerButton: {
     borderWidth: 1,
@@ -802,17 +778,22 @@ const styles = StyleSheet.create({
     color: '#133F7C',
   },
   dropdownList: {
-    borderWidth: 1,
-    borderColor: '#DEECFF',
     borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    marginTop: 2,
-    maxHeight: 150,
+    marginTop: 0,
+    padding: 4,
+    paddingTop: 0,
   },
   dropdownItem: {
-    padding: 10,
+    padding: 0,
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
+  },
+  dropdownItems: {
+    borderColor: '#DEECFF',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
   },
   dropdownItemText: {
     fontSize: 16,
@@ -855,6 +836,17 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     fontWeight: '600',
   },
+  cancelButton: {
+    backgroundColor: '#fce2e5ff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  cancelButtonText: {
+    color: '#7c1313ff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
   deleteButton: {
     backgroundColor: '#FF6B6B',
     paddingVertical: 10,
@@ -864,7 +856,18 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  submitButton: {
+    backgroundColor: '#133F7C',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  submitButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
     fontWeight: 'bold',
   },
 });

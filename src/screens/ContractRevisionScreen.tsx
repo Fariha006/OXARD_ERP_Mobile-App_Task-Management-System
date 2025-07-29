@@ -109,7 +109,7 @@ export default function ContractRevisionScreen({ navigation }: { navigation?: an
                           </View>
                           <View style={styles.tile}>
                             <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'ContractRevision' })}>
-                              <Image source={require('../../assets/images/innerpage/eligibility.png')} style={styles.image} />
+                              <Image source={require('../../assets/images/innerpage/eligibility.png')} style={[styles.image, styles.imagelast]} />
                               <Text style={styles.title}>Eligibilities</Text>
                             </TouchableOpacity>
                           </View>
@@ -271,8 +271,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
-    paddingLeft: 18,
-    paddingRight: 18,
+    paddingLeft: 14,
+    paddingRight: 14,
   },
 
   algnbtn: {
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   title: {
-    fontSize: 12,
+    fontSize: 11,
     textAlign: 'center',
     color: '#ffffff',
     marginLeft: 6,
@@ -293,4 +293,8 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     alignItems: 'center'
   },
+  imagelast: {
+    width: 20,
+    height: 20,
+  }
 });
