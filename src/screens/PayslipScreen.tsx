@@ -146,7 +146,8 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
               onPress={() => toggleAccordion(idx)}>
               <View style={styles.hdrltficn}>
                 <Image source={require('../../assets/images/innerpage/star.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
-                <Text style={styles.accordionTitle}>{item.ReferenceNo} {item.TransactionDate}</Text>
+                <Text style={styles.accordionTitle}>{item.ReferenceNo}</Text>
+                <Text style={styles.accordiondate}>{item.TransactionDate}</Text>
               </View>
               <View style={styles.rightbtn}>
                 <TouchableOpacity
@@ -290,8 +291,12 @@ const styles = StyleSheet.create({
   },
   accordionTitle: {
     fontSize: 16,
-    fontWeight: '600',
     marginLeft: 12,
+  },
+  accordiondate: {
+    fontSize: 16,
+    marginLeft: 12,
+    color: '#133F7C',
   },
   accordionContent: {
     marginTop: 10,

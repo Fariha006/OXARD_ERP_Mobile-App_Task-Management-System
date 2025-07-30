@@ -243,7 +243,6 @@ const styles = StyleSheet.create({
   },
   pagetitle: {
     fontSize: 22,
-    fontWeight: 'bold',
     color: '#133F7C',
   },
   backicon: {
@@ -294,7 +293,6 @@ const styles = StyleSheet.create({
   },
   accordionTitle: {
     fontSize: 16,
-    fontWeight: '600',
   },
   accordionContent: {
     marginTop: 10,
