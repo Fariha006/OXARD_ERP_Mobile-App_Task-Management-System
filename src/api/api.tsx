@@ -537,6 +537,23 @@ class ApiService {
   }
 
   // Get notifications (My Desk) API call
+  async getMesseges(token: string): Promise<any[]> {
+    try {
+      const apiurl = getApiUrl('/api/MobAdm0009/LG_Mode');
+      const requestBody = { "Mode": "TWO" };
+      const response = await axios.post<any[]>(apiurl, requestBody, {
+        headers: {
+          ...API_CONFIG.DEFAULT_HEADERS,
+          'Authorization': `Bearer ${token}`,
+        },
+        timeout: API_CONFIG.TIMEOUT,
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Notifications API Error:', error);
+      throw error;
+    }
+  }
   async getNotifications(token: string): Promise<any> {
     try {
       const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
@@ -741,3 +758,70 @@ export const getEmployeeDirectory = (token: string) => apiService.getEmployeeDir
 export const getCertificateTypes = (token: string) => apiService.getCertificateTypes(token);
 export const getCertificateDetails = (certificateId: string, token: string) => apiService.getCertificateDetails(certificateId, token);
 export const saveCertificateRequest = (mode: string, certificateId: string, certificateTypeId: string, requestedDate: string, token: string) => apiService.saveCertificateRequest(mode, certificateId, certificateTypeId, requestedDate, token);
+export const getMesseges = (token: string) => apiService.getMesseges(token);
+
+export async function fetchMessageCategories(token: string) {
+  try {
+    const apiurl = getApiUrl('/api/MobAdm0009/LO_Mode');
+    const requestBody = {
+      "Mode": "TWO"
+    };
+    const response = await axios.post<any>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Message Categories API Error:', error);
+    throw error;
+  }
+}
+
+export async function fetchSelectTypes(token: string, employeeCategoryId: number) {
+  try {
+    const apiurl = getApiUrl('/api/MobAdm0009/EL_Mode');
+    const requestBody = {
+      "EmployeeCategoryId": employeeCategoryId
+    };
+    const response = await axios.post<any>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Select Types API Error:', error);
+    throw error;
+  }
+}
+
+export async function saveMessage(token: string, messageData: {
+  Mode: string;
+  NotificationId: string;
+  FkCategoryId: string;
+  Title: string;
+  NotificationDate: string;
+  NotificationContent: string;
+  EmployeeCategoryId: string;
+  EmployeeCategoryListIds: string;
+}) {
+  try {
+    const apiurl = getApiUrl('/api/MobAdm0009/I_U_D_Mode');
+    const response = await axios.post<any>(apiurl, messageData, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Save Message API Error:', error);
+    throw error;
+  }
+}
