@@ -378,6 +378,13 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                 <Image source={require('../../assets/images/innerpage/star.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
                 <Text style={styles.accordionTitle}>{item.ReferenceNo}</Text>
                 <Text style={styles.accordiondate}>{item.RequestedDate}</Text>
+                <Text style={[
+                  styles.accordionStatus,
+                  item.ApprovalStatus === 'Pending' && styles.statusPending,
+                  item.ApprovalStatus === 'Progress' && styles.statusProgress,
+                  item.ApprovalStatus === 'Approved' && styles.statusApproved,
+                  item.ApprovalStatus === 'Rejected' && styles.statusRejected,
+                ]}>{item.ApprovalStatus}</Text>
               </View>
               <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text>
             </TouchableOpacity>
@@ -396,14 +403,16 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                   <Text style={styles.vlue}>{item.CertificateType}</Text>
                 </View>
                 <View style={styles.even}>
-                  <Text style={styles.lbl}>Remark:</Text>
-                  <Text style={styles.vlue}>{item.Remark}</Text>
+                  <Text style={styles.lbl}>Approval Status:</Text>
+                  <Text style={styles.vlue}>{item.ApprovalStatus}</Text>
                 </View>
-                <View style={styles.editButtonContainer}>
-                  <TouchableOpacity style={styles.editButton} onPress={() => handleEditRequest(item)}>
-                    <Text style={styles.editIcon}>✏️</Text>
-                  </TouchableOpacity>
-                </View>
+                                 {item.ApprovalStatus === 'Pending' && (
+                   <View style={styles.editButtonContainer}>
+                     <TouchableOpacity style={styles.editButton} onPress={() => handleEditRequest(item)}>
+                       <Text style={styles.editIcon}>✏️</Text>
+                     </TouchableOpacity>
+                   </View>
+                 )}
               </View>
             )}
           </View>
@@ -622,6 +631,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 12,
     color: '#133F7C',
+  },
+  accordionStatus: {
+    fontSize: 14,
+    marginLeft: 12,
+    color: '#666',
+    fontWeight: '500',
+  },
+  statusPending: {
+    color: '#DAA520', // Dark yellow
+  },
+  statusProgress: {
+    color: '#FF8C00', // Orange
+  },
+  statusApproved: {
+    color: '#228B22', // Green
+  },
+  statusRejected: {
+    color: '#DC143C', // Red
   },
   accordionContent: {
     marginTop: 2,
