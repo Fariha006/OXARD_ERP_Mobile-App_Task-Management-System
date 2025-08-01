@@ -82,14 +82,14 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
       text: 'Directory',
       icon: require('../../assets/images/directory.png'),
       screen: 'Details',
-      navigationParams: { screen: 'Details' }
+      navigationParams: { screen: 'Directory' }
     },
     {
       id: 'messages',
       text: 'Messages',
       icon: require('../../assets/images/messages.png'),
       screen: 'Details',
-      navigationParams: { screen: 'Details' }
+      navigationParams: { screen: 'Messege' }
     },
     {
       id: 'leaveoutstanding',
@@ -103,7 +103,7 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
       text: 'Approval',
       icon: require('../../assets/images/approval2.png'),
       screen: 'Details',
-      navigationParams: { screen: 'Details' }
+      navigationParams: { screen: 'Approvals' }
     },
     {
       id: 'addbuttons',

@@ -199,7 +199,7 @@ const Footer = () => {
         <Text style={styles.label}>Home</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.btmmenu} onPress={() => navigation.navigate('Main', { screen: 'Details' })}>
+      <TouchableOpacity style={styles.btmmenu} onPress={() => navigation.navigate('Main', { screen: 'Messege' })}>
         <View><Image source={require('../../assets/images/btmmsgs.png')}
           style={styles.btmicon} resizeMode="contain" />
         </View>
