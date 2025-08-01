@@ -200,10 +200,10 @@ export default function NotificationScreen({ navigation }: Props) {
 
               {openAccordion === section.key && (
                 <View style={styles.accordionContent}>
-                  {section.items.map((item) => (
+                  {section.items.map((item,index) => (
                     <View
                       key={item.NotificationId?.toString() || Math.random().toString()}
-                      style={item.NotificationId % 2 === 0 ? styles.even : styles.odd}
+                      style={index % 2 === 0 ? styles.even : styles.odd}
                     >
                       <Text style={styles.lbl}>{item.Title}</Text>
                       <Text style={styles.vlue}>{item.NotificationContent}</Text>
@@ -313,8 +313,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   lbl: {
-    fontSize: 12,
-    color: '#000000',
+    fontSize: 11,
+    color: 'gray',
     paddingLeft: 12,
     fontWeight: '600',
   },

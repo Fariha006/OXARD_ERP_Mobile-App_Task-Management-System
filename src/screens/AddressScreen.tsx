@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
   },
 
   accordionHeaderOpen: {
-    backgroundColor: '#E1E6EC',
+      backgroundColor: '#E2EDFC',
   },
   accordionHeaderClosed: {
     borderColor: '#DEECFF',
@@ -349,6 +349,7 @@ const styles = StyleSheet.create({
   accordionTitle: {
     fontSize: 12,
     fontWeight: '600',
+    marginLeft: 5,
   },
   accordionContent: {
     marginTop: 1,

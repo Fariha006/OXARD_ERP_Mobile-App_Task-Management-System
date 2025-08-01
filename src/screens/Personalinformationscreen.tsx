@@ -199,7 +199,7 @@ export default function Personalinformationscreen({ navigation }: Props) {
                 style={[styles.ltficn, styles.star]} resizeMode="contain" />
               <Text style={styles.accordionTitle}>Personal Information</Text>
             </View>
-            <Text>{accordionOpen ? '▲' : '▼'}</Text>
+            {/* <Text>{accordionOpen ? '▲' : '▼'}</Text> */}
           </TouchableOpacity>
           {accordionOpen && (
             <View style={styles.accordionContent}>
@@ -292,11 +292,11 @@ const styles = StyleSheet.create({
     color: '#133F7C',
   },
   backicon: {
-    marginLeft: 15,
+    marginLeft:20,
   },
   backiconimg: {
-    width: 13,
-    height: 20,
+    width:25,
+    height: 25,
   },
   rightclick: {
     width: 110,
@@ -350,10 +350,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     borderRadius: 20,
-    backgroundColor: '#E1E6EC',
+     backgroundColor: '#E1E6EC',
   },
   accordionHeaderOpen: {
-    backgroundColor: '#E1E6EC',
+    backgroundColor: '#E2EDFC',
   },
   accordionHeaderClosed: {
     borderColor: '#DEECFF',
@@ -361,7 +361,8 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
   },
   accordionTitle: {
-    fontSize: 16,
+    fontSize: 12,
+    fontWeight: '600',
     marginLeft: 12,
   },
   accordionContent: {
@@ -382,13 +383,14 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   lbl: {
-    fontSize: 16,
-    color: '#000000',
+    fontSize: 11,
+    color: 'gray',
     paddingLeft: 12,
+    fontWeight: '600',
   },
   vlue: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 11,
+    // fontWeight: '600',
     color: '#000000',
     paddingLeft: 12,
   },
