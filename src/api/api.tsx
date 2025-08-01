@@ -825,3 +825,23 @@ export async function saveMessage(token: string, messageData: {
     throw error;
   }
 }
+
+export async function fetchMessageForEdit(token: string, notificationId: string) {
+  try {
+    const apiurl = getApiUrl('/api/MobAdm0009/SE_Mode');
+    const requestBody = {
+      "NotificationId": notificationId
+    };
+    const response = await axios.post<any>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Fetch Message for Edit API Error:', error);
+    throw error;
+  }
+}

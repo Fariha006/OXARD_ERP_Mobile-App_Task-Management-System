@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaVi
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { getMesseges, fetchMessageCategories, fetchSelectTypes, saveMessage } from '../api/api';
+import { getMesseges, fetchMessageCategories, fetchSelectTypes, saveMessage, fetchMessageForEdit } from '../api/api';
 import UserStorage from '../utils/userStorage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
@@ -27,6 +27,10 @@ export default function MessegeScreen({ navigation }: Props) {
   const [filterTypeDropdownOpen, setFilterTypeDropdownOpen] = useState(false);
   const [selectTypeDropdownOpen, setSelectTypeDropdownOpen] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editData, setEditData] = useState<any>(null);
+  const [selectedNotificationId, setSelectedNotificationId] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,7 +55,7 @@ export default function MessegeScreen({ navigation }: Props) {
   }, []);
 
   useEffect(() => {
-    if (modalVisible) {
+    if (modalVisible || editModalVisible) {
       (async () => {
         try {
           const token = await UserStorage.getToken();
@@ -65,7 +69,7 @@ export default function MessegeScreen({ navigation }: Props) {
         }
       })();
     }
-  }, [modalVisible]);
+  }, [modalVisible, editModalVisible]);
 
   useEffect(() => {
     if (selectedFilterType !== null) {
@@ -119,8 +123,8 @@ export default function MessegeScreen({ navigation }: Props) {
       const employeeCategoryListIds = selectedSelectTypes.join(',');
 
       const messageData = {
-        "Mode": "I",
-        "NotificationId": "0",
+        "Mode": isEditMode ? "U" : "I",
+        "NotificationId": isEditMode ? selectedNotificationId : "0",
         "FkCategoryId": selectedCategory?.toString() || "",
         "Title": title,
         "NotificationDate": tillDate || "",
@@ -140,7 +144,14 @@ export default function MessegeScreen({ navigation }: Props) {
         console.log('Message saved successfully!');
         
         // Close modal and reset form
-        setModalVisible(false);
+        if (isEditMode) {
+          setEditModalVisible(false);
+          setIsEditMode(false);
+          setEditData(null);
+          setSelectedNotificationId('');
+        } else {
+          setModalVisible(false);
+        }
         setSelectedCategory(null);
         setTitle('');
         setMessage('');
@@ -150,8 +161,16 @@ export default function MessegeScreen({ navigation }: Props) {
         setSelectedSelectTypes([]);
         setSelectTypes([]);
         
-        // Optionally refresh the messages list
-        // You can add a callback here to refresh the main list
+        // Reload the messages data
+        try {
+          setLoading(true);
+          const result = await getMesseges(token);
+          setData(Array.isArray(result) ? result : []);
+        } catch (err) {
+          setError('Failed to refresh notifications');
+        } finally {
+          setLoading(false);
+        }
       } else {
         console.error('Save failed - unexpected response format:', result);
         // Handle unexpected response format
@@ -164,6 +183,49 @@ export default function MessegeScreen({ navigation }: Props) {
 
   const handleClose = () => {
     setModalVisible(false);
+    // Reset form
+    setSelectedCategory(null);
+    setTitle('');
+    setMessage('');
+    setTillDate('');
+    setSendViaEmail(false);
+    setSelectedFilterType(null);
+    setSelectedSelectTypes([]);
+    setSelectTypes([]);
+  };
+
+  const handleEditPress = async (notificationId: string) => {
+    try {
+      setSelectedNotificationId(notificationId);
+      const token = await UserStorage.getToken();
+      if (!token) {
+        console.error('No authentication token found');
+        return;
+      }
+      
+      const result = await fetchMessageForEdit(token, notificationId);
+      setEditData(result);
+      setIsEditMode(true);
+      setEditModalVisible(true);
+      
+      // Pre-fill the form with edit data
+      if (result.Item1 && result.Item1.length > 0) {
+        const messageData = result.Item1[0];
+        setSelectedCategory(messageData.FkCategoryId);
+        setTitle(messageData.Title);
+        setMessage(messageData.NotificationContent);
+        setTillDate(messageData.NotificationDate);
+      }
+    } catch (error) {
+      console.error('Error fetching message for edit:', error);
+    }
+  };
+
+  const handleEditClose = () => {
+    setEditModalVisible(false);
+    setIsEditMode(false);
+    setEditData(null);
+    setSelectedNotificationId('');
     // Reset form
     setSelectedCategory(null);
     setTitle('');
@@ -225,8 +287,16 @@ export default function MessegeScreen({ navigation }: Props) {
         ListEmptyComponent={<Text style={styles.lbl}>No notifications found.</Text>}
         renderItem={({ item, index }) => (
           <View style={[styles.row, index % 2 === 0 ? styles.rowEven : styles.rowOdd]}>
-            <Text style={styles.rowTitle}>{item.Title}</Text>
-            <Text style={styles.rowLabel}>Notification ID: <Text style={styles.rowValue}>{item.NotificationId}</Text></Text>
+            <View style={styles.rowHeader}>
+              <Text style={styles.rowTitle}>{item.Title}</Text>
+              <TouchableOpacity 
+                style={styles.editButton} 
+                onPress={() => handleEditPress(item.NotificationId)}
+              >
+                <Text style={styles.editButtonText}>Edit</Text>
+              </TouchableOpacity>
+            </View>
+            {/* <Text style={styles.rowLabel}>Notification ID: <Text style={styles.rowValue}>{item.NotificationId}</Text></Text> */}
             <Text style={styles.rowLabel}>Document Type: <Text style={styles.rowValue}>{item.DocType}</Text></Text>
             <Text style={styles.rowLabel}>Date: <Text style={styles.rowValue}>{item.NotificationDate}</Text></Text>
             <Text style={styles.rowLabel}>Content: <Text style={styles.rowValue}>{item.NotificationContent}</Text></Text>
@@ -444,6 +514,138 @@ export default function MessegeScreen({ navigation }: Props) {
                 <Text style={styles.saveButtonText}>Save</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.cancelButton} onPress={handleClose}>
+                <Text style={styles.cancelButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit Message Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={editModalVisible}
+        onRequestClose={handleEditClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Message</Text>
+              <TouchableOpacity onPress={handleEditClose} style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>×</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={styles.modalBody}>
+              {/* Category Dropdown */}
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Category</Text>
+                <TouchableOpacity
+                  style={styles.dropdown}
+                  onPress={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+                >
+                  <Text style={styles.dropdownText}>
+                    {selectedCategory !== null ? categories.find(c => c.FieldID === selectedCategory)?.FieldValue : 'Select Category'}
+                  </Text>
+                  <Text style={styles.dropdownArrow}>▼</Text>
+                </TouchableOpacity>
+                {categoryDropdownOpen && (
+                  <View style={styles.dropdownList}>
+                    {categories.map(cat => (
+                      <TouchableOpacity
+                        key={cat.FieldID}
+                        style={styles.dropdownItem}
+                        activeOpacity={0.7}
+                        onPress={() => {
+                          setSelectedCategory(cat.FieldID);
+                          setCategoryDropdownOpen(false);
+                        }}
+                      >
+                        <Text style={styles.dropdownText}>{cat.FieldValue}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </View>
+
+              {/* Title TextBox */}
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Title</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={title}
+                  onChangeText={setTitle}
+                  placeholder="Enter title"
+                />
+              </View>
+
+              {/* Message Rich Text */}
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Message</Text>
+                <TextInput
+                  style={[styles.textInput, styles.textArea]}
+                  value={message}
+                  onChangeText={setMessage}
+                  placeholder="Enter message"
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                />
+              </View>
+
+              {/* Till Date DatePicker */}
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Till Date</Text>
+                <TouchableOpacity style={styles.datePicker} onPress={showDatePickerModal}>
+                  <Text style={styles.datePickerText}>
+                    {tillDate || 'Select Date'}
+                  </Text>
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={tillDate ? new Date(tillDate) : new Date()}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={handleDateChange}
+                    minimumDate={new Date()}
+                  />
+                )}
+              </View>
+
+              {/* Send Via Email Checkbox */}
+              <View style={styles.formGroup}>
+                <View style={styles.checkboxContainer}>
+                  <Switch
+                    value={sendViaEmail}
+                    onValueChange={setSendViaEmail}
+                    trackColor={{ false: '#767577', true: '#133F7C' }}
+                    thumbColor={sendViaEmail ? '#fff' : '#f4f3f4'}
+                  />
+                  <Text style={styles.checkboxLabel}>Send Via Email</Text>
+                </View>
+              </View>
+
+              {/* Employee Tags Section */}
+              {editData && editData.Item2 && editData.Item2.length > 0 && (
+                <View style={styles.formGroup}>
+                  <Text style={styles.formLabel}>Employees</Text>
+                  <View style={styles.tagsContainer}>
+                    {editData.Item2.map((employee: any, index: number) => (
+                      <View key={index} style={styles.tag}>
+                        <Text style={styles.tagText}>
+                          {employee.EmpNo} - {employee.EmployeeName}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )}
+            </ScrollView>
+
+            {/* Modal Buttons */}
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.cancelButton} onPress={handleEditClose}>
                 <Text style={styles.cancelButtonText}>Close</Text>
               </TouchableOpacity>
             </View>
@@ -774,5 +976,41 @@ const styles = StyleSheet.create({
     color: '#133F7C',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  rowHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  editButton: {
+    backgroundColor: '#133F7C',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+  editButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  tag: {
+    backgroundColor: '#E3F2FD',
+    borderWidth: 1,
+    borderColor: '#133F7C',
+    borderRadius: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginBottom: 4,
+  },
+  tagText: {
+    color: '#133F7C',
+    fontSize: 12,
+    fontWeight: '500',
   },
 });

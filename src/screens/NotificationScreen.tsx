@@ -189,13 +189,13 @@ export default function NotificationScreen({ navigation }: Props) {
               >
                 <View style={styles.hdrltficn}>
                   <Image
-                    source={require('../../assets/images/innerpage/star.png')}
+                    source={require('../../assets/images/innerpage/Notificationnew.png')}
                     style={[styles.ltficn, styles.star]}
                     resizeMode="contain"
                   />
                   <Text style={styles.accordionTitle}>{section.caption}</Text>
                 </View>
-                <Text>{openAccordion === section.key ? '▲' : '▼'}</Text>
+                {/* <Text>{openAccordion === section.key ? '▲' : '▼'}</Text> */}
               </TouchableOpacity>
 
               {openAccordion === section.key && (
@@ -205,7 +205,7 @@ export default function NotificationScreen({ navigation }: Props) {
                       key={item.NotificationId?.toString() || Math.random().toString()}
                       style={item.NotificationId % 2 === 0 ? styles.even : styles.odd}
                     >
-                      <Text style={styles.lbl}>{item.DocType}:</Text>
+                      <Text style={styles.lbl}>{item.Title}</Text>
                       <Text style={styles.vlue}>{item.NotificationContent}</Text>
                     </View>
                   ))}
@@ -247,11 +247,11 @@ const styles = StyleSheet.create({
     color: '#133F7C',
   },
   backicon: {
-    marginLeft: 15,
+    marginLeft: 20,
   },
   backiconimg: {
-    width: 13,
-    height: 20,
+    width: 25,
+    height: 25,
   },
   rightclick: {
     width: 110,
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   accordionHeaderOpen: {
-    backgroundColor: '#E1E6EC',
+    backgroundColor: '#E2EDFC',
   },
   accordionHeaderClosed: {
     borderColor: '#DEECFF',
@@ -293,10 +293,11 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
   },
   accordionTitle: {
-    fontSize: 16,
+    fontSize: 12,
+    fontWeight: '600',
   },
   accordionContent: {
-    marginTop: 10,
+    marginTop: 1,
     paddingHorizontal: 6,
   },
   odd: {
@@ -312,13 +313,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   lbl: {
-    fontSize: 16,
+    fontSize: 12,
     color: '#000000',
     paddingLeft: 12,
+    fontWeight: '600',
   },
   vlue: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 11,
+    // fontWeight: '600',
     color: '#000000',
     paddingLeft: 12,
   },

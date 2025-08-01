@@ -30,7 +30,7 @@ export default function HomeScreen({ navigation }: Props) {
   };
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.back}>
+      {/* <View style={styles.back}>
         <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Home' })}>
           <View style={styles.backicon}>
             <Image source={require('../../assets/images/backarow.png')}
@@ -40,6 +40,21 @@ export default function HomeScreen({ navigation }: Props) {
       </View>
       <View style={styles.Caption}>
           <Text style={styles.CaptionText}>MyDesk</Text>
+      </View> */}
+       <View style={[styles.back, styles.toptitle]}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <View style={styles.backicon}>
+            <Image
+              source={require('../../assets/images/backarow.png')}
+              style={styles.backiconimg}
+              resizeMode="contain"
+            />
+          </View>
+        </TouchableOpacity>
+        <View style={styles.pagewrap}>
+          <Text style={styles.pagetitle}>Notifications</Text>
+        </View>
+        <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
       <View>
         <View style={styles.logoContainer}>
@@ -72,7 +87,8 @@ export default function HomeScreen({ navigation }: Props) {
               {/* <Text style={styles.userdesig}>Development Department of Unisis</Text>
               <Text style={styles.userdesig}>Manager</Text> */}
             </View>
-            <View style={[styles.tile, styles.lightpink]}>
+            {/* <View style={[styles.tile, styles.lightpink]}> */}
+            <View style={[styles.tile, styles.lightblue]}>
               <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Address' })}>
                 <Image source={require('../../assets/images/mydesk/addrss.png')} style={styles.image} />
                 <Text style={styles.title}>Address</Text>
@@ -80,7 +96,8 @@ export default function HomeScreen({ navigation }: Props) {
             </View>
           </View>
           <View style={styles.mydeskbtnfirstraw}>
-            <View style={[styles.tile, styles.lightyllow]}>
+            {/* <View style={[styles.tile, styles.lightyllow]}> */}
+            <View style={[styles.tile, styles.lightblue]}>
               <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Dependent' })}>
                 <Image source={require('../../assets/images/mydesk/depnds.png')} style={styles.image} />
                 <Text style={styles.title}>Dependents</Text>
@@ -92,13 +109,15 @@ export default function HomeScreen({ navigation }: Props) {
                 <Text style={styles.title}>Payments</Text>
               </TouchableOpacity>
             </View>
-            <View style={[styles.tile, styles.lightyllow]}>
+            {/* <View style={[styles.tile, styles.lightyllow]}> */}
+            <View style={[styles.tile, styles.lightblue]}>
               <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Qualifications' })}>
                 <Image source={require('../../assets/images/mydesk/qlfction.png')} style={styles.image} />
                 <Text style={styles.title}>Qualifications</Text>
               </TouchableOpacity>
             </View>
-            <View style={[styles.tile, styles.whitebg]}>
+            {/* <View style={[styles.tile, styles.whitebg]}> */}
+            <View style={[styles.tile, styles.lightblue]}>
               <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Documents' })}>
                 <Image source={require('../../assets/images/mydesk/documentd.png')} style={styles.image} />
                 <Text style={styles.title}>Documents</Text>
@@ -112,19 +131,22 @@ export default function HomeScreen({ navigation }: Props) {
                 <Text style={styles.title}>Contract Info</Text>
               </TouchableOpacity>
             </View>
-            <View style={[styles.tile, styles.lightpink]}>
+            {/* <View style={[styles.tile, styles.lightpink]}> */}
+            <View style={[styles.tile, styles.lightblue]}>
               <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Salary' })}>
                 <Image source={require('../../assets/images/mydesk/salry.png')} style={styles.image} />
                 <Text style={styles.title}>Salary</Text>
               </TouchableOpacity>
             </View>
-            <View style={[styles.tile, styles.whitebg]}>
+            {/* <View style={[styles.tile, styles.whitebg]}> */}
+            <View style={[styles.tile, styles.lightblue]}>
               <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Eligibilities' })}>
                 <Image source={require('../../assets/images/mydesk/eligibilty.png')} style={styles.image} />
                 <Text style={styles.title}>Eligibilities</Text>
               </TouchableOpacity>
             </View>
-            <View style={[styles.tile, styles.lightpink]}>
+            {/* <View style={[styles.tile, styles.lightpink]}> */}
+            <View style={[styles.tile, styles.lightblue]}>
               <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'ContractRevision' })}>
                 <Image source={require('../../assets/images/mydesk/revisn.png')} style={styles.image} />
                 <Text style={styles.title}>Revisions</Text>
@@ -132,25 +154,29 @@ export default function HomeScreen({ navigation }: Props) {
             </View>
           </View>
           <View style={styles.mydeskbtnfirstraw}>
-            <View style={[styles.tile, styles.whitebg]}>
+            {/* <View style={[styles.tile, styles.whitebg]}> */}
+            <View style={[styles.tile, styles.lightblue]}>
               <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Assets' })}>
                 <Image source={require('../../assets/images/mydesk/asst.png')} style={styles.image} />
                 <Text style={styles.title}>Assets</Text>
               </TouchableOpacity>
             </View>
-            <View style={[styles.tile, styles.lightyllow]}>
+            {/* <View style={[styles.tile, styles.lightyllow]}> */}
+            <View style={[styles.tile, styles.lightblue]}>
               <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'LeaveHistory' })}>
                 <Image source={require('../../assets/images/mydesk/leaverqst.png')} style={styles.image} />
                 <Text style={styles.title}>Leave Requests</Text>
               </TouchableOpacity>
             </View>
+            {/* <View style={[styles.tile, styles.lightblue]}> */}
             <View style={[styles.tile, styles.lightblue]}>
               <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'CertificateRequest' })}>
                 <Image source={require('../../assets/images/mydesk/crtfctrqst.png')} style={styles.image} />
                 <Text style={styles.title}>Certificates Requests</Text>
               </TouchableOpacity>
             </View>
-            <View style={[styles.tile, styles.whitebg]}>
+            {/* <View style={[styles.tile, styles.whitebg]}> */}
+            <View style={[styles.tile, styles.lightblue]}>
               <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Approvals' })}>
                 <Image source={require('../../assets/images/mydesk/aprov.png')} style={styles.image} />
                 <Text style={styles.title}>Approvals</Text>
@@ -166,7 +192,7 @@ export default function HomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 5,
+    // padding: 5,
     flexDirection: 'column',
     backgroundColor: '#fff',
   },
@@ -177,12 +203,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   backicon: {
-    marginLeft: 15,
-    marginBottom: 10,
+    marginLeft: 20,
+    // marginBottom: 10,
   },
   backiconimg: {
-    width: 13,
-    height: 20,
+    width: 25,
+    height: 25,
   },
   Caption: {
     justifyContent: 'center',
@@ -198,6 +224,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 20,
   },
   profilepic: {
     borderRadius: 100,
@@ -217,7 +244,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logoContainercodetext: {
-    fontSize: 21,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#CB525A',
     margin: 0,
@@ -238,14 +265,14 @@ const styles = StyleSheet.create({
   },
   desig: {
     color: '#000000ff',
-    fontSize: 16,
+    fontSize: 11,
   },
   depsec: {
     color: '#5d5d5dff',
-    fontSize: 15,
+    fontSize: 11,
   },
   usernametext: {
-    fontSize: 19,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#07478D',
     margin: 0,
@@ -258,6 +285,8 @@ const styles = StyleSheet.create({
     paddingRight: 2,
     paddingTop: 5,
     paddingBottom: 5,
+    marginLeft:20,
+    marginRight:20,
   },
   tile: {
     width: 82,
@@ -302,7 +331,27 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   title: {
-    fontSize: 12,
+    fontSize: 11,
     textAlign: 'center',
+  },
+
+  toptitle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingRight: 10,
+  },
+  pagewrap: {
+    width: '100%',
+    paddingRight: 50,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  pagetitle: {
+    fontSize: 22,
+    color: '#133F7C',
+  },
+  rightclick: {
+    width: 110,
   },
 });

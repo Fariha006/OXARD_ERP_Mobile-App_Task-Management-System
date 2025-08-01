@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#002F65',
   },
   label: {
-    fontSize: 12,
+    fontSize: 11,
     textAlign: 'center',
     marginTop: 4,
     color: '#EAEFFF',

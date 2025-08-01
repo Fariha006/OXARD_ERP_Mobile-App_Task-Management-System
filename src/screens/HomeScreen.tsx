@@ -108,7 +108,7 @@ export default function HomeScreen({ navigation }: Props) {
       </View>
       <View>
         <Text style={styles.itemname}>Happy Birthday {item.name}</Text>
-        <Text >{item.tags}</Text>
+        <Text style={styles.itemtags}>{item.tags}</Text>
       </View>
     </View>
   );
@@ -181,6 +181,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingRight: 0,
     backgroundColor: '#ffffff',
+    
     paddingLeft: 0,
     paddingBottom: 80,
   },
@@ -254,10 +255,16 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'flex-start',
     width: '100%',
-    backgroundColor: '#CAD6FF',
-    marginBottom: 7,
+    //backgroundColor: '#CAD6FF',
+    backgroundColor: '#f1f6ff',
+    marginBottom: 10,
     borderRadius: 8,
     padding: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
   },
 
   card: {
@@ -278,7 +285,8 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    //backgroundColor: '#FFFFFF',
+    backgroundColor: '#e8eaed',
     marginLeft: 10,
     paddingLeft: 6,
     paddingTop: 6,
@@ -287,16 +295,20 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   itemname: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#C50205',
   },
+  itemtags: {
+    fontSize: 11,
+   
+  },
   lsttitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   role: {
-    fontSize: 14,
+    fontSize: 11,
     color: '#133F7C',
   },
   tagsContainer: {

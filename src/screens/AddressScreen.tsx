@@ -78,7 +78,7 @@ export default function AddressScreen({ navigation }: Props) {
                     style={[styles.ltficn, styles.star]} resizeMode="contain" />
                   <Text style={styles.accordionTitle}>Current Address</Text>
                 </View>
-                <Text>{permanentaccordionOpen ? '▲' : '▼'}</Text>
+                {/* <Text>{permanentaccordionOpen ? '▲' : '▼'}</Text> */}
               </TouchableOpacity>
               {currentaccordionOpen && (
                 <View style={styles.accordionContent}>
@@ -146,11 +146,11 @@ export default function AddressScreen({ navigation }: Props) {
                 style={[styles.accordionHeader, permanentaccordionOpen ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
                 onPress={() => setPermanentAccordionOpen(!permanentaccordionOpen)}>
                 <View style={styles.hdrltficn}>
-                  <Image source={require('../../assets/images/innerpage/location2.png')}
+                  <Image source={require('../../assets/images/innerpage/location1.png')}
                     style={[styles.ltficn, styles.star]} resizeMode="contain" />
                   <Text style={styles.accordionTitle}>Permanent Address</Text>
                 </View>
-                <Text>{permanentaccordionOpen ? '▲' : '▼'}</Text>
+                {/* <Text>{permanentaccordionOpen ? '▲' : '▼'}</Text> */}
               </TouchableOpacity>
               {permanentaccordionOpen && (
                 <View style={styles.accordionContent}>
@@ -196,7 +196,7 @@ export default function AddressScreen({ navigation }: Props) {
                     style={[styles.ltficn, styles.star]} resizeMode="contain" />
                   <Text style={styles.accordionTitle}>Emergency Contact</Text>
                 </View>
-                <Text>{emergencyaccordionOpen ? '▲' : '▼'}</Text>
+                {/* <Text>{emergencyaccordionOpen ? '▲' : '▼'}</Text> */}
               </TouchableOpacity>
               {emergencyaccordionOpen && (
                 <View style={styles.accordionContent}>
@@ -278,11 +278,11 @@ const styles = StyleSheet.create({
     color: '#133F7C',
   },
   backicon: {
-    marginLeft: 15,
+    marginLeft: 20,
   },
   backiconimg: {
-    width: 13,
-    height: 20,
+    width: 25,
+    height: 25,
   },
   rightclick: {
     width: 110,
@@ -347,11 +347,11 @@ const styles = StyleSheet.create({
   },
 
   accordionTitle: {
-    fontSize: 16,
-    marginLeft: 12,
+    fontSize: 12,
+    fontWeight: '600',
   },
   accordionContent: {
-    marginTop: 10,
+    marginTop: 1,
     paddingLeft: 6,
     paddingRight: 6,
   },
@@ -368,13 +368,14 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   lbl: {
-    fontSize: 16,
-    color: '#000000',
+    fontSize: 11,
+    color: 'gray',
     paddingLeft: 12,
+    fontWeight: '600',
   },
   vlue: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 11,
+    // fontWeight: '600',
     color: '#000000',
     paddingLeft: 12,
   },

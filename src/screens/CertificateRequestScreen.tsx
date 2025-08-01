@@ -375,7 +375,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
             <TouchableOpacity style={[styles.accordionHeader, openIndexes.includes(idx) ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
               onPress={() => toggleAccordion(idx)}>
               <View style={styles.hdrltficn}>
-                <Image source={require('../../assets/images/innerpage/star.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
+                <Image source={require('../../assets/images/innerpage/Certificate.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
                 <Text style={styles.accordionTitle}>{item.ReferenceNo}</Text>
                 <Text style={styles.accordiondate}>{item.RequestedDate}</Text>
                 <Text style={[
@@ -386,7 +386,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                   item.ApprovalStatus === 'Rejected' && styles.statusRejected,
                 ]}>{item.ApprovalStatus}</Text>
               </View>
-              <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text>
+              {/* <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text> */}
             </TouchableOpacity>
             {openIndexes.includes(idx) && (
               <View style={styles.accordionContent}>
@@ -557,11 +557,11 @@ const styles = StyleSheet.create({
     color: '#133F7C',
   },
   backicon: {
-    marginLeft: 15,
+    marginLeft: 20,
   },
   backiconimg: {
-    width: 13,
-    height: 20,
+    width: 25,
+    height: 25,
   },
   rightclick: {
     width: 110,
@@ -624,19 +624,21 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
   },
   accordionTitle: {
-    fontSize: 16,
-    marginLeft: 12,
+    marginLeft:5,
+    fontSize: 12,
+    fontWeight: '600',
   },
   accordiondate: {
-    fontSize: 16,
-    marginLeft: 12,
-    color: '#133F7C',
+    fontSize: 11,
+    marginLeft: 5,
+    color: 'gray',
   },
   accordionStatus: {
-    fontSize: 14,
-    marginLeft: 12,
-    color: '#666',
-    fontWeight: '500',
+    fontSize: 11,
+    
+    marginLeft: 5,
+    color: 'gray',
+    // fontWeight: '500',
   },
   statusPending: {
     color: '#DAA520', // Dark yellow
@@ -651,7 +653,7 @@ const styles = StyleSheet.create({
     color: '#DC143C', // Red
   },
   accordionContent: {
-    marginTop: 2,
+    marginTop: 1,
     paddingLeft: 6,
     paddingRight: 6,
   },
@@ -667,14 +669,16 @@ const styles = StyleSheet.create({
     paddingBottom: 2,
     paddingTop: 2,
   },
+   
   lbl: {
-    fontSize: 16,
-    color: '#000000',
+    fontSize: 11,
+    color: 'gray',
     paddingLeft: 12,
+    fontWeight: '600',
   },
   vlue: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 11,
+    // fontWeight: '600',
     color: '#000000',
     paddingLeft: 12,
   },
@@ -715,7 +719,7 @@ const styles = StyleSheet.create({
   },
   newRequestButtonText: {
     color: '#133F7C',
-    fontSize: 16,
+    fontSize: 12,
   },
   modalOverlay: {
     flex: 1,
