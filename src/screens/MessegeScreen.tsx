@@ -918,7 +918,7 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
   },
   datePickerText: {
     fontSize: 16,
@@ -1035,7 +1035,7 @@ const styles = StyleSheet.create({
   tag: {
     backgroundColor: '#E3F2FD',
     borderWidth: 1,
-    borderColor: '#133F7C',
+    borderColor: '#bbd2f5ff',
     borderRadius: 16,
     paddingVertical: 6,
     paddingHorizontal: 12,

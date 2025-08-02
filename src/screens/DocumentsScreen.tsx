@@ -332,8 +332,9 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
   },
   accordionTitle: {
-    fontSize: 16,
-    marginLeft: 12,
+    marginLeft: 5,
+    fontSize: 12,
+    fontWeight: '600',
   },
   accordionContent: {
     marginTop: 10,
