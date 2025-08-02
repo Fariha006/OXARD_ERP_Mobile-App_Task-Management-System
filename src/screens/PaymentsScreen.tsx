@@ -76,7 +76,7 @@ export default function PaymentsScreen({ navigation }: { navigation: any }) {
                     style={[styles.ltficn, styles.star]} resizeMode="contain" />
                   <Text style={styles.accordionTitle}>{pay["Payment Mode"] || pay["Beneficiary Name"]}</Text>
                 </View>
-                <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text>
+                {/* <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text> */}
               </TouchableOpacity>
               {openIndexes.includes(idx) && (
                 <View style={styles.accordionContent}>
@@ -213,8 +213,9 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
   },
   accordionTitle: {
-    fontSize: 16,
-    marginLeft: 12,
+    marginLeft: 5,
+    fontSize: 12,
+    fontWeight: '600',
   },
   accordionContent: {
     marginTop: 10,
@@ -234,13 +235,13 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   lbl: {
-    fontSize: 16,
-    color: '#000000',
+    fontSize: 11,
+    color: 'gray',
     paddingLeft: 12,
+    fontWeight: '600',
   },
   vlue: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 11,
     color: '#000000',
     paddingLeft: 12,
   },

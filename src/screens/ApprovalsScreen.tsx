@@ -87,7 +87,7 @@ export default function ApprovalsScreen({ navigation }: Props) {
             <TouchableOpacity style={[styles.accordionHeader, openIndexes.includes(idx) ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
               onPress={() => toggleAccordion(idx)}>
               <View style={styles.hdrltficn}>
-                <Image source={require('../../assets/images/innerpage/star.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
+                <Image source={require('../../assets/images/innerpage/aproval.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
                 <Text style={styles.accordionTitle}>{item1.MenuDisplayName} ({item1.RecordCount})</Text>
               </View>
               {/* <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text> */}
@@ -286,6 +286,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   downloadBtn: {
-
+    paddingRight: 6,
   },
 });

@@ -83,10 +83,10 @@ export default function EligibilitiesScreen({ navigation }: { navigation?: any }
             <TouchableOpacity style={[styles.accordionHeader, openIndexes.includes(key) ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}  
             onPress={() => toggleAccordion(key)}>
               <View style={styles.hdrltficn}>
-                <Image source={require('../../assets/images/innerpage/star.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
+                <Image source={require('../../assets/images/innerpage/eligibilty.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
                 <Text style={styles.accordionTitle}>{label}</Text>
               </View>
-              <Text>{openIndexes.includes(key) ? '▲' : '▼'}</Text>
+              {/* <Text>{openIndexes.includes(key) ? '▲' : '▼'}</Text> */}
             </TouchableOpacity>
             {openIndexes.includes(key) && (
               <View style={styles.accordionContent}>
@@ -138,8 +138,8 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   backiconimg: {
-    width: 13,
-    height: 20,
+    width: 25,
+    height: 25,
   },
   rightclick: {
     width: 110,
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   accordionHeaderOpen: {
-    backgroundColor: '#E1E6EC',
+    backgroundColor: '#E2EDFC',
   },
   accordionHeaderClosed: {
     borderColor: '#DEECFF',
@@ -181,8 +181,9 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
   },
   accordionTitle: {
-    fontSize: 16,
-    marginLeft: 12,
+    marginLeft: 5,
+    fontSize: 12,
+    fontWeight: '600',
   },
   accordionContent: {
     marginTop: 10,
@@ -202,13 +203,13 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   lbl: {
-    fontSize: 16,
-    color: '#000000',
+    fontSize: 11,
+    color: 'gray',
     paddingLeft: 12,
+    fontWeight: '600',
   },
   vlue: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 11,
     color: '#000000',
     paddingLeft: 12,
   },

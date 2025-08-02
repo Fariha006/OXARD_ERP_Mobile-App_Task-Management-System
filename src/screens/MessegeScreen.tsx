@@ -1010,6 +1010,7 @@ const styles = StyleSheet.create({
   editButton: {
     padding: 8,
     paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 4,
     backgroundColor: '#bdd8fdff',
     flexDirection: 'row',
