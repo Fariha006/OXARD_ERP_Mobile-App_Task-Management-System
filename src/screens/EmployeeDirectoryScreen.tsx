@@ -119,11 +119,11 @@ const styles = StyleSheet.create({
     color: '#133F7C',
   },
   backicon: {
-    marginLeft: 15,
+    marginLeft: 20,
   },
   backiconimg: {
-    width: 13,
-    height: 20,
+    width: 25,
+    height: 25,
   },
   rightclick: {
     width: 110,
@@ -158,9 +158,10 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   lbl: {
-    fontSize: 16,
-    color: '#000000',
+    fontSize: 11,
+    color: 'gray',
     paddingLeft: 12,
+    fontWeight: '600',
   },
   loadingContainer: {
     flex: 1,
@@ -201,23 +202,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   rowTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#133F7C',
+    fontSize: 12,
+    fontWeight: '600',
     marginBottom: 2,
   },
-  rowDetails: {
-    fontSize: 14,
-    color: '#333',
-    flexWrap: 'wrap',
-  },
   rowValue: {
-    fontWeight: '600',
-    color: '#000',
+    fontSize: 11,
+    color: '#000000',
+    paddingLeft: 12,
   },
   rowLabel: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: 11,
+    color: 'gray',
+    paddingLeft: 12,
+    fontWeight: '600',
     marginBottom: 1,
   },
 });

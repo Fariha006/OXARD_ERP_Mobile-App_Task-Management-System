@@ -73,7 +73,7 @@ export default function DependentScreen({ navigation }: { navigation: any }) {
                 onPress={() => toggleAccordion(idx)}>
                 <View style={styles.hdrltficn}>
                   <Image
-                    source={require('../../assets/images/innerpage/depend.png')}
+                    source={require('../../assets/images/mydesk/depnds.png')}
                     style={[styles.ltficn, styles.star]} resizeMode="contain" />
                   <Text style={styles.accordionTitle}>{dep.DependentName}</Text>
                 </View>

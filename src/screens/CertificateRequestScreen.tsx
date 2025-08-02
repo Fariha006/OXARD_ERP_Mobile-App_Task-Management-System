@@ -375,16 +375,20 @@ export default function CertificateRequestScreen({ navigation }: Props) {
             <TouchableOpacity style={[styles.accordionHeader, openIndexes.includes(idx) ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
               onPress={() => toggleAccordion(idx)}>
               <View style={styles.hdrltficn}>
-                <Image source={require('../../assets/images/innerpage/Certificate.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
-                <Text style={styles.accordionTitle}>{item.ReferenceNo}</Text>
-                <Text style={styles.accordiondate}>{item.RequestedDate}</Text>
-                <Text style={[
-                  styles.accordionStatus,
-                  item.ApprovalStatus === 'Pending' && styles.statusPending,
-                  item.ApprovalStatus === 'Progress' && styles.statusProgress,
-                  item.ApprovalStatus === 'Approved' && styles.statusApproved,
-                  item.ApprovalStatus === 'Rejected' && styles.statusRejected,
-                ]}>{item.ApprovalStatus}</Text>
+                <View style={styles.iconanddetail}>
+                  <Image source={require('../../assets/images/innerpage/Certificate.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
+                  <Text style={styles.accordionTitle}>{item.ReferenceNo}</Text>
+                  <Text style={styles.accordiondate}>{item.RequestedDate}</Text>
+                </View>
+                <View>
+                  <Text style={[
+                    styles.accordionStatus,
+                    item.ApprovalStatus === 'Pending' && styles.statusPending,
+                    item.ApprovalStatus === 'Progress' && styles.statusProgress,
+                    item.ApprovalStatus === 'Approved' && styles.statusApproved,
+                    item.ApprovalStatus === 'Rejected' && styles.statusRejected,
+                  ]}>{item.ApprovalStatus}</Text>
+                </View>
               </View>
               {/* <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text> */}
             </TouchableOpacity>
@@ -406,13 +410,13 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                   <Text style={styles.lbl}>Approval Status:</Text>
                   <Text style={styles.vlue}>{item.ApprovalStatus}</Text>
                 </View>
-                                 {item.ApprovalStatus === 'Pending' && (
-                   <View style={styles.editButtonContainer}>
-                     <TouchableOpacity style={styles.editButton} onPress={() => handleEditRequest(item)}>
-                       <Text style={styles.editIcon}>✏️</Text>
-                     </TouchableOpacity>
-                   </View>
-                 )}
+                {item.ApprovalStatus === 'Pending' && (
+                  <View style={styles.editButtonContainer}>
+                    <TouchableOpacity style={styles.editButton} onPress={() => handleEditRequest(item)}>
+                      <Text style={styles.editIcon}>✏️</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
             )}
           </View>
@@ -474,8 +478,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                 <TouchableOpacity
                   style={styles.dropdownButton}
                   onPress={() => setShowCertificateDropdown(!showCertificateDropdown)}
-                  disabled={loadingCertificateTypes}
-                >
+                  disabled={loadingCertificateTypes}>
                   <Text style={styles.dropdownButtonText}>
                     {loadingCertificateTypes ? 'Loading...' : (selectedCertificateType || 'Select certificate type')}
                   </Text>
@@ -484,24 +487,25 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                   </Text>
                 </TouchableOpacity>
                 {showCertificateDropdown && (
-                  <View style={styles.dropdownList}>
-                    {certificateTypes.length === 0 ? (
-                      <View style={styles.dropdownItem}>
-                        <Text style={styles.dropdownItemText}>
-                          {loadingCertificateTypes ? 'Loading...' : 'No certificate types available'}
-                        </Text>
-                      </View>
-                    ) : (
-                      certificateTypes.map((type, index) => (
-                        <TouchableOpacity
-                          key={index}
-                          style={[styles.dropdownItem, styles.dropdownItems]}
-                          onPress={() => handleCertificateTypeSelect(type)}
-                        >
-                          <Text style={styles.dropdownItemText}>{type.CertificateName}</Text>
-                        </TouchableOpacity>
-                      ))
-                    )}
+                  <View style={styles.dropdownListwrap}>
+                    <View style={styles.dropdownList}>
+                      {certificateTypes.length === 0 ? (
+                        <View style={styles.dropdownItem}>
+                          <Text style={styles.dropdownItemText}>
+                            {loadingCertificateTypes ? 'Loading...' : 'No certificate types available'}
+                          </Text>
+                        </View>
+                      ) : (
+                        certificateTypes.map((type, index) => (
+                          <TouchableOpacity
+                            key={index}
+                            style={[styles.dropdownItem, styles.dropdownItems]}
+                            onPress={() => handleCertificateTypeSelect(type)}>
+                            <Text style={styles.dropdownItemText}>{type.CertificateName}</Text>
+                          </TouchableOpacity>
+                        ))
+                      )}
+                    </View>
                   </View>
                 )}
               </View>
@@ -599,6 +603,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    width: '100%',
+  },
+  iconanddetail: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   ltficn: {
     width: 15,
@@ -624,7 +634,7 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
   },
   accordionTitle: {
-    marginLeft:5,
+    marginLeft: 5,
     fontSize: 12,
     fontWeight: '600',
   },
@@ -635,7 +645,7 @@ const styles = StyleSheet.create({
   },
   accordionStatus: {
     fontSize: 11,
-    
+
     marginLeft: 5,
     color: 'gray',
     // fontWeight: '500',
@@ -669,7 +679,7 @@ const styles = StyleSheet.create({
     paddingBottom: 2,
     paddingTop: 2,
   },
-   
+
   lbl: {
     fontSize: 11,
     color: 'gray',
@@ -678,7 +688,6 @@ const styles = StyleSheet.create({
   },
   vlue: {
     fontSize: 11,
-    // fontWeight: '600',
     color: '#000000',
     paddingLeft: 12,
   },
@@ -742,7 +751,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 17,
     color: '#133F7C',
   },
   closeButton: {
@@ -757,7 +766,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   inputLabel: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#333',
     marginBottom: 5,
   },
@@ -766,7 +775,7 @@ const styles = StyleSheet.create({
     borderColor: '#DEECFF',
     borderRadius: 8,
     padding: 10,
-    fontSize: 16,
+    fontSize: 14,
     color: '#000',
   },
   textArea: {
@@ -786,7 +795,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   datePickerButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#000',
   },
   dropdownButton: {
@@ -800,21 +809,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dropdownButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#000',
     flex: 1,
   },
   dropdownArrow: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#133F7C',
   },
+  dropdownListwrap:{
+    padding: 5,
+    paddingTop: 2,
+  },
   dropdownList: {
-    borderRadius: 8,
-    marginTop: 0,
-    padding: 2,
+    borderRadius: 0,
+    marginTop: 1,
+    padding: 0,
     paddingTop: 0,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: '#e3e6ffff',
   },
   dropdownItem: {
     padding: 0,
@@ -822,14 +837,14 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F0F0F0',
   },
   dropdownItems: {
-    borderColor: '#DEECFF',
+    borderColor: '#e3e6ffff',
     padding: 10,
-    borderBottomWidth: 0,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
   },
   dropdownItemText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#000',
   },
   readonlyInput: {

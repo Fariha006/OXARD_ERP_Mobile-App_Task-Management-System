@@ -122,11 +122,11 @@ const styles = StyleSheet.create({
     color: '#133F7C',
   },
   backicon: {
-    marginLeft: 15,
+    marginLeft: 20,
   },
   backiconimg: {
-    width: 13,
-    height: 20,
+    width: 25,
+    height: 25,
   },
   rightclick: {
     width: 110,

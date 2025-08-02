@@ -145,7 +145,7 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
             <TouchableOpacity style={[styles.accordionHeader, openIndexes.includes(idx) ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
               onPress={() => toggleAccordion(idx)}>
               <View style={styles.hdrltficn}>
-                <Image source={require('../../assets/images/innerpage/star.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
+                <Image source={require('../../assets/images/innerpage/payslip.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
                 <Text style={styles.accordionTitle}>{item.ReferenceNo}</Text>
                 <Text style={styles.accordiondate}>{item.TransactionDate}</Text>
               </View>
@@ -159,7 +159,7 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
                     {/* <Text style={styles.downloadBtnText}> {downloadingId === item.PayslipId ? 'Downloading...' : 'Download'}</Text> */}
                   </View>
                 </TouchableOpacity>
-                <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text>
+                {/* <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text> */}
               </View>
             </TouchableOpacity>
             {openIndexes.includes(idx) && (
@@ -237,11 +237,11 @@ const styles = StyleSheet.create({
     color: '#133F7C',
   },
   backicon: {
-    marginLeft: 15,
+    marginLeft: 20,
   },
   backiconimg: {
-    width: 13,
-    height: 20,
+    width: 25,
+    height: 25,
   },
   rightclick: {
     width: 110,
@@ -280,9 +280,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dwnloadicon: {},
-    downloadimage: {},
+    downloadimage: {
+    width: 16,
+    height: 18,
+    },
     accordionHeaderOpen: {
-    backgroundColor: '#E1E6EC',
+      backgroundColor: '#E2EDFC',
   },
   accordionHeaderClosed: {
     borderColor: '#DEECFF',
@@ -290,13 +293,14 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
   },
   accordionTitle: {
-    fontSize: 16,
-    marginLeft: 12,
+    fontSize: 12,
+    marginLeft: 5,
+    fontWeight: '600',
   },
   accordiondate: {
-    fontSize: 16,
+    fontSize: 11,
     marginLeft: 12,
-    color: '#133F7C',
+    color: 'gray',
   },
   accordionContent: {
     marginTop: 10,
@@ -316,13 +320,13 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   lbl: {
-    fontSize: 16,
-    color: '#000000',
+    fontSize: 11,
+    color: 'gray',
     paddingLeft: 12,
+    fontWeight: '600',
   },
   vlue: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 11,
     color: '#000000',
     paddingLeft: 12,
   },

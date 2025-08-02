@@ -274,11 +274,12 @@ export default function MessegeScreen({ navigation }: Props) {
       </View>
       
       {/* New Button */}
-      <View style={styles.newButtonContainer}>
-        <TouchableOpacity style={styles.newButton} onPress={() => setModalVisible(true)}>
-          <Text style={styles.newButtonText}>New</Text>
+      <View style={styles.newRequestContainer}>
+        <TouchableOpacity style={styles.newRequestButton} onPress={() => setModalVisible(true)}>
+          <Text style={styles.newRequestButtonText}>New</Text>
         </TouchableOpacity>
       </View>
+
 
       <FlatList
         data={data}
@@ -289,12 +290,11 @@ export default function MessegeScreen({ navigation }: Props) {
           <View style={[styles.row, index % 2 === 0 ? styles.rowEven : styles.rowOdd]}>
             <View style={styles.rowHeader}>
               <Text style={styles.rowTitle}>{item.Title}</Text>
-              <TouchableOpacity 
-                style={styles.editButton} 
-                onPress={() => handleEditPress(item.NotificationId)}
-              >
-                <Text style={styles.editButtonText}>Edit</Text>
-              </TouchableOpacity>
+              <View style={styles.editButtonContainer}>
+                <TouchableOpacity style={styles.editButton} onPress={() => handleEditPress(item.NotificationId)}>
+                    <Text style={styles.editIcon}>✏️</Text>
+                </TouchableOpacity>
+              </View>
             </View>
             {/* <Text style={styles.rowLabel}>Notification ID: <Text style={styles.rowValue}>{item.NotificationId}</Text></Text> */}
             <Text style={styles.rowLabel}>Document Type: <Text style={styles.rowValue}>{item.DocType}</Text></Text>
@@ -309,14 +309,14 @@ export default function MessegeScreen({ navigation }: Props) {
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={handleClose}
-      >
+        onRequestClose={handleClose}>
+
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>New Message</Text>
-              <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-                <Text style={styles.closeButtonText}>×</Text>
+              <TouchableOpacity onPress={handleClose}>
+                <Text style={styles.closeButton}>✕</Text>
               </TouchableOpacity>
             </View>
             
@@ -326,29 +326,29 @@ export default function MessegeScreen({ navigation }: Props) {
                 <Text style={styles.formLabel}>Category</Text>
                                  <TouchableOpacity
                    style={styles.dropdown}
-                   onPress={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-                 >
+                   onPress={() => setCategoryDropdownOpen(!categoryDropdownOpen)}>
                   <Text style={styles.dropdownText}>
                     {selectedCategory !== null ? categories.find(c => c.FieldID === selectedCategory)?.FieldValue : 'Select Category'}
                   </Text>
                   <Text style={styles.dropdownArrow}>▼</Text>
                 </TouchableOpacity>
                                  {categoryDropdownOpen && (
-                   <View style={styles.dropdownList}>
-                     {categories.map(cat => (
-                                               <TouchableOpacity
-                          key={cat.FieldID}
-                          style={styles.dropdownItem}
-                          activeOpacity={0.7}
-                          onPress={() => {
-                            setSelectedCategory(cat.FieldID);
-                            setCategoryDropdownOpen(false);
-                          }}
-                        >
-                         <Text style={styles.dropdownText}>{cat.FieldValue}</Text>
-                       </TouchableOpacity>
-                     ))}
-                   </View>
+                  <View style={styles.dropdownListwrap}>
+                    <View style={styles.dropdownList}>
+                      {categories.map(cat => (
+                                                <TouchableOpacity
+                            key={cat.FieldID}
+                            style={styles.dropdownItem}
+                            activeOpacity={0.7}
+                            onPress={() => {
+                              setSelectedCategory(cat.FieldID);
+                              setCategoryDropdownOpen(false);
+                            }}>
+                          <Text style={styles.dropdownText}>{cat.FieldValue}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
                  )}
               </View>
 
@@ -364,22 +364,24 @@ export default function MessegeScreen({ navigation }: Props) {
                    </Text>
                    <Text style={styles.dropdownArrow}>▼</Text>
                  </TouchableOpacity>
-                                  {filterTypeDropdownOpen && (
-                    <View style={styles.dropdownList}>
-                      {filterTypes.map(ft => (
-                        <TouchableOpacity
-                          key={ft.EmployeeCategoryId}
-                          style={styles.dropdownItem}
-                          activeOpacity={0.7}
-                          onPress={() => {
-                            setSelectedFilterType(ft.EmployeeCategoryId);
-                            setFilterTypeDropdownOpen(false);
-                            // loadSelectTypes(ft.EmployeeCategoryId);
-                          }}
-                        >
-                          <Text style={styles.dropdownText}>{ft.EmployeeCategory}</Text>
-                        </TouchableOpacity>
-                      ))}
+                  {filterTypeDropdownOpen && (
+                    <View style={styles.dropdownListwrap}>
+                      <View style={styles.dropdownList}>
+                        {filterTypes.map(ft => (
+                          <TouchableOpacity
+                            key={ft.EmployeeCategoryId}
+                            style={styles.dropdownItem}
+                            activeOpacity={0.7}
+                            onPress={() => {
+                              setSelectedFilterType(ft.EmployeeCategoryId);
+                              setFilterTypeDropdownOpen(false);
+                              // loadSelectTypes(ft.EmployeeCategoryId);
+                            }}
+                          >
+                            <Text style={styles.dropdownText}>{ft.EmployeeCategory}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
                     </View>
                   )}
                </View>
@@ -406,47 +408,47 @@ export default function MessegeScreen({ navigation }: Props) {
                         }
                       }
                       setSelectTypeDropdownOpen(!selectTypeDropdownOpen);
-                    }}
-                  >
-                                        <Text style={styles.dropdownText}>
+                    }}>
+                    <Text style={styles.dropdownText}>
                       {selectedSelectTypes.length > 0 
                         ? `${selectedSelectTypes.length} selected` 
                         : 'Select Types'}
                     </Text>
                    <Text style={styles.dropdownArrow}>▼</Text>
                  </TouchableOpacity>
-                                  {selectTypeDropdownOpen && (
-                    <View style={styles.dropdownList}>
-                      {selectTypes.map(st => (
-                        <TouchableOpacity
-                          key={st.Id}
-                          style={[
-                            styles.dropdownItem,
-                            selectedSelectTypes.includes(st.Id) && styles.dropdownItemSelected
-                          ]}
-                          activeOpacity={0.7}
-                          onPress={() => {
-                            setSelectedSelectTypes(prev => {
-                              if (prev.includes(st.Id)) {
-                                return prev.filter(id => id !== st.Id);
-                              } else {
-                                return [...prev, st.Id];
-                              }
-                            });
-                          }}
-                        >
-                          <Text style={[
-                            styles.dropdownText,
-                            selectedSelectTypes.includes(st.Id) && styles.dropdownTextSelected
-                          ]}>
-                            {st.Descr}
-                          </Text>
-                          {selectedSelectTypes.includes(st.Id) && (
-                            <Text style={styles.checkmark}>✓</Text>
-                          )}
-                        </TouchableOpacity>
-                      ))}
-                    </View>
+                    {selectTypeDropdownOpen && (
+                      <View style={styles.dropdownListwrap}>
+                        <View style={styles.dropdownList}>
+                          {selectTypes.map(st => (
+                            <TouchableOpacity
+                              key={st.Id}
+                              style={[
+                                styles.dropdownItem,
+                                selectedSelectTypes.includes(st.Id) && styles.dropdownItemSelected
+                              ]}
+                              activeOpacity={0.7}
+                              onPress={() => {
+                                setSelectedSelectTypes(prev => {
+                                  if (prev.includes(st.Id)) {
+                                    return prev.filter(id => id !== st.Id);
+                                  } else {
+                                    return [...prev, st.Id];
+                                  }
+                                });
+                              }}>
+                              <Text style={[
+                                styles.dropdownText,
+                                selectedSelectTypes.includes(st.Id) && styles.dropdownTextSelected
+                              ]}>
+                                {st.Descr}
+                              </Text>
+                              {selectedSelectTypes.includes(st.Id) && (
+                                <Text style={styles.checkmark}>✓</Text>
+                              )}
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </View>
                   )}
                </View>
 
@@ -526,14 +528,14 @@ export default function MessegeScreen({ navigation }: Props) {
         animationType="slide"
         transparent={true}
         visible={editModalVisible}
-        onRequestClose={handleEditClose}
-      >
+        onRequestClose={handleEditClose}>
+
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Edit Message</Text>
-              <TouchableOpacity onPress={handleEditClose} style={styles.closeButton}>
-                <Text style={styles.closeButtonText}>×</Text>
+              <TouchableOpacity onPress={handleEditClose}>
+                <Text style={styles.closeButton}>✕</Text>
               </TouchableOpacity>
             </View>
             
@@ -543,28 +545,23 @@ export default function MessegeScreen({ navigation }: Props) {
                 <Text style={styles.formLabel}>Category</Text>
                 <TouchableOpacity
                   style={styles.dropdown}
-                  onPress={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-                >
+                  onPress={() => setCategoryDropdownOpen(!categoryDropdownOpen)}>
                   <Text style={styles.dropdownText}>
                     {selectedCategory !== null ? categories.find(c => c.FieldID === selectedCategory)?.FieldValue : 'Select Category'}
                   </Text>
                   <Text style={styles.dropdownArrow}>▼</Text>
                 </TouchableOpacity>
                 {categoryDropdownOpen && (
-                  <View style={styles.dropdownList}>
-                    {categories.map(cat => (
-                      <TouchableOpacity
-                        key={cat.FieldID}
-                        style={styles.dropdownItem}
-                        activeOpacity={0.7}
-                        onPress={() => {
-                          setSelectedCategory(cat.FieldID);
-                          setCategoryDropdownOpen(false);
-                        }}
-                      >
-                        <Text style={styles.dropdownText}>{cat.FieldValue}</Text>
-                      </TouchableOpacity>
-                    ))}
+                  <View style={styles.dropdownListwrap}>
+                    <View style={styles.dropdownList}>
+                      {categories.map(cat => (
+                        <TouchableOpacity key={cat.FieldID} style={styles.dropdownItem}
+                          activeOpacity={0.7} onPress={() => { setSelectedCategory(cat.FieldID);
+                            setCategoryDropdownOpen(false);}}>
+                          <Text style={styles.dropdownText}>{cat.FieldValue}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
                   </View>
                 )}
               </View>
@@ -684,11 +681,11 @@ const styles = StyleSheet.create({
     color: '#133F7C',
   },
   backicon: {
-    marginLeft: 15,
+    marginLeft: 20,
   },
   backiconimg: {
-    width: 13,
-    height: 20,
+    width: 25,
+    height: 25,
   },
   rightclick: {
     width: 110,
@@ -766,10 +763,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   rowTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#133F7C',
     marginBottom: 2,
+  },
+  editButtonContainer: {
+    alignItems: 'flex-end',
+    marginTop: 10,
+    paddingRight: 10,
+  },
+  editIcon: {
+    fontSize: 16,
   },
   rowDetails: {
     fontSize: 14,
@@ -777,14 +782,43 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   rowValue: {
-    fontWeight: '600',
-    color: '#000',
+    fontSize: 11,
+    color: '#000000',
+    paddingLeft: 12,
   },
   rowLabel: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: 11,
+    color: 'gray',
+    paddingLeft: 12,
+    fontWeight: '600',
     marginBottom: 1,
   },
+
+
+
+  newRequestContainer: {
+    alignItems: 'flex-end',
+    marginTop: 10,
+    marginBottom: 10,
+    paddingRight: 16,
+  },
+  newRequestButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    borderWidth: .5,
+    borderColor: '#90a4c3ff',
+  },
+  newRequestButtonText: {
+    color: '#133F7C',
+    fontSize: 12,
+  },
+
+
+
+
+
+
   // New Button Styles
   newButtonContainer: {
     padding: 16,
@@ -829,20 +863,12 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e0e0e0',
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 17,
     color: '#133F7C',
   },
   closeButton: {
-    width: 30,
-    height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  closeButtonText: {
-    fontSize: 24,
-    color: '#666',
-    fontWeight: 'bold',
+    fontSize: 20,
+    color: '#930606ff',
   },
   modalBody: {
     padding: 20,
@@ -852,10 +878,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   formLabel: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 15,
     color: '#333',
-    marginBottom: 8,
+    marginBottom: 5,
   },
   textInput: {
     borderWidth: 1,
@@ -873,14 +898,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    padding: 12,
+    padding: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffffff',
   },
   dropdownText: {
-    fontSize: 16,
+    fontSize: 12,
     color: '#333',
     fontWeight: '500',
   },
@@ -917,11 +942,9 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     backgroundColor: '#133F7C',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 8,
-    flex: 1,
-    marginRight: 8,
   },
   saveButtonText: {
     color: '#fff',
@@ -930,34 +953,35 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   cancelButton: {
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    backgroundColor: '#fce2e5ff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 8,
-    flex: 1,
-    marginLeft: 8,
   },
   cancelButtonText: {
-    color: '#333',
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
+    color: '#7c1313ff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  dropdownListwrap:{
+    padding: 5,
+    paddingTop: 2,
   },
   dropdownList: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    marginTop: 4,
-    maxHeight: 180,
-    paddingVertical: 4,
-    paddingHorizontal: 0,
+    borderRadius: 0,
+    marginTop: 1,
+    padding: 0,
+    paddingTop: 0,
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: '#e3e6ffff',
   },
   dropdownItem: {
     padding: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     minHeight: 44,
     justifyContent: 'center',
   },
@@ -984,10 +1008,18 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   editButton: {
-    backgroundColor: '#133F7C',
-    paddingVertical: 6,
+    padding: 8,
     paddingHorizontal: 12,
-    borderRadius: 6,
+    borderRadius: 4,
+    backgroundColor: '#bdd8fdff',
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
   },
   editButtonText: {
     color: '#fff',

@@ -90,7 +90,7 @@ export default function ApprovalsScreen({ navigation }: Props) {
                 <Image source={require('../../assets/images/innerpage/star.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
                 <Text style={styles.accordionTitle}>{item1.MenuDisplayName} ({item1.RecordCount})</Text>
               </View>
-              <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text>
+              {/* <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text> */}
             </TouchableOpacity>
             {openIndexes.includes(idx) && (
               <View style={styles.accordionContent}>
@@ -153,11 +153,11 @@ const styles = StyleSheet.create({
     color: '#133F7C',
   },
   backicon: {
-    marginLeft: 15,
+    marginLeft: 20,
   },
   backiconimg: {
-    width: 13,
-    height: 20,
+    width: 25,
+    height: 25,
   },
   rightclick: {
     width: 110,
@@ -215,15 +215,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#E2EDFC',
   },
   dwnloadicon: {},
-  downloadimage: {},
+    downloadimage: {
+    width: 16,
+    height: 18,
+    },
   accordionHeaderClosed: {
     borderColor: '#DEECFF',
     borderWidth: 1,
     borderStyle: 'solid',
   },
   accordionTitle: {
-    fontSize: 16,
-    marginLeft: 12,
+    marginLeft: 5,
+    fontSize: 12,
+    fontWeight: '600',
   },
   accordionContent: {
     marginTop: 10,
@@ -249,13 +253,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   lbl: {
-    fontSize: 16,
-    color: '#000000',
+    fontSize: 11,
+    color: 'gray',
     paddingLeft: 12,
+    fontWeight: '600',
   },
   vlue: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 11,
     color: '#000000',
     paddingLeft: 12,
   },

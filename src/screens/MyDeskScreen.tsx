@@ -204,7 +204,6 @@ const styles = StyleSheet.create({
   },
   backicon: {
     marginLeft: 20,
-    // marginBottom: 10,
   },
   backiconimg: {
     width: 25,
@@ -281,12 +280,12 @@ const styles = StyleSheet.create({
   mydeskbtnfirstraw: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingLeft: 2,
-    paddingRight: 2,
-    paddingTop: 5,
-    paddingBottom: 5,
-    marginLeft:20,
-    marginRight:20,
+    paddingLeft: 0,
+    paddingRight: 0,
+    paddingTop: 0,
+    paddingBottom: 10,
+    marginLeft:6,
+    marginRight:6,
   },
   tile: {
     width: 82,

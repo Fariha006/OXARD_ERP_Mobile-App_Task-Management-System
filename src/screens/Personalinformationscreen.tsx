@@ -195,7 +195,7 @@ export default function Personalinformationscreen({ navigation }: Props) {
           <TouchableOpacity style={styles.accordionHeader}
             onPress={() => setAccordionOpen(!accordionOpen)}>
             <View style={styles.hdrltficn}>
-              <Image source={require('../../assets/images/innerpage/star.png')}
+              <Image source={require('../../assets/images/mydesk/pers_info.png')}
                 style={[styles.ltficn, styles.star]} resizeMode="contain" />
               <Text style={styles.accordionTitle}>Personal Information</Text>
             </View>
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     borderRadius: 20,
-     backgroundColor: '#E1E6EC',
+    backgroundColor: '#E2EDFC',
   },
   accordionHeaderOpen: {
     backgroundColor: '#E2EDFC',

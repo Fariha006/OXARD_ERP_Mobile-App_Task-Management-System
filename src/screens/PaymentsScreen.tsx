@@ -72,7 +72,7 @@ export default function PaymentsScreen({ navigation }: { navigation: any }) {
                 onPress={() => toggleAccordion(idx)}>
                 <View style={styles.hdrltficn}>
                   <Image
-                    source={require('../../assets/images/innerpage/payment.png')}
+                    source={require('../../assets/images/mydesk/paymnts.png')}
                     style={[styles.ltficn, styles.star]} resizeMode="contain" />
                   <Text style={styles.accordionTitle}>{pay["Payment Mode"] || pay["Beneficiary Name"]}</Text>
                 </View>
@@ -146,11 +146,11 @@ const styles = StyleSheet.create({
     color: '#133F7C',
   },
   backicon: {
-    marginLeft: 15,
+    marginLeft: 20,
   },
   backiconimg: {
-    width: 13,
-    height: 20,
+    width: 25,
+    height: 25,
   },
   rightclick: {
     width: 110,
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   accordionHeaderOpen: {
-    backgroundColor: '#E1E6EC',
+      backgroundColor: '#E2EDFC',
   },
   accordionHeaderClosed: {
     borderColor: '#DEECFF',
