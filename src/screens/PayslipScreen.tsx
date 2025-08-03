@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
     color: 'gray',
   },
   accordionContent: {
-    marginTop: 10,
+    marginTop: 1,
     paddingLeft: 6,
     paddingRight: 6,
   },

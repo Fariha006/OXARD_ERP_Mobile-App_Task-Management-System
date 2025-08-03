@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   accordionContent: {
-    marginTop: 10,
+    marginTop: 1,
     paddingLeft: 6,
     paddingRight: 6,
   },
