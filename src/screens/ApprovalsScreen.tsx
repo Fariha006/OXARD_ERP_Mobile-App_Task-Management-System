@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList,
-  SafeAreaView, ActivityIndicator, Alert
+  SafeAreaView, ActivityIndicator, Alert, Modal, TextInput
 } from 'react-native';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import UserStorage from '../utils/userStorage';
-import { getApprovals } from '../api/api';
+import { getApprovals, submitApproval } from '../api/api';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -16,6 +16,10 @@ export default function ApprovalsScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openIndexes, setOpenIndexes] = useState<number[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedDecisionId, setSelectedDecisionId] = useState<string>('');
+  const [remarks, setRemarks] = useState<string>('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,6 +47,65 @@ export default function ApprovalsScreen({ navigation }: Props) {
     setOpenIndexes(openIndexes.includes(idx)
       ? openIndexes.filter(i => i !== idx)
       : [...openIndexes, idx]);
+  };
+
+  const openViewModal = (decisionId: string) => {
+    setSelectedDecisionId(decisionId);
+    setRemarks('');
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedDecisionId('');
+    setRemarks('');
+  };
+
+  const submitDecision = async (decision: string) => {
+    if (!remarks.trim()) {
+      Alert.alert('Error', 'Please enter remarks before submitting.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const token = await UserStorage.getToken();
+      if (!token) {
+        Alert.alert('Error', 'No authentication token found. Please login again.');
+        return;
+      }
+
+      const result = await submitApproval(selectedDecisionId, decision, remarks, token);
+
+      if (result.success) {
+        Alert.alert(
+          'Success', 
+          `Request ${decision === '1' ? 'approved' : 'rejected'} successfully.`,
+          [{ text: 'OK', onPress: () => {
+            closeModal();
+            // Refresh the data
+            const fetchData = async () => {
+              try {
+                const token = await UserStorage.getToken();
+                if (token) {
+                  const result = await getApprovals(token);
+                  setData(result);
+                }
+              } catch (err) {
+                console.error('Failed to refresh data:', err);
+              }
+            };
+            fetchData();
+          }}]
+        );
+      } else {
+        Alert.alert('Error', result.message || 'Failed to submit decision.');
+      }
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Failed to submit decision. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -104,15 +167,21 @@ export default function ApprovalsScreen({ navigation }: Props) {
                       <Text style={styles.lbl}>Transaction Date: <Text style={styles.vlue}>{item2.TransactionDate ? item2.TransactionDate.split('T')[0] : '-'}</Text></Text>
                       <Text style={styles.lbl}>Decision Level: <Text style={styles.vlue}>{item2.DecisionLevel ?? '-'}</Text></Text>
                     </View>
-                    <View>
-                    {item2.ReportFlag === 1 && (
-                      <TouchableOpacity style={styles.downloadBtn} onPress={() => {/* TODO: implement download logic */ }}>
-                        <View style={styles.dwnloadicon}>
-                          <Image source={require('../../assets/images/innerpage/download.png')} style={styles.downloadimage} resizeMode="contain" />
-                          {/* <Text style={styles.downloadBtnText}> {downloadingId === item.PayslipId ? 'Downloading...' : 'Download'}</Text> */}
-                        </View>
+                    <View style={styles.actionButtons}>
+                      <TouchableOpacity 
+                        style={styles.viewBtn} 
+                        onPress={() => openViewModal(item2.DecisionId || '0')}
+                      >
+                        <Text style={styles.viewBtnText}>View</Text>
                       </TouchableOpacity>
-                    )}
+                      {item2.ReportFlag === 1 && (
+                        <TouchableOpacity style={styles.downloadBtn} onPress={() => {/* TODO: implement download logic */ }}>
+                          <View style={styles.dwnloadicon}>
+                            <Image source={require('../../assets/images/innerpage/download.png')} style={styles.downloadimage} resizeMode="contain" />
+                            {/* <Text style={styles.downloadBtnText}> {downloadingId === item.PayslipId ? 'Downloading...' : 'Download'}</Text> */}
+                          </View>
+                        </TouchableOpacity>
+                      )}
                     </View>
                   </View>
                 ))}
@@ -121,6 +190,61 @@ export default function ApprovalsScreen({ navigation }: Props) {
           </View>
         ))}
       </ScrollView>
+
+      {/* Modal for Approval/Rejection */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={closeModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Approval Decision</Text>
+            
+            <Text style={styles.modalLabel}>Remarks *</Text>
+            <TextInput
+              style={styles.remarksInput}
+              placeholder="Enter your remarks..."
+              value={remarks}
+              onChangeText={setRemarks}
+              multiline={true}
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.acceptButton]}
+                onPress={() => submitDecision('1')}
+                disabled={submitting}
+              >
+                <Text style={styles.modalButtonText}>
+                  {submitting ? 'Submitting...' : 'Accept'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.rejectButton]}
+                onPress={() => submitDecision('2')}
+                disabled={submitting}
+              >
+                <Text style={styles.modalButtonText}>
+                  {submitting ? 'Submitting...' : 'Reject'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.closeButton]}
+                onPress={closeModal}
+                disabled={submitting}
+              >
+                <Text style={styles.modalButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -263,6 +387,22 @@ const styles = StyleSheet.create({
     color: '#000000',
     paddingLeft: 12,
   },
+  actionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  viewBtn: {
+    backgroundColor: '#133F7C',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+  },
+  viewBtnText: {
+    color: '#ffffff',
+    fontSize: 10,
+    fontWeight: '600',
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -287,5 +427,67 @@ const styles = StyleSheet.create({
   },
   downloadBtn: {
     paddingRight: 6,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    padding: 20,
+    margin: 20,
+    width: '90%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#133F7C',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  remarksInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 14,
+    minHeight: 80,
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  acceptButton: {
+    backgroundColor: '#28a745',
+  },
+  rejectButton: {
+    backgroundColor: '#dc3545',
+  },
+  closeButton: {
+    backgroundColor: '#6c757d',
+  },
+  modalButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

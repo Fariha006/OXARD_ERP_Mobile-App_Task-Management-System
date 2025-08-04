@@ -706,6 +706,60 @@ class ApiService {
     }
   }  
 
+  // Submit approval decision API call
+  async submitApproval(decisionId: string, decision: string, remarks: string, token: string): Promise<any> {
+    try {
+      const apiurl = getApiUrl('/api/MobUsr0070/Approval');
+      const requestBody = {
+        DecisionId: decisionId,
+        Decision: decision,
+        Remarks: remarks
+      };
+      
+      console.log('Submit Approval API URL:', apiurl);
+      console.log('Submit Approval Request Body:', requestBody);
+      
+      const response = await axios.post<any>(apiurl, requestBody, {
+        headers: {
+          ...API_CONFIG.DEFAULT_HEADERS,
+          'Authorization': `Bearer ${token}`,
+        },
+        timeout: API_CONFIG.TIMEOUT,
+      });
+      
+      console.log('Submit Approval API Response:', response.data);
+      
+      // Check if response has the expected format with Status field
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+        const statusItem = response.data[0];
+        if (statusItem.Status === 'Success') {
+          return { success: true, message: 'Approval submitted successfully' };
+        } else {
+          throw new Error(statusItem.Status || 'Approval submission failed');
+        }
+      } else {
+        throw new Error('Invalid response format from server');
+      }
+    } catch (error: any) {
+      console.error('Submit Approval API Error:', error);
+      
+      if (error.response) {
+        // Server responded with error status
+        console.error('Server Error Status:', error.response.status);
+        console.error('Server Error Data:', error.response.data);
+        throw new Error(error.response.data?.message || `Server error: ${error.response.status}`);
+      } else if (error.request) {
+        // Network error
+        console.error('Network Error:', error.request);
+        throw new Error('Network error. Please check your internet connection.');
+      } else {
+        // Other error
+        console.error('Other Error:', error.message);
+        throw new Error(error.message || 'An unexpected error occurred.');
+      }
+    }
+  }
+
   // Save or update certificate request API call
   async saveCertificateRequest(mode: string, certificateId: string, certificateTypeId: string, requestedDate: string, token: string): Promise<any[]> {
     try {
@@ -759,6 +813,7 @@ export const getCertificateTypes = (token: string) => apiService.getCertificateT
 export const getCertificateDetails = (certificateId: string, token: string) => apiService.getCertificateDetails(certificateId, token);
 export const saveCertificateRequest = (mode: string, certificateId: string, certificateTypeId: string, requestedDate: string, token: string) => apiService.saveCertificateRequest(mode, certificateId, certificateTypeId, requestedDate, token);
 export const getMesseges = (token: string) => apiService.getMesseges(token);
+export const submitApproval = (decisionId: string, decision: string, remarks: string, token: string) => apiService.submitApproval(decisionId, decision, remarks, token);
 
 export async function fetchMessageCategories(token: string) {
   try {
