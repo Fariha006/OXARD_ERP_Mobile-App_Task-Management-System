@@ -1,14 +1,468 @@
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
-  View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList, SafeAreaView, StatusBar
+  View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList, 
+  SafeAreaView, StatusBar, ActivityIndicator,Dimensions 
 } from 'react-native';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-
+import { getNotifications, getFileUrl } from '../api/api';
+import UserStorage from '../utils/userStorage';
+const { width } = Dimensions.get('window');
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+interface NotificationItem {
+  NotificationId: number;
+  CategoryId: number;
+  NotificationContent: string;
+  DocType: string;
+}
 
+interface AccordionSection {
+  key: string;
+  caption: string;
+  items: NotificationItem[];
+}
+
+interface CircularItem {
+  id: string;
+  caption: string;
+  listTitle: string;
+  content: string;
+  photoUrl: string;
+}
+
+interface EventItem {
+  id: string;
+  caption: string;
+  listTitle: string;
+  content: string;
+  photoUrl: string;
+}
+
+interface AnnouncementItem {
+  id: string;
+  caption: string;
+  listTitle: string;
+  content: string;
+  photoUrl: string;
+}
+
+interface BannerItem {
+  id: string;
+  caption: string;
+  listTitle: string;
+  content: string;
+  photoUrl: string;
+}
+
+interface MemoItem {
+  id: string;
+  caption: string;
+  listTitle: string;
+  content: string;
+  photoUrl: string;
+}
+
+interface MessageItem {
+  id: string;
+  caption: string;
+  listTitle: string;
+  content: string;
+  photoUrl: string;
+  employeeName: string;
+  designation: string;
+}
+
+function flattenRest(obj: any, parentKey: string = ''): any {
+  let result = { ...obj };
+  Object.keys(obj).forEach((key) => {
+    if (key === 'Rest' && typeof obj[key] === 'object') {
+      const restFlat = flattenRest(obj[key], parentKey ? parentKey + '_Rest' : 'Rest');
+      Object.keys(restFlat).forEach((restKey) => {
+        let newKey = parentKey ? `${parentKey}_${restKey}` : `Rest_${restKey}`;
+        let counter = 1;
+        while (result[newKey]) {
+          newKey = `${newKey}_${counter++}`;
+        }
+        result[newKey] = restFlat[restKey];
+      });
+      delete result[key];
+    } else if (
+      typeof obj[key] === 'object' &&
+      obj[key] !== null &&
+      !Array.isArray(obj[key])
+    ) {
+      result[key] = flattenRest(obj[key], key);
+    }
+  });
+  return result;
+}
+
+function reformatApiResult(obj: any) {
+  const flatObj = flattenRest(obj);
+  const Hdr: any[] = [];
+  const Items: any[] = [];
+
+  Object.values(flatObj).forEach((arr: any) => {
+    if (Array.isArray(arr)) {
+      arr.forEach((item) => {
+        if (item && typeof item === 'object') {
+          if ('NotificationCaption' in item) {
+            Hdr.push(item);
+          } else if ('NotificationContent' in item) {
+            Items.push(item);
+          }
+        }
+      });
+    }
+  });
+
+  return { Hdr, Items };
+}
+
+function parseNotificationData(obj: any): AccordionSection[] {
+  const { Hdr, Items } = obj;
+  const result: AccordionSection[] = [];
+
+  Hdr.forEach((header: any) => {
+    const items = Items.filter(
+      (item: any) => item.CategoryId === header.CategoryId && item.NotificationContent
+    );
+    result.push({
+      key: `${header.CategoryId}`,
+      caption: `${header.Category} (${header.RecordCount})`,
+      items,
+    });
+  });
+
+  return result;
+}
 export default function HomeScreen({ navigation }: Props) {
+  const [data, setData] = useState<AccordionSection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [circularCurrentIndex, setCircularCurrentIndex] = useState(0);
+  const [announcementCurrentIndex, setAnnouncementCurrentIndex] = useState(0);
+  const [bannerCurrentIndex, setBannerCurrentIndex] = useState(0);
+  const [memoCurrentIndex, setMemoCurrentIndex] = useState(0);
+  const [messageCurrentIndex, setMessageCurrentIndex] = useState(0);
+  const [birthdayData, setBirthdayData] = useState<any[]>([]);
+  const [circularData, setCircularData] = useState<CircularItem[]>([]);
+  const [eventData, setEventData] = useState<EventItem[]>([]);
+  const [announcementData, setAnnouncementData] = useState<AnnouncementItem[]>([]);
+  const [bannerData, setBannerData] = useState<BannerItem[]>([]);
+  const [memoData, setMemoData] = useState<MemoItem[]>([]);
+  const [messageData, setMessageData] = useState<MessageItem[]>([]);
+  const flatListRef = useRef<FlatList<any>>(null);
+  const circularFlatListRef = useRef<FlatList<CircularItem>>(null);
+  const eventFlatListRef = useRef<FlatList<EventItem>>(null);
+  const announcementFlatListRef = useRef<FlatList<AnnouncementItem>>(null);
+  const bannerFlatListRef = useRef<FlatList<BannerItem>>(null);
+  const memoFlatListRef = useRef<FlatList<MemoItem>>(null);
+  const messageFlatListRef = useRef<FlatList<MessageItem>>(null);
+
+  const fetchData = async () => {
+    setError(null);
+    try {
+      const token = await UserStorage.getToken();
+      if (!token) {
+        setError('No authentication token found. Please login again.');
+        setLoading(false);
+        return;
+      }
+
+      const json = await getNotifications(token);
+      const transformedData = reformatApiResult(json);
+      setData(parseNotificationData(transformedData));
+      
+      // Process birthday data (CategoryId = 2)
+      const flattenedData = flattenRest(json);
+      const birthdayItems = processBirthdayData(flattenedData);
+      setBirthdayData(birthdayItems);
+
+      // Process circular data (CategoryId = 4)
+      const circularItems = processCircularData(flattenedData);
+      setCircularData(circularItems);
+
+      // Process event data (CategoryId = 5)
+      const eventItems = processEventData(flattenedData);
+      setEventData(eventItems);
+
+      // Process announcement data (CategoryId = 6)
+      const announcementItems = processAnnouncementData(flattenedData);
+      setAnnouncementData(announcementItems);
+
+      // Process banner data (CategoryId = 7)
+      const bannerItems = processBannerData(flattenedData);
+      setBannerData(bannerItems);
+
+      // Process memo data (CategoryId = 8)
+      const memoItems = processMemoData(flattenedData);
+      setMemoData(memoItems);
+
+      // Process message data (CategoryId = 9)
+      const messageItems = processMessageData(flattenedData);
+      setMessageData(messageItems);
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError('Failed to fetch notifications');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  // Process birthday data from API response
+  const processBirthdayData = (apiData: any): any[] => {
+    const birthdayItems: any[] = [];
+    let autoIncrementId = 1;
+
+    // Extract all items from the flattened structure
+    const allItems: any[] = [];
+    
+    Object.values(apiData).forEach((arr: any) => {
+      if (Array.isArray(arr)) {
+        arr.forEach((item) => {
+          if (item && typeof item === 'object' && item.CategoryId === 2) {
+            allItems.push(item);
+          }
+        });
+      }
+    });
+
+    // Transform items to required format
+    allItems.forEach((item) => {
+      birthdayItems.push({
+        id: autoIncrementId.toString(),
+        name: item.EmployeeName || 'Unknown',
+        role: item.Designation || 'Employee',
+        image: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/birthday.png'),
+        tags: item.NotificationContent || 'Happy Birthday!',
+      });
+      autoIncrementId++;
+    });
+
+    return birthdayItems;
+  };
+
+  // Process circular data from API response
+  const processCircularData = (apiData: any): CircularItem[] => {
+    const circularItems: CircularItem[] = [];
+    let autoIncrementId = 1;
+
+    // Extract all items from the flattened structure
+    const allItems: any[] = [];
+    
+    Object.values(apiData).forEach((arr: any) => {
+      if (Array.isArray(arr)) {
+        arr.forEach((item) => {
+          if (item && typeof item === 'object' && 
+              item.CategoryId === 4 && 
+              item.DocType === 'Circulars') {
+            allItems.push(item);
+          }
+        });
+      }
+    });
+
+    // Transform items to required format
+    allItems.forEach((item) => {
+      circularItems.push({
+        id: autoIncrementId.toString(),
+        caption: item.DocType || 'Circular',
+        listTitle: item.Title || 'No Title',
+        content: item.NotificationContent || 'No content available',
+        photoUrl: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/icon!.png'),
+      });
+      autoIncrementId++;
+    });
+
+    return circularItems;
+  };
+
+  // Process event data from API response
+  const processEventData = (apiData: any): EventItem[] => {
+    const eventItems: EventItem[] = [];
+    let autoIncrementId = 1;
+
+    // Extract all items from the flattened structure
+    const allItems: any[] = [];
+    
+    Object.values(apiData).forEach((arr: any) => {
+      if (Array.isArray(arr)) {
+        arr.forEach((item) => {
+          if (item && typeof item === 'object' && 
+              item.CategoryId === 5 && 
+              item.DocType === 'Events') {
+            allItems.push(item);
+          }
+        });
+      }
+    });
+
+    // Transform items to required format
+    allItems.forEach((item) => {
+      eventItems.push({
+        id: autoIncrementId.toString(),
+        caption: item.DocType || 'Event',
+        listTitle: item.Title || 'No Title',
+        content: item.NotificationContent || 'No content available',
+        photoUrl: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/icon!.png'),
+      });
+      autoIncrementId++;
+    });
+
+    return eventItems;
+  };
+
+  // Process announcement data from API response
+  const processAnnouncementData = (apiData: any): AnnouncementItem[] => {
+    const announcementItems: AnnouncementItem[] = [];
+    let autoIncrementId = 1;
+
+    // Extract all items from the flattened structure
+    const allItems: any[] = [];
+    
+    Object.values(apiData).forEach((arr: any) => {
+      if (Array.isArray(arr)) {
+        arr.forEach((item) => {
+          if (item && typeof item === 'object' && 
+              item.CategoryId === 6 && 
+              item.DocType === 'Announcements') {
+            allItems.push(item);
+          }
+        });
+      }
+    });
+
+    // Transform items to required format
+    allItems.forEach((item) => {
+      announcementItems.push({
+        id: autoIncrementId.toString(),
+        caption: item.DocType || 'Announcement',
+        listTitle: item.Title || 'No Title',
+        content: item.NotificationContent || 'No content available',
+        photoUrl: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/icon!.png'),
+      });
+      autoIncrementId++;
+    });
+
+    return announcementItems;
+  };
+
+  // Process banner data from API response
+  const processBannerData = (apiData: any): BannerItem[] => {
+    const bannerItems: BannerItem[] = [];
+    let autoIncrementId = 1;
+
+    // Extract all items from the flattened structure
+    const allItems: any[] = [];
+    
+    Object.values(apiData).forEach((arr: any) => {
+      if (Array.isArray(arr)) {
+        arr.forEach((item) => {
+          if (item && typeof item === 'object' && 
+              item.CategoryId === 7 && 
+              item.DocType === 'Banners') {
+            allItems.push(item);
+          }
+        });
+      }
+    });
+
+    // Transform items to required format
+    allItems.forEach((item) => {
+      bannerItems.push({
+        id: autoIncrementId.toString(),
+        caption: item.DocType || 'Banner',
+        listTitle: item.Title || 'No Title',
+        content: item.NotificationContent || 'No content available',
+        photoUrl: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/icon!.png'),
+      });
+      autoIncrementId++;
+    });
+
+    return bannerItems;
+  };
+
+  // Process memo data from API response
+  const processMemoData = (apiData: any): MemoItem[] => {
+    const memoItems: MemoItem[] = [];
+    let autoIncrementId = 1;
+
+    // Extract all items from the flattened structure
+    const allItems: any[] = [];
+    
+    Object.values(apiData).forEach((arr: any) => {
+      if (Array.isArray(arr)) {
+        arr.forEach((item) => {
+          if (item && typeof item === 'object' && 
+              item.CategoryId === 8 && 
+              item.DocType === 'Memos') {
+            allItems.push(item);
+          }
+        });
+      }
+    });
+
+    // Transform items to required format
+    allItems.forEach((item) => {
+      memoItems.push({
+        id: autoIncrementId.toString(),
+        caption: item.DocType || 'Memo',
+        listTitle: item.Title || 'No Title',
+        content: item.NotificationContent || 'No content available',
+        photoUrl: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/icon!.png'),
+      });
+      autoIncrementId++;
+    });
+
+    return memoItems;
+  };
+
+  // Process message data from API response
+  const processMessageData = (apiData: any): MessageItem[] => {
+    const messageItems: MessageItem[] = [];
+    let autoIncrementId = 1;
+
+    // Extract all items from the flattened structure
+    const allItems: any[] = [];
+    
+    Object.values(apiData).forEach((arr: any) => {
+      if (Array.isArray(arr)) {
+        arr.forEach((item) => {
+          if (item && typeof item === 'object' && 
+              item.CategoryId === 9 && 
+              item.DocType === 'Messages') {
+            allItems.push(item);
+          }
+        });
+      }
+    });
+
+    // Transform items to required format
+    allItems.forEach((item) => {
+      messageItems.push({
+        id: autoIncrementId.toString(),
+        caption: item.DocType || 'Message',
+        listTitle: item.Title || 'No Title',
+        content: item.NotificationContent || 'No content available',
+        photoUrl: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/icon!.png'),
+        employeeName: item.EmployeeName || 'Unknown',
+        designation: item.Designation || 'Employee',
+      });
+      autoIncrementId++;
+    });
+
+    return messageItems;
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    fetchData();
+  }, []);
 
   const tiles = [
     { id: 1, title: 'My Desk', image: require('../../assets/images/home/mydesk.png'),route:'Main',screen:'MyDesk' },
@@ -22,84 +476,227 @@ export default function HomeScreen({ navigation }: Props) {
     { id: 9, title: 'Add ', image: require('../../assets/images/home/addbtn.png'),route:'Main',screen:'Add' },
   ];
 
-  const DATA = [
-    {
-      id: '1',
-      name: 'Alina Mathew',
-      role: 'Software Engineer',
-      image: require('../../assets/images/birthday.png'),
-      tags: 'Wishing you a day filled with love, laughter, andunforgettable moments-Happy Birthday!',
-    },
-    {
-      id: '2',
-      name: 'Ravi',
-      role: 'UI/UX Designer',
-      image: require('../../assets/images/birthday.png'),
-      tags: 'Wishing you a day filled with love, laughter, andunforgettable moments-Happy Birthday!',
-    },
-    {
-      id: '3',
-      name: 'Sara',
-      role: 'Project Manager',
-      image: require('../../assets/images/birthday.png'),
-      tags: 'Wishing you a day filled with love, laughter, andunforgettable moments-Happy Birthday!',
-    },
-    {
-      id: '4',
-      name: 'Sara',
-      role: 'Project Manager',
-      image: require('../../assets/images/birthday.png'),
-      tags: 'Wishing you a day filled with love, laughter, andunforgettable moments-Happy Birthday!',
-    },
-    {
-      id: '5',
-      name: 'Sara',
-      role: 'Project Manager',
-      image: require('../../assets/images/birthday.png'),
-      tags: 'Wishing you a day filled with love, laughter, andunforgettable moments-Happy Birthday!',
-    },
-    {
-      id: '6',
-      name: 'Sara',
-      role: 'Project Manager',
-      image: require('../../assets/images/birthday.png'),
-      tags: 'Wishing you a day filled with love, laughter, andunforgettable moments-Happy Birthday!',
-    },
-  ];
+  // Auto-scroll effect for birthday - moved after DATA declaration
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (flatListRef.current && birthdayData.length > 0) {
+        const nextIndex = (currentIndex + 1) % birthdayData.length;
+        flatListRef.current.scrollToIndex({ 
+          index: nextIndex,
+          animated: true,
+          viewPosition: 0.5
+        });
+        setCurrentIndex(nextIndex);
+      }
+    }, 5000); // Scroll every 5 seconds
+    return () => clearInterval(interval);
+  }, [currentIndex, birthdayData.length]);
 
-  const ANNOUNCEMENTS = [
-    {
-      id: '1',
-      tags: 'As part of our World Environment Day celebrations,\nwe invite everyone to join us on Thursday, 5th June,\nby wearing green or a shade of green outfit.',
-    },
-    {
-      id: '2',
-      tags: 'As part of our World Environment Day celebrations,\nwe invite everyone to join us on Thursday, 5th June,\nby wearing green or a shade of green outfit.',
-    },
-    {
-      id: '3',
-      tags: 'As part of our World Environment Day celebrations,\nwe invite everyone to join us on Thursday, 5th June,\nby wearing green or a shade of green outfit.',
-    },
-    {
-      id: '4',
-      tags: 'As part of our World Environment Day celebrations,\nwe invite everyone to join us on Thursday, 5th June,\nby wearing green or a shade of green outfit.',
-    },
-    {
-      id: '5',
-      tags: 'As part of our World Environment Day celebrations,\nwe invite everyone to join us on Thursday, 5th June,\nby wearing green or a shade of green outfit.',
-    },
-    {
-      id: '6',
-      tags: 'As part of our World Environment Day celebrations,\nwe invite everyone to join us on Thursday, 5th June,\nby wearing green or a shade of green outfit.',
-    },
-  ];
+  // Auto-scroll effect for circular
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (circularFlatListRef.current && circularData.length > 0) {
+        const nextIndex = (circularCurrentIndex + 1) % circularData.length;
+        circularFlatListRef.current.scrollToIndex({ 
+          index: nextIndex,
+          animated: true,
+          viewPosition: 0.5
+        });
+        setCircularCurrentIndex(nextIndex);
+      }
+    }, 4000); // Scroll every 4 seconds (slightly faster than birthday)
+    return () => clearInterval(interval);
+  }, [circularCurrentIndex, circularData.length]);
+
+  // Auto-scroll effect for announcements
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (announcementFlatListRef.current && announcementData.length > 0) {
+        const nextIndex = (announcementCurrentIndex + 1) % announcementData.length;
+        announcementFlatListRef.current.scrollToIndex({ 
+          index: nextIndex,
+          animated: true,
+          viewPosition: 0.5
+        });
+        setAnnouncementCurrentIndex(nextIndex);
+      }
+    }, 3500); // Scroll every 3.5 seconds (faster than circular)
+    return () => clearInterval(interval);
+  }, [announcementCurrentIndex, announcementData.length]);
+
+  // Auto-scroll effect for banners
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (bannerFlatListRef.current && bannerData.length > 0) {
+        const nextIndex = (bannerCurrentIndex + 1) % bannerData.length;
+        bannerFlatListRef.current.scrollToIndex({ 
+          index: nextIndex,
+          animated: true,
+          viewPosition: 0.5
+        });
+        setBannerCurrentIndex(nextIndex);
+      }
+    }, 3000); // Scroll every 3 seconds (fastest of all)
+    return () => clearInterval(interval);
+  }, [bannerCurrentIndex, bannerData.length]);
+
+  // Auto-scroll effect for memos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (memoFlatListRef.current && memoData.length > 0) {
+        const nextIndex = (memoCurrentIndex + 1) % memoData.length;
+        memoFlatListRef.current.scrollToIndex({ 
+          index: nextIndex,
+          animated: true,
+          viewPosition: 0.5
+        });
+        setMemoCurrentIndex(nextIndex);
+      }
+    }, 2500); // Scroll every 2.5 seconds (fastest of all)
+    return () => clearInterval(interval);
+  }, [memoCurrentIndex, memoData.length]);
+
+  // Auto-scroll effect for messages
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (messageFlatListRef.current && messageData.length > 0) {
+        const nextIndex = (messageCurrentIndex + 1) % messageData.length;
+        messageFlatListRef.current.scrollToIndex({ 
+          index: nextIndex,
+          animated: true,
+          viewPosition: 0.5
+        });
+        setMessageCurrentIndex(nextIndex);
+      }
+    }, 2000); // Scroll every 2 seconds (fastest of all)
+    return () => clearInterval(interval);
+  }, [messageCurrentIndex, messageData.length]);
+
+  // Handle manual scroll to pause auto-scroll temporarily
+  const handleScroll = () => {
+    // Optional: Add logic to pause auto-scroll when user manually scrolls
+  };
+
+  // Handle scroll errors for birthday
+  const handleScrollToIndexFailed = (info: { index: number }) => {
+    const wait = new Promise(resolve => setTimeout(resolve, 500));
+    wait.then(() => {
+      if (flatListRef.current) {
+        flatListRef.current.scrollToIndex({ 
+          index: info.index, 
+          animated: true,
+          viewPosition: 0.5
+        });
+      }
+    });
+  };
+
+  // Handle scroll errors for circular
+  const handleCircularScrollToIndexFailed = (info: { index: number }) => {
+    const wait = new Promise(resolve => setTimeout(resolve, 500));
+    wait.then(() => {
+      if (circularFlatListRef.current) {
+        circularFlatListRef.current.scrollToIndex({ 
+          index: info.index, 
+          animated: true,
+          viewPosition: 0.5
+        });
+      }
+    });
+  };
+
+  // Handle scroll errors for announcements
+  const handleAnnouncementScrollToIndexFailed = (info: { index: number }) => {
+    const wait = new Promise(resolve => setTimeout(resolve, 500));
+    wait.then(() => {
+      if (announcementFlatListRef.current) {
+        announcementFlatListRef.current.scrollToIndex({ 
+          index: info.index, 
+          animated: true,
+          viewPosition: 0.5
+        });
+      }
+    });
+  };
+
+  // Handle scroll errors for banners
+  const handleBannerScrollToIndexFailed = (info: { index: number }) => {
+    const wait = new Promise(resolve => setTimeout(resolve, 500));
+    wait.then(() => {
+      if (bannerFlatListRef.current) {
+        bannerFlatListRef.current.scrollToIndex({ 
+          index: info.index, 
+          animated: true,
+          viewPosition: 0.5
+        });
+      }
+    });
+  };
+
+  // Handle scroll errors for memos
+  const handleMemoScrollToIndexFailed = (info: { index: number }) => {
+    const wait = new Promise(resolve => setTimeout(resolve, 500));
+    wait.then(() => {
+      if (memoFlatListRef.current) {
+        memoFlatListRef.current.scrollToIndex({ 
+          index: info.index, 
+          animated: true,
+          viewPosition: 0.5
+        });
+      }
+    });
+  };
+
+  // Handle scroll errors for messages
+  const handleMessageScrollToIndexFailed = (info: { index: number }) => {
+    const wait = new Promise(resolve => setTimeout(resolve, 500));
+    wait.then(() => {
+      if (messageFlatListRef.current) {
+        messageFlatListRef.current.scrollToIndex({ 
+          index: info.index, 
+          animated: true,
+          viewPosition: 0.5
+        });
+      }
+    });
+  };
+
+  // const ANNOUNCEMENTS = [
+  //   {
+  //     id: '1',
+  //     tags: 'As part of our World Environment Day celebrations,\nwe invite everyone to join us on Thursday, 5th June,\nby wearing green or a shade of green outfit.',
+  //   },
+  //   {
+  //     id: '2',
+  //     tags: 'As part of our World Environment Day celebrations,\nwe invite everyone to join us on Thursday, 5th June,\nby wearing green or a shade of green outfit.',
+  //   },
+  //   {
+  //     id: '3',
+  //     tags: 'As part of our World Environment Day celebrations,\nwe invite everyone to join us on Thursday, 5th June,\nby wearing green or a shade of green outfit.',
+  //   },
+  //   {
+  //     id: '4',
+  //     tags: 'As part of our World Environment Day celebrations,\nwe invite everyone to join us on Thursday, 5th June,\nby wearing green or a shade of green outfit.',
+  //   },
+  //   {
+  //     id: '5',
+  //     tags: 'As part of our World Environment Day celebrations,\nwe invite everyone to join us on Thursday, 5th June,\nby wearing green or a shade of green outfit.',
+  //   },
+  //   {
+  //     id: '6',
+  //     tags: 'As part of our World Environment Day celebrations,\nwe invite everyone to join us on Thursday, 5th June,\nby wearing green or a shade of green outfit.',
+  //   },
+  // ];
 
 
-  const renderItem = ({ item }: { item: typeof DATA[0] }) => (
+  const renderItem = ({ item }: { item: any }) => (
     <View style={styles.lstcontainer}>
       <View style={styles.card}>
         <View style={styles.topRow}>
-          <Image source={item.image} style={styles.lstimage} />
+          <Image 
+            source={typeof item.image === 'string' ? { uri: item.image } : item.image} 
+            style={styles.lstimage} 
+          />
           <View style={styles.textContainer}>
             <Text style={styles.lsttitle}>{item.name}</Text>
             <Text style={styles.role}>{item.role}</Text>
@@ -113,9 +710,134 @@ export default function HomeScreen({ navigation }: Props) {
     </View>
   );
 
-  const announcementRenderItem = ({ item }: { item: typeof ANNOUNCEMENTS[0] }) => (
-    <View style={styles.anouncementitem}>
-      <Text style={styles.anouncementtagText}>{item.tags}</Text>
+  // const announcementRenderItem = ({ item }: { item: typeof ANNOUNCEMENTS[0] }) => (
+  //   <View style={styles.anouncementitem}>
+  //     <Text style={styles.anouncementtagText}>{item.tags}</Text>
+  //   </View>
+  // );
+
+  const circularRenderItem = ({ item }: { item: CircularItem }) => (
+    <View style={styles.circularContainer}>
+      <View style={styles.circularCard}>
+        <View style={styles.circularTopRow}>
+          <Image 
+            source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl} 
+            style={styles.circularImage} 
+          />
+          <View style={styles.circularTextContainer}>
+            <Text style={styles.circularCaption}>{item.caption}</Text>
+            <Text style={styles.circularTitle}>{item.listTitle}</Text>
+          </View>
+        </View>
+      </View>
+      <View style={styles.circularContentContainer}>
+        <Text style={styles.circularContent}>{item.content}</Text>
+      </View>
+    </View>
+  );
+
+  const eventRenderItem = ({ item }: { item: EventItem }) => (
+    <View style={styles.eventContainer}>
+      <View style={styles.eventCard}>
+        <View style={styles.eventTopRow}>
+          <Image 
+            source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl} 
+            style={styles.eventImage} 
+          />
+          <View style={styles.eventTextContainer}>
+            <Text style={styles.eventCaption}>{item.caption}</Text>
+            <Text style={styles.eventTitle}>{item.listTitle}</Text>
+          </View>
+        </View>
+      </View>
+      <View style={styles.eventContentContainer}>
+        <Text style={styles.eventContent}>{item.content}</Text>
+      </View>
+    </View>
+  );
+
+  const announcementDataRenderItem = ({ item }: { item: AnnouncementItem }) => (
+    <View style={styles.announcementContainer}>
+      <View style={styles.announcementCard}>
+        <View style={styles.announcementTopRow}>
+          <Image 
+            source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl} 
+            style={styles.announcementImage} 
+          />
+          <View style={styles.announcementTextContainer}>
+            <Text style={styles.announcementCaption}>{item.caption}</Text>
+            <Text style={styles.announcementTitle}>{item.listTitle}</Text>
+          </View>
+        </View>
+      </View>
+      <View style={styles.announcementContentContainer}>
+        <Text style={styles.announcementContent}>{item.content}</Text>
+      </View>
+    </View>
+  );
+
+  const bannerRenderItem = ({ item }: { item: BannerItem }) => (
+    <View style={styles.bannerContainer}>
+      <View style={styles.bannerCard}>
+        <View style={styles.bannerTopRow}>
+          <Image 
+            source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl} 
+            style={styles.bannerImage} 
+          />
+          <View style={styles.bannerTextContainer}>
+            <Text style={styles.bannerCaption}>{item.caption}</Text>
+            <Text style={styles.bannerTitle}>{item.listTitle}</Text>
+          </View>
+        </View>
+      </View>
+      <View style={styles.bannerContentContainer}>
+        <Text style={styles.bannerContent}>{item.content}</Text>
+      </View>
+    </View>
+  );
+
+  const memoRenderItem = ({ item }: { item: MemoItem }) => (
+    <View style={styles.memoContainer}>
+      <View style={styles.memoCard}>
+        <View style={styles.memoTopRow}>
+          <Image 
+            source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl} 
+            style={styles.memoImage} 
+          />
+          <View style={styles.memoTextContainer}>
+            <Text style={styles.memoCaption}>{item.caption}</Text>
+            <Text style={styles.memoTitle}>{item.listTitle}</Text>
+          </View>
+        </View>
+      </View>
+      <View style={styles.memoContentContainer}>
+        <Text style={styles.memoContent}>{item.content}</Text>
+      </View>
+    </View>
+  );
+
+  const messageRenderItem = ({ item }: { item: MessageItem }) => (
+    <View style={styles.messageContainer}>
+      <View style={styles.messageCard}>
+        <View style={styles.messageTopRow}>
+          <Image 
+            source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl} 
+            style={styles.messageImage} 
+          />
+          <View style={styles.messageTextContainer}>
+            <Text style={styles.messageCaption}>{item.caption}</Text>
+            <Text style={styles.messageTitle}>{item.listTitle}</Text>
+          </View>
+        </View>
+      </View>
+      <View style={styles.messageContentContainer}>
+        <Text style={styles.messageContent}>{item.content}</Text>
+      </View>
+      <View style={styles.messageAuthorContainer}>
+        <Text style={styles.messageAuthorLabel}>Message by:</Text>
+        <Text style={styles.messageAuthorName}>{item.employeeName}</Text>
+        <Text style={styles.messageAuthorDesignation}>{item.designation}</Text>
+      </View>
     </View>
   );
 
@@ -133,7 +855,7 @@ export default function HomeScreen({ navigation }: Props) {
           showsVerticalScrollIndicator={false} horizontal={true} showsHorizontalScrollIndicator={false}>
           <View style={styles.grid}>
             {tiles.map((tile) => (
-              <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: tile.screen })} key={tile.id} style={styles.tile}>
+              <TouchableOpacity onPress={() => navigation.navigate(tile.route as any, { screen: tile.screen })} key={tile.id} style={styles.tile}>
                 <Image source={tile.image} style={styles.image} />
                 <Text style={styles.title}>{tile.title}</Text>
               </TouchableOpacity>
@@ -147,14 +869,168 @@ export default function HomeScreen({ navigation }: Props) {
       >
         <View>
           <FlatList
-            data={DATA}
+            ref={flatListRef}
+            data={birthdayData}
             renderItem={renderItem}
             keyExtractor={item => item.id}
-            contentContainerStyle={{ paddingBottom: 20 }}
-            scrollEnabled={false}
+            horizontal={true}
+            // contentContainerStyle={{ paddingBottom: 20 }}
+           // scrollEnabled={false}
+            showsHorizontalScrollIndicator={false} // Optional: hide scroll bar
+            contentContainerStyle={{ paddingHorizontal: 10 }} // Optional: spacing
+            onScroll={handleScroll}
+            onScrollToIndexFailed={handleScrollToIndexFailed}
+            ListEmptyComponent={() => (
+              <View style={styles.emptyBirthdayContainer}>
+                <Text style={styles.emptyBirthdayText}>
+                  {loading ? 'Loading birthday greetings...' : 'No birthday greetings today'}
+                </Text>
+              </View>
+            )}
           />
         </View>
-        <View style={styles.anouncementcontainer}>
+        
+                 {/* Circular Section */}
+         {circularData.length > 0 && (
+           <View style={styles.circularSection}>
+             {/* <View style={styles.circularHeader}>
+               <Text style={styles.circularHeaderText}>Circulars</Text>
+             </View> */}
+                           <FlatList
+                ref={circularFlatListRef}
+                data={circularData}
+                renderItem={circularRenderItem}
+                keyExtractor={item => item.id}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: 10 }}
+                onScrollToIndexFailed={handleCircularScrollToIndexFailed}
+                ListEmptyComponent={() => (
+                  <View style={styles.emptyCircularContainer}>
+                    <Text style={styles.emptyCircularText}>
+                      {loading ? 'Loading circulars...' : 'No circulars available'}
+                    </Text>
+                  </View>
+                )}
+              />
+           </View>
+         )}
+         
+                   {/* Event Section */}
+          {eventData.length > 0 && (
+            <View style={styles.eventSection}>
+              <FlatList
+                ref={eventFlatListRef}
+                data={eventData}
+                renderItem={eventRenderItem}
+                keyExtractor={item => item.id}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: 10 }}
+                ListEmptyComponent={() => (
+                  <View style={styles.emptyEventContainer}>
+                    <Text style={styles.emptyEventText}>
+                      {loading ? 'Loading events...' : 'No events available'}
+                    </Text>
+                  </View>
+                )}
+              />
+            </View>
+          )}
+          
+                     {/* Announcement Section */}
+           {announcementData.length > 0 && (
+             <View style={styles.announcementSection}>
+               <FlatList
+                 ref={announcementFlatListRef}
+                 data={announcementData}
+                 renderItem={announcementDataRenderItem}
+                 keyExtractor={item => item.id}
+                 horizontal={true}
+                 showsHorizontalScrollIndicator={false}
+                 contentContainerStyle={{ paddingHorizontal: 10 }}
+                 onScrollToIndexFailed={handleAnnouncementScrollToIndexFailed}
+                 ListEmptyComponent={() => (
+                   <View style={styles.emptyAnnouncementContainer}>
+                     <Text style={styles.emptyAnnouncementText}>
+                       {loading ? 'Loading announcements...' : 'No announcements available'}
+                     </Text>
+                   </View>
+                 )}
+               />
+             </View>
+           )}
+           
+                       {/* Banner Section */}
+            {bannerData.length > 0 && (
+              <View style={styles.bannerSection}>
+                <FlatList
+                  ref={bannerFlatListRef}
+                  data={bannerData}
+                  renderItem={bannerRenderItem}
+                  keyExtractor={item => item.id}
+                  horizontal={true}
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: 10 }}
+                  onScrollToIndexFailed={handleBannerScrollToIndexFailed}
+                  ListEmptyComponent={() => (
+                    <View style={styles.emptyBannerContainer}>
+                      <Text style={styles.emptyBannerText}>
+                        {loading ? 'Loading banners...' : 'No banners available'}
+                      </Text>
+                    </View>
+                  )}
+                />
+              </View>
+            )}
+            
+                         {/* Memo Section */}
+             {memoData.length > 0 && (
+               <View style={styles.memoSection}>
+                 <FlatList
+                   ref={memoFlatListRef}
+                   data={memoData}
+                   renderItem={memoRenderItem}
+                   keyExtractor={item => item.id}
+                   horizontal={true}
+                   showsHorizontalScrollIndicator={false}
+                   contentContainerStyle={{ paddingHorizontal: 10 }}
+                   onScrollToIndexFailed={handleMemoScrollToIndexFailed}
+                   ListEmptyComponent={() => (
+                     <View style={styles.emptyMemoContainer}>
+                       <Text style={styles.emptyMemoText}>
+                         {loading ? 'Loading memos...' : 'No memos available'}
+                       </Text>
+                     </View>
+                   )}
+                 />
+               </View>
+             )}
+             
+             {/* Message Section */}
+             {messageData.length > 0 && (
+               <View style={styles.messageSection}>
+                 <FlatList
+                   ref={messageFlatListRef}
+                   data={messageData}
+                   renderItem={messageRenderItem}
+                   keyExtractor={item => item.id}
+                   horizontal={true}
+                   showsHorizontalScrollIndicator={false}
+                   contentContainerStyle={{ paddingHorizontal: 10 }}
+                   onScrollToIndexFailed={handleMessageScrollToIndexFailed}
+                   ListEmptyComponent={() => (
+                     <View style={styles.emptyMessageContainer}>
+                       <Text style={styles.emptyMessageText}>
+                         {loading ? 'Loading messages...' : 'No messages available'}
+                       </Text>
+                     </View>
+                   )}
+                 />
+               </View>
+             )}
+        
+        {/* <View style={styles.anouncementcontainer}>
           <View style={styles.annstextimg}>
             <View style={styles.annIcon}><Image style={styles.annIconimg} source={require('../../assets/images/icon!.png')} /></View>
             <Text style={styles.anouncementheader}>Announcements</Text>
@@ -165,7 +1041,7 @@ export default function HomeScreen({ navigation }: Props) {
             keyExtractor={item => item.id}
             contentContainerStyle={{ marginBottom: 20 }}
             scrollEnabled={false} />
-        </View>
+        </View> */}
       </ScrollView>
 
     </View>
@@ -252,19 +1128,21 @@ const styles = StyleSheet.create({
   },
 
   lstcontainer: {
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    width: '100%',
-    //backgroundColor: '#CAD6FF',
-    backgroundColor: '#f1f6ff',
-    marginBottom: 10,
-    borderRadius: 8,
-    padding: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
+  //   flexDirection: 'column',
+  //   alignItems: 'flex-start',
+  //  // width: '100%',
+  //   //backgroundColor: '#CAD6FF',
+  //   backgroundColor: '#f1f6ff',
+  //   marginBottom: 10,
+  //   borderRadius: 8,
+  //   padding: 6,
+  //   shadowColor: '#000',
+  //   shadowOffset: { width: 0, height: 2 },
+  //   shadowOpacity: 0.1,
+  //   shadowRadius: 4,
+  //   elevation: 5,
+    width: width-30, // fixed width for horizontal cards
+    marginRight: 10,
   },
 
   card: {
@@ -354,5 +1232,451 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
     lineHeight: 20,
+  },
+  emptyBirthdayContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  emptyBirthdayText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
+  },
+  
+  // Circular styles
+  circularSection: {
+    marginVertical: 10,
+  },
+  circularHeader: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: '#E5EEFD',
+    borderRadius: 6,
+    marginBottom: 10,
+  },
+  circularHeaderText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#133F7C',
+    textAlign: 'center',
+  },
+  circularContainer: {
+    width: width - 30,
+    marginRight: 10,
+  },
+  circularCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    borderRadius: 10,
+    marginBottom: 8,
+  },
+  circularTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  circularImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  circularTextContainer: {
+    flex: 1,
+    backgroundColor: '#e8eaed',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 5,
+  },
+  circularCaption: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#133F7C',
+    marginBottom: 4,
+  },
+  circularTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  circularContentContainer: {
+    backgroundColor: '#f1f6ff',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 4,
+  },
+  circularContent: {
+    fontSize: 12,
+    color: '#666',
+    lineHeight: 16,
+  },
+  emptyCircularContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  emptyCircularText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
+  },
+  
+  // Event styles
+  eventSection: {
+    marginVertical: 10,
+  },
+  eventContainer: {
+    width: width - 30,
+    marginRight: 10,
+  },
+  eventCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    borderRadius: 10,
+    marginBottom: 8,
+  },
+  eventTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  eventImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  eventTextContainer: {
+    flex: 1,
+    backgroundColor: '#e8eaed',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 5,
+  },
+  eventCaption: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#133F7C',
+    marginBottom: 4,
+  },
+  eventTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  eventContentContainer: {
+    backgroundColor: '#f1f6ff',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 4,
+  },
+  eventContent: {
+    fontSize: 12,
+    color: '#666',
+    lineHeight: 16,
+  },
+  emptyEventContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  emptyEventText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
+  },
+  
+  // Announcement styles
+  announcementSection: {
+    marginVertical: 10,
+  },
+  announcementContainer: {
+    width: width - 30,
+    marginRight: 10,
+  },
+  announcementCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    borderRadius: 10,
+    marginBottom: 8,
+  },
+  announcementTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  announcementImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  announcementTextContainer: {
+    flex: 1,
+    backgroundColor: '#e8eaed',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 5,
+  },
+  announcementCaption: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#133F7C',
+    marginBottom: 4,
+  },
+  announcementTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  announcementContentContainer: {
+    backgroundColor: '#f1f6ff',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 4,
+  },
+  announcementContent: {
+    fontSize: 12,
+    color: '#666',
+    lineHeight: 16,
+  },
+  emptyAnnouncementContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  emptyAnnouncementText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
+  },
+  
+  // Banner styles
+  bannerSection: {
+    marginVertical: 10,
+  },
+  bannerContainer: {
+    width: width - 30,
+    marginRight: 10,
+  },
+  bannerCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    borderRadius: 10,
+    marginBottom: 8,
+  },
+  bannerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  bannerImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  bannerTextContainer: {
+    flex: 1,
+    backgroundColor: '#e8eaed',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 5,
+  },
+  bannerCaption: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#133F7C',
+    marginBottom: 4,
+  },
+  bannerTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  bannerContentContainer: {
+    backgroundColor: '#f1f6ff',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 4,
+  },
+  bannerContent: {
+    fontSize: 12,
+    color: '#666',
+    lineHeight: 16,
+  },
+  emptyBannerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  emptyBannerText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
+  },
+  
+  // Memo styles
+  memoSection: {
+    marginVertical: 10,
+  },
+  memoContainer: {
+    width: width - 30,
+    marginRight: 10,
+  },
+  memoCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    borderRadius: 10,
+    marginBottom: 8,
+  },
+  memoTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  memoImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  memoTextContainer: {
+    flex: 1,
+    backgroundColor: '#e8eaed',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 5,
+  },
+  memoCaption: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#133F7C',
+    marginBottom: 4,
+  },
+  memoTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  memoContentContainer: {
+    backgroundColor: '#f1f6ff',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 4,
+  },
+  memoContent: {
+    fontSize: 12,
+    color: '#666',
+    lineHeight: 16,
+  },
+  emptyMemoContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  emptyMemoText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
+  },
+  
+  // Message styles
+  messageSection: {
+    marginVertical: 10,
+  },
+  messageContainer: {
+    width: width - 30,
+    marginRight: 10,
+  },
+  messageCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    borderRadius: 10,
+    marginBottom: 8,
+  },
+  messageTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  messageImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  messageTextContainer: {
+    flex: 1,
+    backgroundColor: '#e8eaed',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 5,
+  },
+  messageCaption: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#133F7C',
+    marginBottom: 4,
+  },
+  messageTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  messageContentContainer: {
+    backgroundColor: '#f1f6ff',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 4,
+  },
+  messageContent: {
+    fontSize: 12,
+    color: '#666',
+    lineHeight: 16,
+  },
+  messageAuthorContainer: {
+    backgroundColor: '#e8f4fd',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  messageAuthorLabel: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#133F7C',
+    marginRight: 4,
+  },
+  messageAuthorName: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#333',
+    marginRight: 4,
+  },
+  messageAuthorDesignation: {
+    fontSize: 11,
+    color: '#666',
+    fontStyle: 'italic',
+  },
+  emptyMessageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  emptyMessageText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
   },
 });

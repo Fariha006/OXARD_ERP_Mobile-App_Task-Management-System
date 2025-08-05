@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_CONFIG, getApiUrl } from '../config/apiConfig';
+import { API_CONFIG, getApiUrl, getFileUrl } from '../config/apiConfig';
 import { Alert } from 'react-native';
 import { Buffer } from 'buffer';
 
@@ -814,6 +814,7 @@ export const getCertificateDetails = (certificateId: string, token: string) => a
 export const saveCertificateRequest = (mode: string, certificateId: string, certificateTypeId: string, requestedDate: string, token: string) => apiService.saveCertificateRequest(mode, certificateId, certificateTypeId, requestedDate, token);
 export const getMesseges = (token: string) => apiService.getMesseges(token);
 export const submitApproval = (decisionId: string, decision: string, remarks: string, token: string) => apiService.submitApproval(decisionId, decision, remarks, token);
+export { getFileUrl };
 
 export async function fetchMessageCategories(token: string) {
   try {
