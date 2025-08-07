@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
-  View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList, 
-  SafeAreaView, StatusBar, ActivityIndicator,Dimensions 
+  View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList,
+  SafeAreaView, StatusBar, ActivityIndicator, Dimensions
 } from 'react-native';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -176,7 +176,7 @@ export default function HomeScreen({ navigation }: Props) {
       const json = await getNotifications(token);
       const transformedData = reformatApiResult(json);
       setData(parseNotificationData(transformedData));
-      
+
       // Process birthday data (CategoryId = 2)
       const flattenedData = flattenRest(json);
       const birthdayItems = processBirthdayData(flattenedData);
@@ -221,7 +221,7 @@ export default function HomeScreen({ navigation }: Props) {
 
     // Extract all items from the flattened structure
     const allItems: any[] = [];
-    
+
     Object.values(apiData).forEach((arr: any) => {
       if (Array.isArray(arr)) {
         arr.forEach((item) => {
@@ -254,13 +254,13 @@ export default function HomeScreen({ navigation }: Props) {
 
     // Extract all items from the flattened structure
     const allItems: any[] = [];
-    
+
     Object.values(apiData).forEach((arr: any) => {
       if (Array.isArray(arr)) {
         arr.forEach((item) => {
-          if (item && typeof item === 'object' && 
-              item.CategoryId === 4 && 
-              item.DocType === 'Circulars') {
+          if (item && typeof item === 'object' &&
+            item.CategoryId === 4 &&
+            item.DocType === 'Circulars') {
             allItems.push(item);
           }
         });
@@ -289,13 +289,13 @@ export default function HomeScreen({ navigation }: Props) {
 
     // Extract all items from the flattened structure
     const allItems: any[] = [];
-    
+
     Object.values(apiData).forEach((arr: any) => {
       if (Array.isArray(arr)) {
         arr.forEach((item) => {
-          if (item && typeof item === 'object' && 
-              item.CategoryId === 5 && 
-              item.DocType === 'Events') {
+          if (item && typeof item === 'object' &&
+            item.CategoryId === 5 &&
+            item.DocType === 'Events') {
             allItems.push(item);
           }
         });
@@ -324,13 +324,13 @@ export default function HomeScreen({ navigation }: Props) {
 
     // Extract all items from the flattened structure
     const allItems: any[] = [];
-    
+
     Object.values(apiData).forEach((arr: any) => {
       if (Array.isArray(arr)) {
         arr.forEach((item) => {
-          if (item && typeof item === 'object' && 
-              item.CategoryId === 6 && 
-              item.DocType === 'Announcements') {
+          if (item && typeof item === 'object' &&
+            item.CategoryId === 6 &&
+            item.DocType === 'Announcements') {
             allItems.push(item);
           }
         });
@@ -359,13 +359,13 @@ export default function HomeScreen({ navigation }: Props) {
 
     // Extract all items from the flattened structure
     const allItems: any[] = [];
-    
+
     Object.values(apiData).forEach((arr: any) => {
       if (Array.isArray(arr)) {
         arr.forEach((item) => {
-          if (item && typeof item === 'object' && 
-              item.CategoryId === 7 && 
-              item.DocType === 'Banners') {
+          if (item && typeof item === 'object' &&
+            item.CategoryId === 7 &&
+            item.DocType === 'Banners') {
             allItems.push(item);
           }
         });
@@ -394,13 +394,13 @@ export default function HomeScreen({ navigation }: Props) {
 
     // Extract all items from the flattened structure
     const allItems: any[] = [];
-    
+
     Object.values(apiData).forEach((arr: any) => {
       if (Array.isArray(arr)) {
         arr.forEach((item) => {
-          if (item && typeof item === 'object' && 
-              item.CategoryId === 8 && 
-              item.DocType === 'Memos') {
+          if (item && typeof item === 'object' &&
+            item.CategoryId === 8 &&
+            item.DocType === 'Memos') {
             allItems.push(item);
           }
         });
@@ -429,13 +429,13 @@ export default function HomeScreen({ navigation }: Props) {
 
     // Extract all items from the flattened structure
     const allItems: any[] = [];
-    
+
     Object.values(apiData).forEach((arr: any) => {
       if (Array.isArray(arr)) {
         arr.forEach((item) => {
-          if (item && typeof item === 'object' && 
-              item.CategoryId === 9 && 
-              item.DocType === 'Messages') {
+          if (item && typeof item === 'object' &&
+            item.CategoryId === 9 &&
+            item.DocType === 'Messages') {
             allItems.push(item);
           }
         });
@@ -465,15 +465,15 @@ export default function HomeScreen({ navigation }: Props) {
   }, []);
 
   const tiles = [
-    { id: 1, title: 'My Desk', image: require('../../assets/images/home/mydesk.png'),route:'Main',screen:'MyDesk' },
-    { id: 2, title: 'My Requests', image: require('../../assets/images/home/request.png'),route:'Main',screen:'CertificateRequest' },
-    { id: 3, title: 'Payslips', image: require('../../assets/images/home/payslip.png'),route:'Main',screen:'Payslip' },
-    { id: 4, title: 'Approval', image: require('../../assets/images/home/aproval.png'),route:'Main',screen:'Approvals' },
-    { id: 5, title: 'Directory', image: require('../../assets/images/home/directory.png'),route:'Main',screen:'EmployeeDirectory' },
-    { id: 6, title: 'Messages', image: require('../../assets/images/home/msgs.png'),route:'Main',screen:'Messege' },
-    { id: 7, title: 'Leave Outstandings ', image: require('../../assets/images/home/leave.png'),route:'Main',screen:'LeaveOutstanding' },
-    { id: 8, title: 'Approval', image: require('../../assets/images/home/aprovb.png'),route:'Main',screen:'Approval' },
-    { id: 9, title: 'Add ', image: require('../../assets/images/home/addbtn.png'),route:'Main',screen:'Add' },
+    { id: 1, title: 'My Desk', image: require('../../assets/images/home/mydesk.png'), route: 'Main', screen: 'MyDesk' },
+    { id: 2, title: 'My Requests', image: require('../../assets/images/home/request.png'), route: 'Main', screen: 'CertificateRequest' },
+    { id: 3, title: 'Payslips', image: require('../../assets/images/home/payslip.png'), route: 'Main', screen: 'Payslip' },
+    { id: 4, title: 'Approval', image: require('../../assets/images/home/aproval.png'), route: 'Main', screen: 'Approvals' },
+    { id: 5, title: 'Directory', image: require('../../assets/images/home/directory.png'), route: 'Main', screen: 'EmployeeDirectory' },
+    { id: 6, title: 'Messages', image: require('../../assets/images/home/msgs.png'), route: 'Main', screen: 'Messege' },
+    { id: 7, title: 'Leave Outstandings ', image: require('../../assets/images/home/leave.png'), route: 'Main', screen: 'LeaveOutstanding' },
+    { id: 8, title: 'Approval', image: require('../../assets/images/home/aprovb.png'), route: 'Main', screen: 'Approval' },
+    { id: 9, title: 'Add ', image: require('../../assets/images/home/addbtn.png'), route: 'Main', screen: 'Add' },
   ];
 
   // Auto-scroll effect for birthday - moved after DATA declaration
@@ -481,7 +481,7 @@ export default function HomeScreen({ navigation }: Props) {
     const interval = setInterval(() => {
       if (flatListRef.current && birthdayData.length > 0) {
         const nextIndex = (currentIndex + 1) % birthdayData.length;
-        flatListRef.current.scrollToIndex({ 
+        flatListRef.current.scrollToIndex({
           index: nextIndex,
           animated: true,
           viewPosition: 0.5
@@ -497,7 +497,7 @@ export default function HomeScreen({ navigation }: Props) {
     const interval = setInterval(() => {
       if (circularFlatListRef.current && circularData.length > 0) {
         const nextIndex = (circularCurrentIndex + 1) % circularData.length;
-        circularFlatListRef.current.scrollToIndex({ 
+        circularFlatListRef.current.scrollToIndex({
           index: nextIndex,
           animated: true,
           viewPosition: 0.5
@@ -513,7 +513,7 @@ export default function HomeScreen({ navigation }: Props) {
     const interval = setInterval(() => {
       if (announcementFlatListRef.current && announcementData.length > 0) {
         const nextIndex = (announcementCurrentIndex + 1) % announcementData.length;
-        announcementFlatListRef.current.scrollToIndex({ 
+        announcementFlatListRef.current.scrollToIndex({
           index: nextIndex,
           animated: true,
           viewPosition: 0.5
@@ -529,7 +529,7 @@ export default function HomeScreen({ navigation }: Props) {
     const interval = setInterval(() => {
       if (bannerFlatListRef.current && bannerData.length > 0) {
         const nextIndex = (bannerCurrentIndex + 1) % bannerData.length;
-        bannerFlatListRef.current.scrollToIndex({ 
+        bannerFlatListRef.current.scrollToIndex({
           index: nextIndex,
           animated: true,
           viewPosition: 0.5
@@ -545,7 +545,7 @@ export default function HomeScreen({ navigation }: Props) {
     const interval = setInterval(() => {
       if (memoFlatListRef.current && memoData.length > 0) {
         const nextIndex = (memoCurrentIndex + 1) % memoData.length;
-        memoFlatListRef.current.scrollToIndex({ 
+        memoFlatListRef.current.scrollToIndex({
           index: nextIndex,
           animated: true,
           viewPosition: 0.5
@@ -561,7 +561,7 @@ export default function HomeScreen({ navigation }: Props) {
     const interval = setInterval(() => {
       if (messageFlatListRef.current && messageData.length > 0) {
         const nextIndex = (messageCurrentIndex + 1) % messageData.length;
-        messageFlatListRef.current.scrollToIndex({ 
+        messageFlatListRef.current.scrollToIndex({
           index: nextIndex,
           animated: true,
           viewPosition: 0.5
@@ -582,8 +582,8 @@ export default function HomeScreen({ navigation }: Props) {
     const wait = new Promise(resolve => setTimeout(resolve, 500));
     wait.then(() => {
       if (flatListRef.current) {
-        flatListRef.current.scrollToIndex({ 
-          index: info.index, 
+        flatListRef.current.scrollToIndex({
+          index: info.index,
           animated: true,
           viewPosition: 0.5
         });
@@ -596,8 +596,8 @@ export default function HomeScreen({ navigation }: Props) {
     const wait = new Promise(resolve => setTimeout(resolve, 500));
     wait.then(() => {
       if (circularFlatListRef.current) {
-        circularFlatListRef.current.scrollToIndex({ 
-          index: info.index, 
+        circularFlatListRef.current.scrollToIndex({
+          index: info.index,
           animated: true,
           viewPosition: 0.5
         });
@@ -610,8 +610,8 @@ export default function HomeScreen({ navigation }: Props) {
     const wait = new Promise(resolve => setTimeout(resolve, 500));
     wait.then(() => {
       if (announcementFlatListRef.current) {
-        announcementFlatListRef.current.scrollToIndex({ 
-          index: info.index, 
+        announcementFlatListRef.current.scrollToIndex({
+          index: info.index,
           animated: true,
           viewPosition: 0.5
         });
@@ -624,8 +624,8 @@ export default function HomeScreen({ navigation }: Props) {
     const wait = new Promise(resolve => setTimeout(resolve, 500));
     wait.then(() => {
       if (bannerFlatListRef.current) {
-        bannerFlatListRef.current.scrollToIndex({ 
-          index: info.index, 
+        bannerFlatListRef.current.scrollToIndex({
+          index: info.index,
           animated: true,
           viewPosition: 0.5
         });
@@ -638,8 +638,8 @@ export default function HomeScreen({ navigation }: Props) {
     const wait = new Promise(resolve => setTimeout(resolve, 500));
     wait.then(() => {
       if (memoFlatListRef.current) {
-        memoFlatListRef.current.scrollToIndex({ 
-          index: info.index, 
+        memoFlatListRef.current.scrollToIndex({
+          index: info.index,
           animated: true,
           viewPosition: 0.5
         });
@@ -652,8 +652,8 @@ export default function HomeScreen({ navigation }: Props) {
     const wait = new Promise(resolve => setTimeout(resolve, 500));
     wait.then(() => {
       if (messageFlatListRef.current) {
-        messageFlatListRef.current.scrollToIndex({ 
-          index: info.index, 
+        messageFlatListRef.current.scrollToIndex({
+          index: info.index,
           animated: true,
           viewPosition: 0.5
         });
@@ -693,10 +693,11 @@ export default function HomeScreen({ navigation }: Props) {
     <View style={styles.lstcontainer}>
       <View style={styles.card}>
         <View style={styles.topRow}>
-          <Image 
-            source={typeof item.image === 'string' ? { uri: item.image } : item.image} 
-            style={styles.lstimage} 
-          />
+          <View style={styles.slideimage}>
+            <Image
+              source={typeof item.image === 'string' ? { uri: item.image } : item.image}
+              style={styles.lstimage} />
+          </View>
           <View style={styles.textContainer}>
             <Text style={styles.lsttitle}>{item.name}</Text>
             <Text style={styles.role}>{item.role}</Text>
@@ -720,18 +721,18 @@ export default function HomeScreen({ navigation }: Props) {
     <View style={styles.circularContainer}>
       <View style={styles.circularCard}>
         <View style={styles.circularTopRow}>
-          <Image 
-            source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl} 
-            style={styles.circularImage} 
-          />
           <View style={styles.circularTextContainer}>
-            <Text style={styles.circularCaption}>{item.caption}</Text>
-            <Text style={styles.circularTitle}>{item.listTitle}</Text>
+            <Text style={styles.lsttitle}>{item.caption}</Text>
+            <Text style={styles.role}>{item.listTitle}</Text>
+          </View>
+          <View style={styles.slideimage}>
+            <Image source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl}
+              style={styles.circularImage} />
           </View>
         </View>
       </View>
-      <View style={styles.circularContentContainer}>
-        <Text style={styles.circularContent}>{item.content}</Text>
+      <View>
+        <Text style={styles.itemtags}>{item.content}</Text>
       </View>
     </View>
   );
@@ -740,18 +741,19 @@ export default function HomeScreen({ navigation }: Props) {
     <View style={styles.eventContainer}>
       <View style={styles.eventCard}>
         <View style={styles.eventTopRow}>
-          <Image 
-            source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl} 
-            style={styles.eventImage} 
-          />
-          <View style={styles.eventTextContainer}>
-            <Text style={styles.eventCaption}>{item.caption}</Text>
-            <Text style={styles.eventTitle}>{item.listTitle}</Text>
+          <View style={styles.slideimage}>
+            <Image
+              source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl}
+              style={styles.eventImage} />
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={styles.lsttitle}>{item.caption}</Text>
+            <Text style={styles.role}>{item.listTitle}</Text>
           </View>
         </View>
       </View>
-      <View style={styles.eventContentContainer}>
-        <Text style={styles.eventContent}>{item.content}</Text>
+      <View>
+        <Text style={styles.itemtags}>{item.content}</Text>
       </View>
     </View>
   );
@@ -760,18 +762,19 @@ export default function HomeScreen({ navigation }: Props) {
     <View style={styles.announcementContainer}>
       <View style={styles.announcementCard}>
         <View style={styles.announcementTopRow}>
-          <Image 
-            source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl} 
-            style={styles.announcementImage} 
-          />
-          <View style={styles.announcementTextContainer}>
-            <Text style={styles.announcementCaption}>{item.caption}</Text>
-            <Text style={styles.announcementTitle}>{item.listTitle}</Text>
+          <View style={styles.circularTextContainer}>
+            <Text style={styles.lsttitle}>{item.caption}</Text>
+            <Text style={styles.role}>{item.listTitle}</Text>
+          </View>
+          <View style={styles.slideimage}>
+            <Image
+              source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl}
+              style={styles.announcementImage} />
           </View>
         </View>
       </View>
-      <View style={styles.announcementContentContainer}>
-        <Text style={styles.announcementContent}>{item.content}</Text>
+      <View>
+        <Text style={styles.itemtags}>{item.content}</Text>
       </View>
     </View>
   );
@@ -780,18 +783,19 @@ export default function HomeScreen({ navigation }: Props) {
     <View style={styles.bannerContainer}>
       <View style={styles.bannerCard}>
         <View style={styles.bannerTopRow}>
-          <Image 
-            source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl} 
-            style={styles.bannerImage} 
-          />
-          <View style={styles.bannerTextContainer}>
-            <Text style={styles.bannerCaption}>{item.caption}</Text>
-            <Text style={styles.bannerTitle}>{item.listTitle}</Text>
+          <View style={styles.slideimage}>
+            <Image
+              source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl}
+              style={styles.bannerImage} />
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={styles.lsttitle}>{item.caption}</Text>
+            <Text style={styles.role}>{item.listTitle}</Text>
           </View>
         </View>
       </View>
-      <View style={styles.bannerContentContainer}>
-        <Text style={styles.bannerContent}>{item.content}</Text>
+      <View>
+        <Text style={styles.itemtags}>{item.content}</Text>
       </View>
     </View>
   );
@@ -800,18 +804,19 @@ export default function HomeScreen({ navigation }: Props) {
     <View style={styles.memoContainer}>
       <View style={styles.memoCard}>
         <View style={styles.memoTopRow}>
-          <Image 
-            source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl} 
-            style={styles.memoImage} 
-          />
-          <View style={styles.memoTextContainer}>
-            <Text style={styles.memoCaption}>{item.caption}</Text>
-            <Text style={styles.memoTitle}>{item.listTitle}</Text>
+          <View style={styles.circularTextContainer}>
+            <Text style={styles.lsttitle}>{item.caption}</Text>
+            <Text style={styles.role}>{item.listTitle}</Text>
+          </View>
+          <View style={styles.slideimage}>
+          <Image
+            source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl}
+            style={styles.memoImage} />
           </View>
         </View>
       </View>
-      <View style={styles.memoContentContainer}>
-        <Text style={styles.memoContent}>{item.content}</Text>
+      <View>
+        <Text style={styles.itemtags}>{item.content}</Text>
       </View>
     </View>
   );
@@ -820,18 +825,19 @@ export default function HomeScreen({ navigation }: Props) {
     <View style={styles.messageContainer}>
       <View style={styles.messageCard}>
         <View style={styles.messageTopRow}>
-          <Image 
-            source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl} 
-            style={styles.messageImage} 
-          />
-          <View style={styles.messageTextContainer}>
-            <Text style={styles.messageCaption}>{item.caption}</Text>
-            <Text style={styles.messageTitle}>{item.listTitle}</Text>
+          <View style={styles.slideimage}>
+            <Image
+              source={typeof item.photoUrl === 'string' ? { uri: item.photoUrl } : item.photoUrl}
+              style={styles.messageImage} />
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={styles.lsttitle}>{item.caption}</Text>
+            <Text style={styles.role}>{item.listTitle}</Text>
           </View>
         </View>
       </View>
-      <View style={styles.messageContentContainer}>
-        <Text style={styles.messageContent}>{item.content}</Text>
+      <View>
+        <Text style={styles.itemtags}>{item.content}</Text>
       </View>
       <View style={styles.messageAuthorContainer}>
         <Text style={styles.messageAuthorLabel}>Message by:</Text>
@@ -843,60 +849,60 @@ export default function HomeScreen({ navigation }: Props) {
 
   return (
     <>
-      <StatusBar 
-        backgroundColor="#133F7C" 
-        barStyle="light-content" 
+      <StatusBar
+        backgroundColor="#133F7C"
+        barStyle="light-content"
         translucent={false}
       />
       <View style={styles.container}>
-      <View style={styles.btncontainer}>
+        <View style={styles.btncontainer}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            showsVerticalScrollIndicator={false} horizontal={true} showsHorizontalScrollIndicator={false}>
+            <View style={styles.grid}>
+              {tiles.map((tile) => (
+                <TouchableOpacity onPress={() => navigation.navigate(tile.route as any, { screen: tile.screen })} key={tile.id} style={styles.tile}>
+                  <Image source={tile.image} style={styles.image} />
+                  <Text style={styles.title}>{tile.title}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
-          showsVerticalScrollIndicator={false} horizontal={true} showsHorizontalScrollIndicator={false}>
-          <View style={styles.grid}>
-            {tiles.map((tile) => (
-              <TouchableOpacity onPress={() => navigation.navigate(tile.route as any, { screen: tile.screen })} key={tile.id} style={styles.tile}>
-                <Image source={tile.image} style={styles.image} />
-                <Text style={styles.title}>{tile.title}</Text>
-              </TouchableOpacity>
-            ))}
+          showsVerticalScrollIndicator={true} // 👈 shows the vertical scrollbar
+        >
+          <View>
+            <FlatList
+              ref={flatListRef}
+              data={birthdayData}
+              renderItem={renderItem}
+              keyExtractor={item => item.id}
+              horizontal={true}
+              // contentContainerStyle={{ paddingBottom: 20 }}
+              // scrollEnabled={false}
+              showsHorizontalScrollIndicator={false} // Optional: hide scroll bar
+              contentContainerStyle={{ paddingHorizontal: 10 }} // Optional: spacing
+              onScroll={handleScroll}
+              onScrollToIndexFailed={handleScrollToIndexFailed}
+              ListEmptyComponent={() => (
+                <View style={styles.emptyBirthdayContainer}>
+                  <Text style={styles.emptyBirthdayText}>
+                    {loading ? 'Loading birthday greetings...' : 'No birthday greetings today'}
+                  </Text>
+                </View>
+              )}
+            />
           </View>
-        </ScrollView>
-      </View>
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={true} // 👈 shows the vertical scrollbar
-      >
-        <View>
-          <FlatList
-            ref={flatListRef}
-            data={birthdayData}
-            renderItem={renderItem}
-            keyExtractor={item => item.id}
-            horizontal={true}
-            // contentContainerStyle={{ paddingBottom: 20 }}
-           // scrollEnabled={false}
-            showsHorizontalScrollIndicator={false} // Optional: hide scroll bar
-            contentContainerStyle={{ paddingHorizontal: 10 }} // Optional: spacing
-            onScroll={handleScroll}
-            onScrollToIndexFailed={handleScrollToIndexFailed}
-            ListEmptyComponent={() => (
-              <View style={styles.emptyBirthdayContainer}>
-                <Text style={styles.emptyBirthdayText}>
-                  {loading ? 'Loading birthday greetings...' : 'No birthday greetings today'}
-                </Text>
-              </View>
-            )}
-          />
-        </View>
-        
-                 {/* Circular Section */}
-         {circularData.length > 0 && (
-           <View style={styles.circularSection}>
-             {/* <View style={styles.circularHeader}>
+
+          {/* Circular Section */}
+          {circularData.length > 0 && (
+            <View style={styles.circularSection}>
+              {/* <View style={styles.circularHeader}>
                <Text style={styles.circularHeaderText}>Circulars</Text>
              </View> */}
-                           <FlatList
+              <FlatList
                 ref={circularFlatListRef}
                 data={circularData}
                 renderItem={circularRenderItem}
@@ -913,10 +919,10 @@ export default function HomeScreen({ navigation }: Props) {
                   </View>
                 )}
               />
-           </View>
-         )}
-         
-                   {/* Event Section */}
+            </View>
+          )}
+
+          {/* Event Section */}
           {eventData.length > 0 && (
             <View style={styles.eventSection}>
               <FlatList
@@ -937,100 +943,100 @@ export default function HomeScreen({ navigation }: Props) {
               />
             </View>
           )}
-          
-                     {/* Announcement Section */}
-           {announcementData.length > 0 && (
-             <View style={styles.announcementSection}>
-               <FlatList
-                 ref={announcementFlatListRef}
-                 data={announcementData}
-                 renderItem={announcementDataRenderItem}
-                 keyExtractor={item => item.id}
-                 horizontal={true}
-                 showsHorizontalScrollIndicator={false}
-                 contentContainerStyle={{ paddingHorizontal: 10 }}
-                 onScrollToIndexFailed={handleAnnouncementScrollToIndexFailed}
-                 ListEmptyComponent={() => (
-                   <View style={styles.emptyAnnouncementContainer}>
-                     <Text style={styles.emptyAnnouncementText}>
-                       {loading ? 'Loading announcements...' : 'No announcements available'}
-                     </Text>
-                   </View>
-                 )}
-               />
-             </View>
-           )}
-           
-                       {/* Banner Section */}
-            {bannerData.length > 0 && (
-              <View style={styles.bannerSection}>
-                <FlatList
-                  ref={bannerFlatListRef}
-                  data={bannerData}
-                  renderItem={bannerRenderItem}
-                  keyExtractor={item => item.id}
-                  horizontal={true}
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 10 }}
-                  onScrollToIndexFailed={handleBannerScrollToIndexFailed}
-                  ListEmptyComponent={() => (
-                    <View style={styles.emptyBannerContainer}>
-                      <Text style={styles.emptyBannerText}>
-                        {loading ? 'Loading banners...' : 'No banners available'}
-                      </Text>
-                    </View>
-                  )}
-                />
-              </View>
-            )}
-            
-                         {/* Memo Section */}
-             {memoData.length > 0 && (
-               <View style={styles.memoSection}>
-                 <FlatList
-                   ref={memoFlatListRef}
-                   data={memoData}
-                   renderItem={memoRenderItem}
-                   keyExtractor={item => item.id}
-                   horizontal={true}
-                   showsHorizontalScrollIndicator={false}
-                   contentContainerStyle={{ paddingHorizontal: 10 }}
-                   onScrollToIndexFailed={handleMemoScrollToIndexFailed}
-                   ListEmptyComponent={() => (
-                     <View style={styles.emptyMemoContainer}>
-                       <Text style={styles.emptyMemoText}>
-                         {loading ? 'Loading memos...' : 'No memos available'}
-                       </Text>
-                     </View>
-                   )}
-                 />
-               </View>
-             )}
-             
-             {/* Message Section */}
-             {messageData.length > 0 && (
-               <View style={styles.messageSection}>
-                 <FlatList
-                   ref={messageFlatListRef}
-                   data={messageData}
-                   renderItem={messageRenderItem}
-                   keyExtractor={item => item.id}
-                   horizontal={true}
-                   showsHorizontalScrollIndicator={false}
-                   contentContainerStyle={{ paddingHorizontal: 10 }}
-                   onScrollToIndexFailed={handleMessageScrollToIndexFailed}
-                   ListEmptyComponent={() => (
-                     <View style={styles.emptyMessageContainer}>
-                       <Text style={styles.emptyMessageText}>
-                         {loading ? 'Loading messages...' : 'No messages available'}
-                       </Text>
-                     </View>
-                   )}
-                 />
-               </View>
-             )}
-        
-        {/* <View style={styles.anouncementcontainer}>
+
+          {/* Announcement Section */}
+          {announcementData.length > 0 && (
+            <View style={styles.announcementSection}>
+              <FlatList
+                ref={announcementFlatListRef}
+                data={announcementData}
+                renderItem={announcementDataRenderItem}
+                keyExtractor={item => item.id}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: 10 }}
+                onScrollToIndexFailed={handleAnnouncementScrollToIndexFailed}
+                ListEmptyComponent={() => (
+                  <View style={styles.emptyAnnouncementContainer}>
+                    <Text style={styles.emptyAnnouncementText}>
+                      {loading ? 'Loading announcements...' : 'No announcements available'}
+                    </Text>
+                  </View>
+                )}
+              />
+            </View>
+          )}
+
+          {/* Banner Section */}
+          {bannerData.length > 0 && (
+            <View style={styles.bannerSection}>
+              <FlatList
+                ref={bannerFlatListRef}
+                data={bannerData}
+                renderItem={bannerRenderItem}
+                keyExtractor={item => item.id}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: 10 }}
+                onScrollToIndexFailed={handleBannerScrollToIndexFailed}
+                ListEmptyComponent={() => (
+                  <View style={styles.emptyBannerContainer}>
+                    <Text style={styles.emptyBannerText}>
+                      {loading ? 'Loading banners...' : 'No banners available'}
+                    </Text>
+                  </View>
+                )}
+              />
+            </View>
+          )}
+
+          {/* Memo Section */}
+          {memoData.length > 0 && (
+            <View style={styles.memoSection}>
+              <FlatList
+                ref={memoFlatListRef}
+                data={memoData}
+                renderItem={memoRenderItem}
+                keyExtractor={item => item.id}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: 10 }}
+                onScrollToIndexFailed={handleMemoScrollToIndexFailed}
+                ListEmptyComponent={() => (
+                  <View style={styles.emptyMemoContainer}>
+                    <Text style={styles.emptyMemoText}>
+                      {loading ? 'Loading memos...' : 'No memos available'}
+                    </Text>
+                  </View>
+                )}
+              />
+            </View>
+          )}
+
+          {/* Message Section */}
+          {messageData.length > 0 && (
+            <View style={styles.messageSection}>
+              <FlatList
+                ref={messageFlatListRef}
+                data={messageData}
+                renderItem={messageRenderItem}
+                keyExtractor={item => item.id}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: 10 }}
+                onScrollToIndexFailed={handleMessageScrollToIndexFailed}
+                ListEmptyComponent={() => (
+                  <View style={styles.emptyMessageContainer}>
+                    <Text style={styles.emptyMessageText}>
+                      {loading ? 'Loading messages...' : 'No messages available'}
+                    </Text>
+                  </View>
+                )}
+              />
+            </View>
+          )}
+
+          {/* <View style={styles.anouncementcontainer}>
           <View style={styles.annstextimg}>
             <View style={styles.annIcon}><Image style={styles.annIconimg} source={require('../../assets/images/icon!.png')} /></View>
             <Text style={styles.anouncementheader}>Announcements</Text>
@@ -1042,9 +1048,9 @@ export default function HomeScreen({ navigation }: Props) {
             contentContainerStyle={{ marginBottom: 20 }}
             scrollEnabled={false} />
         </View> */}
-      </ScrollView>
+        </ScrollView>
 
-    </View>
+      </View>
     </>
   );
 }
@@ -1057,7 +1063,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingRight: 0,
     backgroundColor: '#ffffff',
-    
+
     paddingLeft: 0,
     paddingBottom: 80,
   },
@@ -1127,59 +1133,62 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
+  // =============================================================================
   lstcontainer: {
-  //   flexDirection: 'column',
-  //   alignItems: 'flex-start',
-  //  // width: '100%',
-  //   //backgroundColor: '#CAD6FF',
-  //   backgroundColor: '#f1f6ff',
-  //   marginBottom: 10,
-  //   borderRadius: 8,
-  //   padding: 6,
-  //   shadowColor: '#000',
-  //   shadowOffset: { width: 0, height: 2 },
-  //   shadowOpacity: 0.1,
-  //   shadowRadius: 4,
-  //   elevation: 5,
-    width: width-30, // fixed width for horizontal cards
-    marginRight: 10,
+    //   flexDirection: 'column',
+    //   alignItems: 'flex-start',
+    //  // width: '100%',
+    // backgroundColor: 'yellow',
+    //   marginBottom: 10,
+    //   borderRadius: 8,
+    //   padding: 6,
+    //   shadowColor: '#000',
+    //   shadowOffset: { width: 0, height: 2 },
+    //   shadowOpacity: 0.1,
+    //   shadowRadius: 4,
+    //   elevation: 5,
+    width: width - 10, // fixed width for horizontal cards
+    marginRight: 8,
+    padding: 10,
+    paddingLeft: 20,
+    backgroundColor: '#e5eefd',
+    borderRadius: 10,
   },
-
   card: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     borderRadius: 10,
     marginBottom: 8,
+    paddingLeft: 8,
+    paddingRight: 8,
+  },
+  textContainer: {
+    flex: 1,
+    backgroundColor: '#ffffffff',
+    marginLeft: 10,
+    paddingLeft: 6,
+    paddingTop: 6,
+    height: 56,
+    borderRadius: 6,
+    marginTop: 5,
   },
   topRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
+  slideimage: {
+    padding: 8,
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+  },
   lstimage: {
-    width: 73,
-    height: 78,
-    borderRadius: 6,
+    width: 50,
+    height: 50,
     marginRight: 4,
   },
-  textContainer: {
-    flex: 1,
-    //backgroundColor: '#FFFFFF',
-    backgroundColor: '#e8eaed',
-    marginLeft: 10,
-    paddingLeft: 6,
-    paddingTop: 6,
-    height:56,
-    borderRadius: 6,
-    marginTop: 5,
-  },
-  itemname: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#C50205',
-  },
-  itemtags: {
-    fontSize: 11,
-   
+  messageImage: {
+    width: 50,
+    height: 50,
   },
   lsttitle: {
     fontSize: 14,
@@ -1187,8 +1196,188 @@ const styles = StyleSheet.create({
   },
   role: {
     fontSize: 11,
+    color: '#272727ff',
+  },
+  itemname: {
+    fontSize: 14,
+    fontWeight: 'bold',
     color: '#133F7C',
   },
+  itemtags: {
+    fontSize: 11,
+  },
+  circularContainer: {
+    backgroundColor: '#fde8e5',
+    width: width - 10,
+    marginRight: 8,
+    padding: 10,
+    paddingLeft: 20,
+    borderRadius: 10,
+  },
+  circularCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    borderRadius: 10,
+    marginBottom: 8,
+  },
+  circularTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  circularTextContainer: {
+    flex: 1,
+    backgroundColor: '#ffffffff',
+    marginRight: 10,
+    paddingLeft: 6,
+    paddingTop: 6,
+    height: 56,
+    borderRadius: 6,
+    marginTop: 5,
+  },
+  circularImage: {
+    width: 50,
+    height: 50,
+  },
+  circularContentContainer: {
+    backgroundColor: '#fde8e5',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 4,
+  },
+  circularContent: {
+    fontSize: 12,
+    color: '#666',
+    lineHeight: 16,
+  },
+  eventContainer: {
+    backgroundColor: '#e8e5fd',
+    // backgroundColor: '#2200ffff',
+    width: width -10,
+    marginRight: 8,
+    padding: 10,
+    paddingLeft: 10,
+    borderRadius: 10,
+  },
+  eventCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    borderRadius: 10,
+    marginBottom: 8,
+  },
+  eventTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  eventImage: {
+    width: 50,
+    height: 50,
+  },
+  announcementContainer: {
+    backgroundColor: '#ffdcf1ff',
+    width: width - 10,
+    marginRight: 8,
+    padding: 10,
+    paddingLeft: 20,
+  },
+  announcementCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    borderRadius: 10,
+    marginBottom: 8,
+  },
+  announcementTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  announcementTextContainer: {
+    flex: 1,
+    backgroundColor: '#e8eaed',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 5,
+  },
+  announcementCaption: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#133F7C',
+    marginBottom: 4,
+  },
+  announcementTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  announcementImage: {
+    width: 50,
+    height: 50,
+  },
+  bannerContainer: {
+    backgroundColor: '#e9dcf1ff',
+    width: width - 10,
+    marginRight: 8,
+    padding: 10,
+    paddingLeft: 20,
+  },
+  bannerTextContainer: {
+    flex: 1,
+    backgroundColor: '#ffffffff',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 5,
+  },
+  bannerCaption: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#133F7C',
+    marginBottom: 4,
+  },
+  bannerTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  bannerImage: {
+    width: 50,
+    height: 50,
+  },
+  memoContainer: {
+    backgroundColor: '#d2f4f6ff',
+    width: width - 10,
+    marginRight: 8,
+    padding: 10,
+    paddingLeft: 20,
+  },
+  memoImage: {
+    width: 50,
+    height: 50,
+  },
+  memoCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+
+  },
+  messageContainer: {
+    backgroundColor: '#f5f3d7ff',
+    width: width - 10,
+    marginRight: 8,
+    padding: 10,
+    paddingLeft: 20,
+    marginBottom: 18,
+  },
+  messageCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    borderRadius: 10,
+    marginBottom: 8,
+  },
+  messageTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  // ========================================================================777777777=====
+
   tagsContainer: {
 
 
@@ -1244,7 +1433,7 @@ const styles = StyleSheet.create({
     color: '#888',
     textAlign: 'center',
   },
-  
+
   // Circular styles
   circularSection: {
     marginVertical: 10,
@@ -1262,56 +1451,6 @@ const styles = StyleSheet.create({
     color: '#133F7C',
     textAlign: 'center',
   },
-  circularContainer: {
-    width: width - 30,
-    marginRight: 10,
-  },
-  circularCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    borderRadius: 10,
-    marginBottom: 8,
-  },
-  circularTopRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  circularImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 6,
-    marginRight: 8,
-  },
-  circularTextContainer: {
-    flex: 1,
-    backgroundColor: '#e8eaed',
-    padding: 8,
-    borderRadius: 6,
-    marginTop: 5,
-  },
-  circularCaption: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#133F7C',
-    marginBottom: 4,
-  },
-  circularTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  circularContentContainer: {
-    backgroundColor: '#f1f6ff',
-    padding: 8,
-    borderRadius: 6,
-    marginTop: 4,
-  },
-  circularContent: {
-    fontSize: 12,
-    color: '#666',
-    lineHeight: 16,
-  },
   emptyCircularContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -1323,30 +1462,10 @@ const styles = StyleSheet.create({
     color: '#888',
     textAlign: 'center',
   },
-  
+
   // Event styles
   eventSection: {
     marginVertical: 10,
-  },
-  eventContainer: {
-    width: width - 30,
-    marginRight: 10,
-  },
-  eventCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    borderRadius: 10,
-    marginBottom: 8,
-  },
-  eventTopRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  eventImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 6,
-    marginRight: 8,
   },
   eventTextContainer: {
     flex: 1,
@@ -1389,49 +1508,10 @@ const styles = StyleSheet.create({
     color: '#888',
     textAlign: 'center',
   },
-  
+
   // Announcement styles
   announcementSection: {
     marginVertical: 10,
-  },
-  announcementContainer: {
-    width: width - 30,
-    marginRight: 10,
-  },
-  announcementCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    borderRadius: 10,
-    marginBottom: 8,
-  },
-  announcementTopRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  announcementImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 6,
-    marginRight: 8,
-  },
-  announcementTextContainer: {
-    flex: 1,
-    backgroundColor: '#e8eaed',
-    padding: 8,
-    borderRadius: 6,
-    marginTop: 5,
-  },
-  announcementCaption: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#133F7C',
-    marginBottom: 4,
-  },
-  announcementTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
   },
   announcementContentContainer: {
     backgroundColor: '#f1f6ff',
@@ -1455,14 +1535,10 @@ const styles = StyleSheet.create({
     color: '#888',
     textAlign: 'center',
   },
-  
+
   // Banner styles
   bannerSection: {
     marginVertical: 10,
-  },
-  bannerContainer: {
-    width: width - 30,
-    marginRight: 10,
   },
   bannerCard: {
     flexDirection: 'row',
@@ -1473,31 +1549,6 @@ const styles = StyleSheet.create({
   bannerTopRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-  },
-  bannerImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 6,
-    marginRight: 8,
-  },
-  bannerTextContainer: {
-    flex: 1,
-    backgroundColor: '#e8eaed',
-    padding: 8,
-    borderRadius: 6,
-    marginTop: 5,
-  },
-  bannerCaption: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#133F7C',
-    marginBottom: 4,
-  },
-  bannerTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
   },
   bannerContentContainer: {
     backgroundColor: '#f1f6ff',
@@ -1521,30 +1572,14 @@ const styles = StyleSheet.create({
     color: '#888',
     textAlign: 'center',
   },
-  
+
   // Memo styles
   memoSection: {
     marginVertical: 10,
   },
-  memoContainer: {
-    width: width - 30,
-    marginRight: 10,
-  },
-  memoCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    borderRadius: 10,
-    marginBottom: 8,
-  },
   memoTopRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-  },
-  memoImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 6,
-    marginRight: 8,
   },
   memoTextContainer: {
     flex: 1,
@@ -1587,30 +1622,10 @@ const styles = StyleSheet.create({
     color: '#888',
     textAlign: 'center',
   },
-  
+
   // Message styles
   messageSection: {
     marginVertical: 10,
-  },
-  messageContainer: {
-    width: width - 30,
-    marginRight: 10,
-  },
-  messageCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    borderRadius: 10,
-    marginBottom: 8,
-  },
-  messageTopRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  messageImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 6,
-    marginRight: 8,
   },
   messageTextContainer: {
     flex: 1,
@@ -1643,10 +1658,11 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   messageAuthorContainer: {
-    backgroundColor: '#e8f4fd',
+    backgroundColor: '#ffffffff',
     padding: 8,
-    borderRadius: 6,
-    marginTop: 4,
+    paddingLeft: 4,
+    borderRadius: 2,
+    marginTop: 6,
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'wrap',
