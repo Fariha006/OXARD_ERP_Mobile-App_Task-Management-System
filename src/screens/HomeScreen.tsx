@@ -1147,7 +1147,7 @@ const styles = StyleSheet.create({
     //   shadowOpacity: 0.1,
     //   shadowRadius: 4,
     //   elevation: 5,
-    width: width - 10, // fixed width for horizontal cards
+    width: width -10, // fixed width for horizontal cards
     marginRight: 8,
     padding: 10,
     paddingLeft: 20,
@@ -1208,11 +1208,12 @@ const styles = StyleSheet.create({
   },
   circularContainer: {
     backgroundColor: '#fde8e5',
-    width: width - 10,
+    width: width -10,
     marginRight: 8,
     padding: 10,
-    paddingLeft: 20,
+    paddingLeft: 20,    
     borderRadius: 10,
+
   },
   circularCard: {
     flexDirection: 'row',
@@ -1274,9 +1275,10 @@ const styles = StyleSheet.create({
   },
   announcementContainer: {
     backgroundColor: '#ffdcf1ff',
-    width: width - 10,
+    width: width -10,
     marginRight: 8,
     padding: 10,
+    borderRadius: 10,
     paddingLeft: 20,
   },
   announcementCard: {
@@ -1314,9 +1316,10 @@ const styles = StyleSheet.create({
   },
   bannerContainer: {
     backgroundColor: '#e9dcf1ff',
-    width: width - 10,
+    width: width -10,
     marginRight: 8,
     padding: 10,
+    borderRadius: 10,
     paddingLeft: 20,
   },
   bannerTextContainer: {
@@ -1344,9 +1347,10 @@ const styles = StyleSheet.create({
   },
   memoContainer: {
     backgroundColor: '#d2f4f6ff',
-    width: width - 10,
+    width: width -10,
     marginRight: 8,
     padding: 10,
+    borderRadius: 10,
     paddingLeft: 20,
   },
   memoImage: {
@@ -1360,10 +1364,11 @@ const styles = StyleSheet.create({
   },
   messageContainer: {
     backgroundColor: '#f5f3d7ff',
-    width: width - 10,
+    width: width -10,
     marginRight: 8,
     padding: 10,
     paddingLeft: 20,
+    borderRadius: 10,
     marginBottom: 18,
   },
   messageCard: {
