@@ -562,18 +562,19 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                      </Text>
                    </View>
                    <View style={styles.savedLeaveActions}>
-                     <TouchableOpacity 
-                       style={styles.editButton} 
-                       onPress={() => handleEditLeave(leave)}
-                     >
-                       <Text style={styles.editButtonText}>Edit</Text>
+
+                    <View style={styles.editButtonContainer}>
+                     <TouchableOpacity style={styles.editButton} onPress={() => handleEditLeave(leave)}>
+                        <Text style={styles.editIcon}>✏️</Text>
                      </TouchableOpacity>
-                     <TouchableOpacity 
-                       style={styles.removeButton} 
-                       onPress={() => handleRemoveLeave(leave.id)}
-                     >
-                       <Text style={styles.removeButtonText}>Remove</Text>
-                     </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.editButtonContainer}>
+                      <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveLeave(leave.id)}>
+                        {/* <Text style={styles.removeButtonText}>Remove</Text> */}
+                          <Text style={styles.editIcon}>✏️</Text>
+                      </TouchableOpacity>
+                    </View>
                    </View>
                  </View>
                ))}
@@ -1097,11 +1098,25 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     gap: 8,
   },
+  editButtonContainer: {
+    alignItems: 'flex-end',
+    marginTop: 10,
+    paddingRight: 10,
+  },
   editButton: {
-    backgroundColor: '#133F7C',
-    paddingVertical: 4,
+    padding: 8,
     paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 4,
+    backgroundColor: '#bdd8fdff',
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
   },
   editButtonText: {
     color: '#fff',
@@ -1135,6 +1150,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  editIcon: {
+    fontSize: 16,
   },
 });
 

@@ -140,7 +140,7 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
                 {/* {item.EditFlag === true && ( */}
                   <View style={styles.editButtonContainer}>
                     <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('LeaveRequest', { editData: item })}>
-                      <Text style={styles.editButtonText}>Edit</Text>
+                      <Text style={styles.editIcon}>✏️</Text>
                     </TouchableOpacity>
                   </View>
                 {/* )} */}
@@ -329,18 +329,26 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   editButtonContainer: {
-    marginTop: 10,
     alignItems: 'flex-end',
+    marginTop: 10,
+    paddingRight: 10,
   },
   editButton: {
+    padding: 8,
+    paddingHorizontal: 12,
     paddingVertical: 6,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    borderWidth: .5,
-    borderColor: '#90a4c3ff',
+    borderRadius: 4,
+    backgroundColor: '#bdd8fdff',
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
   },
-  editButtonText: {
-    color: '#133F7C',
-    fontSize: 12,
+  editIcon: {
+    fontSize: 16,
   },
 });
