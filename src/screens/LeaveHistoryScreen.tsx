@@ -87,8 +87,19 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
             <TouchableOpacity style={[styles.accordionHeader, openIndexes.includes(idx) ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
               onPress={() => toggleAccordion(idx)}>
               <View style={styles.hdrltficn}>
-                <Image source={require('../../assets/images/innerpage/leaverqst.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
-                <Text style={styles.accordionTitle}>{item.ReferenceNo} {item.StrTransactionDate}</Text>
+                <View style={styles.iconanddetail}>
+                  <Image source={require('../../assets/images/innerpage/leaverqst.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
+                  <Text style={styles.accordionTitle}>{item.ReferenceNo} {item.StrTransactionDate}</Text>
+                </View>
+                <View>
+                  <Text style={[
+                    styles.accordionStatus,
+                    item.ApprovalStatus === 'Pending' && styles.statusPending,
+                    item.ApprovalStatus === 'Progress' && styles.statusProgress,
+                    item.ApprovalStatus === 'Approved' && styles.statusApproved,
+                    item.ApprovalStatus === 'Rejected' && styles.statusRejected,
+                  ]}>{item.ApprovalStatus || 'N/A'}</Text>
+                </View>
               </View>
               {/* <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text> */}
             </TouchableOpacity>
@@ -126,6 +137,13 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
                   <Text style={styles.lbl}>Off or Holidays:</Text>
                   <Text style={styles.vlue}>{item['Off Day Count']}</Text>
                 </View>
+                {/* {item.EditFlag === true && ( */}
+                  <View style={styles.editButtonContainer}>
+                    <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('LeaveRequest', { editData: item })}>
+                      <Text style={styles.editButtonText}>Edit</Text>
+                    </TouchableOpacity>
+                  </View>
+                {/* )} */}
               </View>
             )}
           </View>
@@ -184,6 +202,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    width: '100%',
+  },
+  iconanddetail: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   ltficn: {
     width: 15,
@@ -192,6 +216,14 @@ const styles = StyleSheet.create({
   star: {
     width: 20,
     height: 22,
+  },
+  headerContent: {
+    marginLeft: 5,
+  },
+  approvalStatus: {
+    fontSize: 10,
+    color: 'gray',
+    marginTop: 2,
   },
   accordionHeader: {
     flexDirection: 'row',
@@ -209,9 +241,25 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
   },
   accordionTitle: {
-    marginLeft: 5,
     fontSize: 12,
     fontWeight: '600',
+  },
+  accordionStatus: {
+    fontSize: 11,
+    marginLeft: 5,
+    color: 'gray',
+  },
+  statusPending: {
+    color: '#DAA520', // Dark yellow
+  },
+  statusProgress: {
+    color: '#FF8C00', // Orange
+  },
+  statusApproved: {
+    color: '#228B22', // Green
+  },
+  statusRejected: {
+    color: '#DC143C', // Red
   },
   accordionContent: {
     marginTop: 1,
@@ -277,6 +325,21 @@ const styles = StyleSheet.create({
     borderColor: '#90a4c3ff',
   },
   newRequestButtonText: {
+    color: '#133F7C',
+    fontSize: 12,
+  },
+  editButtonContainer: {
+    marginTop: 10,
+    alignItems: 'flex-end',
+  },
+  editButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    borderWidth: .5,
+    borderColor: '#90a4c3ff',
+  },
+  editButtonText: {
     color: '#133F7C',
     fontSize: 12,
   },

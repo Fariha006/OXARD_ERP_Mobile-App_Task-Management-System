@@ -3,12 +3,12 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaVi
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { getMesseges, fetchMessageCategories, fetchSelectTypes, saveMessage, fetchMessageForEdit, fetchLeaveData, calculateLeaveDays, saveLeaveRequest, saveAllLeaves } from '../api/api';
+import { getMesseges, fetchMessageCategories, fetchSelectTypes, saveMessage, fetchMessageForEdit, fetchLeaveData, calculateLeaveDays, saveLeaveRequest, saveAllLeaves, fetchLeaveEditData } from '../api/api';
 import UserStorage from '../utils/userStorage';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'LeaveRequest'>;
 
-export default function LeaveRequestScreen({ navigation }: Props) {
+export default function LeaveRequestScreen({ navigation, route }: Props) {
   const [leaveReferenceNo, setLeaveReferenceNo] = useState('LR-2024-001');
   const [requestDate, setRequestDate] = useState('');
   const [rejoinStatus, setRejoinStatus] = useState('OPEN');
@@ -32,6 +32,64 @@ export default function LeaveRequestScreen({ navigation }: Props) {
   const [validationMessage, setValidationMessage] = useState('');
   const [showValidationMessage, setShowValidationMessage] = useState(false);
   const [isSavingAll, setIsSavingAll] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editData, setEditData] = useState<any>(null);
+
+  // Check if we're in edit mode and populate form with edit data
+  useEffect(() => {
+    if (route.params?.editData) {
+      const data = route.params.editData;
+      setEditData(data);
+      setIsEditMode(true);
+      
+      // Populate form fields with edit data
+      setLeaveReferenceNo(data.ReferenceNo || '');
+      setRequestDate(data.StrTransactionDate || '');
+      setRejoinStatus(data.StrLeaveType || 'OPEN');
+      setRemarks(data.Remarks || '');
+      // setStartDate(data.StrTransactionDateFrom || '');
+      // setEndDate(data.StrTransactionDateTo || '');
+      // setLeaveDays(data['Leave Count']?.toString() || '0');
+      // setHolidays(data['Off Day Count']?.toString() || '0');
+      
+      console.log('Edit mode activated with data:', data);
+      
+      // Fetch detailed leave data for editing
+      fetchDetailedLeaveData(data.LeaveRegisterId);
+    }
+  }, [route.params]);
+
+  // Function to fetch detailed leave data for editing
+  const fetchDetailedLeaveData = async (leaveRegisterId: string) => {
+    try {
+      const token = await UserStorage.getToken();
+      if (token && leaveRegisterId) {
+        console.log('Fetching detailed leave data for LeaveRegisterId:', leaveRegisterId);
+        const response = await fetchLeaveEditData(token, leaveRegisterId);
+        console.log('Detailed leave data response:', response);
+        
+        if (response && response.Da5011List && Array.isArray(response.Da5011List)) {
+          // Map the Da5011List data to savedLeaves format
+          const mappedLeaves = response.Da5011List.map((item: any) => ({
+            id: item.LeaveRegisterDtlsId?.toString() || '',
+            leaveType: item.PayHeadName || '',
+            startDate:  item.StrLeaveStartDate || '',
+            endDate: item.StrLeaveEndDate || '',
+            leaveDays: item.DayCount?.toString() || '0',
+            holidays: item.offCount?.toString() || '0',
+            payHeadId: item.FkPayHeadId || 0,
+            startHD: item.HalfDayStartDate === 1,
+            endHD: item.HalfDayEndDate === 1
+          }));
+          
+          setSavedLeaves(mappedLeaves);
+          console.log('Mapped leaves for editing:', mappedLeaves);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching detailed leave data:', error);
+    }
+  };
 
   // Debug: Log when isCalculating changes
   useEffect(() => {
@@ -73,6 +131,7 @@ export default function LeaveRequestScreen({ navigation }: Props) {
     setLeaveDays('0');
     setHolidays('0');
     setIsCalculating(false);
+    setEditingLeaveId(null);
   };
 
   const handleStartDateChange = (event: any, selectedDate?: Date) => {
@@ -199,12 +258,15 @@ export default function LeaveRequestScreen({ navigation }: Props) {
   };
 
   const handleSaveLeave = async () => {
-    const validationError = validateLeaveData();
-    if (validationError) {
-      setValidationMessage(validationError);
-      setShowValidationMessage(true);
-      setTimeout(() => setShowValidationMessage(false), 3000);
-      return;
+    // Skip validation if we're updating an existing leave (editingLeaveId is set)
+    if (!editingLeaveId) {
+      const validationError = validateLeaveData();
+      if (validationError) {
+        setValidationMessage(validationError);
+        setShowValidationMessage(true);
+        setTimeout(() => setShowValidationMessage(false), 3000);
+        return;
+      }
     }
 
     setIsSaving(true);
@@ -232,9 +294,8 @@ export default function LeaveRequestScreen({ navigation }: Props) {
         if (result?.Table && result.Table.length > 0) {
           const response = result.Table[0];
           if (response.RequestStatus === 'Success') {
-            // Add to saved leaves list
-            const newLeave = {
-              id: Date.now().toString(),
+            const updatedLeave = {
+              id: editingLeaveId || Date.now().toString(),
               leaveType: leaveData?.Item2?.find((item: any) => item.PayheadId === selectedLeaveType)?.PayHeadName,
               startDate: startDate,
               endDate: endDate,
@@ -244,7 +305,19 @@ export default function LeaveRequestScreen({ navigation }: Props) {
               endHD: endHD,
               payHeadId: selectedLeaveType
             };
-            setSavedLeaves([...savedLeaves, newLeave]);
+
+            // Update existing leave or add new one
+            if (editingLeaveId) {
+              // Update existing leave
+              setSavedLeaves(savedLeaves.map(leave => 
+                leave.id === editingLeaveId ? updatedLeave : leave
+              ));
+              setValidationMessage('Leave updated successfully!');
+            } else {
+              // Add new leave
+              setSavedLeaves([...savedLeaves, updatedLeave]);
+              setValidationMessage('Leave request saved successfully!');
+            }
             
             // Reset form
             setSelectedLeaveType(null);
@@ -255,8 +328,8 @@ export default function LeaveRequestScreen({ navigation }: Props) {
             setLeaveDays('0');
             setHolidays('0');
             setLeaveDropdownOpen(false);
+            setEditingLeaveId(null);
             
-            setValidationMessage('Leave request saved successfully!');
             setShowValidationMessage(true);
             setTimeout(() => setShowValidationMessage(false), 3000);
             
@@ -278,6 +351,8 @@ export default function LeaveRequestScreen({ navigation }: Props) {
       setIsSaving(false);
     }
   };
+
+  const [editingLeaveId, setEditingLeaveId] = useState<string | null>(null);
 
   const handleEditLeave = async (leave: any) => {
     // Fetch leave data if not already available
@@ -301,6 +376,9 @@ export default function LeaveRequestScreen({ navigation }: Props) {
     setEndHD(leave.endHD);
     setLeaveDays(leave.leaveDays);
     setHolidays(leave.holidays);
+    
+    // Store the leave ID being edited
+    setEditingLeaveId(leave.id);
     
     // Open the popup
     setPopupVisible(true);
@@ -398,7 +476,7 @@ export default function LeaveRequestScreen({ navigation }: Props) {
           </View>
         </TouchableOpacity>
         <View style={styles.pagewrap}>
-          <Text style={styles.pagetitle}>Leave Request</Text>
+          <Text style={styles.pagetitle}>{isEditMode ? 'Edit Leave Request' : 'Leave Request'}</Text>
         </View>
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
@@ -535,12 +613,14 @@ export default function LeaveRequestScreen({ navigation }: Props) {
 
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Leave Request Details</Text>
-              <TouchableOpacity onPress={handlePopupClose}>
-                <Text style={styles.closeButton}>✕</Text>
-              </TouchableOpacity>
-            </View>
+                         <View style={styles.modalHeader}>
+               <Text style={styles.modalTitle}>
+                 {editingLeaveId ? 'Edit Leave Details' : 'Leave Request Details'}
+               </Text>
+               <TouchableOpacity onPress={handlePopupClose}>
+                 <Text style={styles.closeButton}>✕</Text>
+               </TouchableOpacity>
+             </View>
             
             <ScrollView style={styles.modalBody}>
               <View style={styles.popupContent}>
@@ -675,17 +755,19 @@ export default function LeaveRequestScreen({ navigation }: Props) {
 
             {/* Modal Buttons */}
             <View style={styles.modalButtons}>
-              <TouchableOpacity 
-                style={[styles.saveButton, isSaving && styles.disabledButton]} 
-                onPress={handleSaveLeave}
-                disabled={isSaving}
-              >
-                {isSaving ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Text style={styles.saveButtonText}>Save</Text>
-                )}
-              </TouchableOpacity>
+                             <TouchableOpacity 
+                 style={[styles.saveButton, isSaving && styles.disabledButton]} 
+                 onPress={handleSaveLeave}
+                 disabled={isSaving}
+               >
+                 {isSaving ? (
+                   <ActivityIndicator size="small" color="#fff" />
+                 ) : (
+                   <Text style={styles.saveButtonText}>
+                     {editingLeaveId ? 'Update' : 'Save'}
+                   </Text>
+                 )}
+               </TouchableOpacity>
               <TouchableOpacity style={styles.cancelButton} onPress={handlePopupClose}>
                 <Text style={styles.cancelButtonText}>Close</Text>
               </TouchableOpacity>

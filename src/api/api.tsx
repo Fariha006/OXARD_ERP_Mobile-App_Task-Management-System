@@ -976,3 +976,23 @@ export async function saveAllLeaves(token: string, leaveData: any) {
     throw error;
   }
 }
+
+export async function fetchLeaveEditData(token: string, leaveRegisterId: string) {
+  try {
+    const apiurl = getApiUrl('/api/MobDa5010/SE_Mode');
+    const requestBody = {
+      "LeaveRegisterId": leaveRegisterId
+    };
+    const response = await axios.post<any>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Fetch Leave Edit Data API Error:', error);
+    throw error;
+  }
+}
