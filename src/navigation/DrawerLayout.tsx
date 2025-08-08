@@ -25,6 +25,7 @@ import ApprovalsScreen from '../screens/ApprovalsScreen';
 import LeaveOutstandingScreen from '../screens/LeaveOutstandingScreen';
 import EmployeeDirectoryScreen from '../screens/EmployeeDirectoryScreen';
 import MessegeScreen from '../screens/MessegeScreen';
+import LeaveRequestScreen from '../screens/LeaveRequestScreen';
 
 const Stack = createStackNavigator();
 
@@ -179,6 +180,13 @@ const InnerStack = () => (
         <Stack.Screen
           name="Messege"
           component={MessegeScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
+        <Stack.Screen
+          name="LeaveRequest"
+          component={LeaveRequestScreen}
           options={({ navigation, route }) => ({
             header: () => <Header navigation={navigation} route={route} />
           })}

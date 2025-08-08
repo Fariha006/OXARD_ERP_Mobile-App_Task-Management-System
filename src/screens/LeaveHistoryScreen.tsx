@@ -72,6 +72,14 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
         </View>
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
+      
+      {/* New Request Button */}
+      <View style={styles.newRequestContainer}>
+        <TouchableOpacity style={styles.newRequestButton} onPress={() => navigation.navigate('LeaveRequest')}>
+          <Text style={styles.newRequestButtonText}>New Request</Text>
+        </TouchableOpacity>
+      </View>
+      
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {data.length === 0 && <Text style={styles.lbl}>No data found.</Text>}
         {data.map((item, idx) => (
@@ -254,5 +262,22 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#FF0000',
     textAlign: 'center',
+  },
+  newRequestContainer: {
+    alignItems: 'flex-end',
+    marginTop: 10,
+    marginBottom: 10,
+    paddingRight: 16,
+  },
+  newRequestButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    borderWidth: .5,
+    borderColor: '#90a4c3ff',
+  },
+  newRequestButtonText: {
+    color: '#133F7C',
+    fontSize: 12,
   },
 });

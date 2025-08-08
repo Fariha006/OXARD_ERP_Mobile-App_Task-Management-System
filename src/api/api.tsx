@@ -901,3 +901,78 @@ export async function fetchMessageForEdit(token: string, notificationId: string)
     throw error;
   }
 }
+
+export async function fetchLeaveData(token: string) {
+  try {
+    const apiurl = getApiUrl('/api/MobDa5010/LO_Mode');
+    const requestBody = {};
+    const response = await axios.post<any>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Fetch Leave Data API Error:', error);
+    throw error;
+  }
+}
+
+export async function calculateLeaveDays(token: string, startDate: string, endDate: string, halfDayStart: boolean, halfDayEnd: boolean) {
+  try {
+    const apiurl = getApiUrl('/api/MobDa5010/V1_Mode');
+    const requestBody = {
+      "startdate": startDate,
+      "enddate": endDate,
+      "halfdaystartdate": halfDayStart.toString(),
+      "halfdayenddate": halfDayEnd.toString()
+    };
+    const response = await axios.post<any>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Calculate Leave Days API Error:', error);
+    throw error;
+  }
+}
+
+export async function saveLeaveRequest(token: string, leaveData: any) {
+  try {
+    const apiurl = getApiUrl('/api/MobDa5010/V2_Mode');
+    const response = await axios.post<any>(apiurl, leaveData, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Save Leave Request API Error:', error);
+    throw error;
+  }
+}
+
+export async function saveAllLeaves(token: string, leaveData: any) {
+  try {
+    const apiurl = getApiUrl('/api/MobDa5010/I_U_D_Mode');
+    const response = await axios.post<any>(apiurl, leaveData, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Save All Leaves API Error:', error);
+    throw error;
+  }
+}
