@@ -548,31 +548,37 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
           {/* Saved Leaves List */}
           {savedLeaves.length > 0 && (
             <View style={styles.savedLeavesContainer}>
-              <Text style={styles.savedLeavesTitle}>Saved Leaves</Text>
+              {/* <Text style={styles.savedLeavesTitle}>Saved Leaves</Text> */}
               {savedLeaves.map((leave, index) => (
                 <View key={leave.id} style={styles.savedLeaveItem}>
-                  <View style={styles.savedLeaveInfo}>
-                    <Text style={styles.savedLeaveType}>{leave.leaveType}</Text>
-                    <Text style={styles.savedLeaveDates}>
-                      {leave.startDate} - {leave.endDate}
-                    </Text>
-                    <Text style={styles.savedLeaveDetails}>
-                      Days: {leave.leaveDays} | Holidays: {leave.holidays}
-                      {leave.startHD && ' | Start HD'} {leave.endHD && ' | End HD'}
-                    </Text>
-                  </View>
-                  <View style={styles.savedLeaveActions}>
-
-                    <View style={styles.editButtonContainer}>
-                      <TouchableOpacity style={styles.editButton} onPress={() => handleEditLeave(leave)}>
-                        <Text style={styles.editIcon}>✏️</Text>
-                      </TouchableOpacity>
+                  <View style={styles.savedleaveicon}>
+                    <View style={styles.leaviconview}>
+                      <Image source={require('../../assets/images/completed.png')} style={styles.leavicon} resizeMode="contain" />
                     </View>
+                    <View>
+                      <View style={styles.savedLeaveInfo}>
+                        <Text style={styles.savedLeaveType}>{leave.leaveType}</Text>
+                        <Text style={styles.savedLeaveDates}>
+                          {leave.startDate} - {leave.endDate}
+                        </Text>
+                        <Text style={styles.savedLeaveDetails}>
+                          Days: {leave.leaveDays} | Holidays: {leave.holidays}
+                          {leave.startHD && ' | Start HD'} {leave.endHD && ' | End HD'}
+                        </Text>
+                      </View>
+                      <View style={styles.savedLeaveActions}>
+                        <View style={styles.editButtonContainer}>
+                          <TouchableOpacity style={styles.editButton} onPress={() => handleEditLeave(leave)}>
+                            <Text style={styles.editIcon}>✏️</Text>
+                          </TouchableOpacity>
+                        </View>
 
-                    <View style={styles.editButtonContainer}>
-                      <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveLeave(leave.id)}>
-                        <Text style={[styles.editIcon, { color: 'red' }]}>🗑️</Text>
-                      </TouchableOpacity>
+                        <View style={styles.editButtonContainer}>
+                          <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveLeave(leave.id)}>
+                            <Text style={[styles.editIcon, { color: 'red' }]}>🗑️</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
                     </View>
                   </View>
                 </View>
@@ -1069,7 +1075,10 @@ const styles = StyleSheet.create({
   savedLeavesContainer: {
     marginTop: 20,
     padding: 16,
-    backgroundColor: '#f8f9fa',
+    paddingTop: 6,
+    paddingLeft: 6,
+    paddingRight: 6,
+    backgroundColor: '#eff7ffff',
     borderRadius: 8,
   },
   savedLeavesTitle: {
@@ -1079,12 +1088,24 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   savedLeaveItem: {
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffffff',
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
     borderWidth: 1,
     borderColor: '#e9ecef',
+  },
+  savedleaveicon: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+  },
+  leaviconview: {
+    marginRight: 8,
+  },
+  leavicon: {
+    width: 20,
+    height:20,
   },
   savedLeaveInfo: {
     marginBottom: 8,
@@ -1108,6 +1129,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: 8,
+    width: '100%',
+    paddingRight: 20,
   },
   editButtonContainer: {
     alignItems: 'flex-end',
@@ -1115,9 +1138,9 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   editButton: {
-    padding: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    padding: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 4,
     backgroundColor: '#bdd8fdff',
     flexDirection: 'row',
@@ -1135,11 +1158,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   removeButton: {
-    padding: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    padding: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 4,
-    backgroundColor: '#fce2e5ff',
+    backgroundColor: '#ffecefff',
     flexDirection: 'row',
     alignItems: 'center',
 
@@ -1172,7 +1195,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   editIcon: {
-    fontSize: 16,
+    fontSize: 12,
   },
 
 

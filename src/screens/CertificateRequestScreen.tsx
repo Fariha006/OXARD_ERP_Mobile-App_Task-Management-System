@@ -411,10 +411,17 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                   <Text style={styles.vlue}>{item.ApprovalStatus}</Text>
                 </View>
                 {item.ApprovalStatus === 'Pending' && (
-                  <View style={styles.editButtonContainer}>
-                    <TouchableOpacity style={styles.editButton} onPress={() => handleEditRequest(item)}>
-                      <Text style={styles.editIcon}>✏️</Text>
-                    </TouchableOpacity>
+                  <View style={styles.savedLeaveActions}>
+                    <View style={styles.editButtonContainer}>
+                      <TouchableOpacity style={styles.editButton} onPress={() => handleEditRequest(item)}>
+                        <Text style={styles.editIcon}>✏️</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.editButtonContainer}>
+                      <TouchableOpacity style={styles.removeButton}>
+                        <Text style={[styles.editIcon, { color: 'red' }]}>🗑️</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 )}
               </View>
@@ -763,7 +770,6 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     marginBottom: 15,
-    backgroundColor: 'red',
   },
   inputLabel: {
     fontSize: 15,
@@ -817,7 +823,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#133F7C',
   },
-  dropdownListwrap:{
+  dropdownListwrap: {
     padding: 5,
     paddingTop: 2,
   },
@@ -856,10 +862,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  removeButton: {
+    padding: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    backgroundColor: '#ffecefff',
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+  },
   editButton: {
-    padding: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    padding: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 4,
     backgroundColor: '#bdd8fdff',
     flexDirection: 'row',
@@ -872,7 +893,12 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   editIcon: {
-    fontSize: 16,
+    fontSize: 12,
+  },
+  savedLeaveActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
   },
   editButtonContainer: {
     alignItems: 'flex-end',

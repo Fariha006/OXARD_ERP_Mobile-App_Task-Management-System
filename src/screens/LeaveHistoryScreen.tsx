@@ -348,9 +348,9 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   editButton: {
-    padding: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    padding: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 4,
     backgroundColor: '#bdd8fdff',
     flexDirection: 'row',
@@ -363,9 +363,9 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   removeButton: {
-    padding: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    padding: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 4,
     backgroundColor: '#fce2e5ff',
     flexDirection: 'row',
@@ -378,6 +378,6 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   editIcon: {
-    fontSize: 16,
+    fontSize: 12,
   },
 });
