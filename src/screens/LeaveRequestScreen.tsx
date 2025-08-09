@@ -44,7 +44,13 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
 
       // Populate form fields with edit data
       setLeaveReferenceNo(data.ReferenceNo || '');
-      setRequestDate(data.StrTransactionDate || '');
+      // Convert date to YYYY-MM-DD format for internal consistency
+      if (data.StrTransactionDate) {
+        const parsedDate = parseDateString(data.StrTransactionDate);
+        setRequestDate(parsedDate.toISOString().split('T')[0]);
+      } else {
+        setRequestDate('');
+      }
       setRejoinStatus(data.StrLeaveType || 'OPEN');
       setRemarks(data.Remarks || '');
       // setStartDate(data.StrTransactionDateFrom || '');
@@ -96,10 +102,55 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
     console.log('isCalculating changed to:', isCalculating);
   }, [isCalculating]);
 
+  // Helper function to parse various date formats
+  const parseDateString = (dateString: string): Date => {
+    if (!dateString) return new Date();
+    
+    // Try standard Date parsing first (YYYY-MM-DD, etc.)
+    let parsedDate = new Date(dateString);
+    
+    // If standard parsing fails, try custom formats
+    if (isNaN(parsedDate.getTime())) {
+      // Check if it's in DD-MMM YYYY format (e.g., "09-Aug 2025")
+      const ddMmmYyyyMatch = dateString.match(/^(\d{1,2})-([A-Za-z]{3})\s+(\d{4})$/);
+      if (ddMmmYyyyMatch) {
+        const [, day, monthStr, year] = ddMmmYyyyMatch;
+        const monthMap: { [key: string]: number } = {
+          'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+          'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+        };
+        const month = monthMap[monthStr];
+        if (month !== undefined) {
+          parsedDate = new Date(parseInt(year), month, parseInt(day));
+        }
+      }
+      
+      // Check if it's in DD-MMM-YYYY format (e.g., "09-Aug-2025")
+      if (isNaN(parsedDate.getTime())) {
+        const ddMmmYyyyDashMatch = dateString.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
+        if (ddMmmYyyyDashMatch) {
+          const [, day, monthStr, year] = ddMmmYyyyDashMatch;
+          const monthMap: { [key: string]: number } = {
+            'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+            'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+          };
+          const month = monthMap[monthStr];
+          if (month !== undefined) {
+            parsedDate = new Date(parseInt(year), month, parseInt(day));
+          }
+        }
+      }
+    }
+    
+    // If all parsing attempts fail, return current date
+    return isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
+  };
+
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setShowDatePicker(Platform.OS === 'ios');
     if (selectedDate) {
-      setRequestDate(selectedDate.toISOString().split('T')[0]); // Format as YYYY-MM-DD
+      // Store in YYYY-MM-DD format for internal consistency
+      setRequestDate(selectedDate.toISOString().split('T')[0]);
     }
   };
 
@@ -203,13 +254,28 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
     }
   };
 
+  // const formatDateForAPI = (dateString: string): string => {
+  //    const [day, monthStr, year] = dateStr.split("-");
+  //   const date = new Date(dateString);
+  //   const day = date.getDate().toString().padStart(2, '0');
+  //   const month = date.toLocaleString('en', { month: 'short' });
+  //   const year = date.getFullYear();
+  //   return `${day}-${month}-${year}`;
+  // };
   const formatDateForAPI = (dateString: string): string => {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = date.toLocaleString('en', { month: 'short' });
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
+    const [days, monthStr, years] = dateString.split("-");
+    if(monthStr.length == 3){
+      return dateString;
+    }
+    else{
+   const date = new Date(dateString);
+   const day = date.getDate().toString().padStart(2, '0');
+   const month = date.toLocaleString('en', { month: 'short' });
+   const year = date.getFullYear();
+   return `${day}-${month}-${year}`;
+ }
+};
+
 
   const showStartDatePickerModal = () => {
     setShowStartDatePicker(true);
@@ -389,6 +455,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
   };
 
   const handleSaveAllLeaves = async () => {
+    debugger;
     if (savedLeaves.length === 0) {
       setValidationMessage('No leaves to save');
       setShowValidationMessage(true);
@@ -504,7 +571,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
             </TouchableOpacity>
             {showDatePicker && (
               <DateTimePicker
-                value={requestDate ? new Date(requestDate) : new Date()}
+                value={requestDate ? parseDateString(requestDate) : new Date()}
                 mode="date"
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                 onChange={handleDateChange}
@@ -668,7 +735,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                   </TouchableOpacity>
                   {showStartDatePicker && (
                     <DateTimePicker
-                      value={startDate ? new Date(startDate) : new Date()}
+                      value={startDate ? parseDateString(startDate) : new Date()}
                       mode="date"
                       display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                       onChange={handleStartDateChange}
@@ -687,7 +754,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                   </TouchableOpacity>
                   {showEndDatePicker && (
                     <DateTimePicker
-                      value={endDate ? new Date(endDate) : new Date()}
+                      value={endDate ? parseDateString(endDate) : new Date()}
                       mode="date"
                       display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                       onChange={handleEndDateChange}
