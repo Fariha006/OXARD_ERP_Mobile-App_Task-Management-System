@@ -72,14 +72,14 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
         </View>
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
-
+      
       {/* New Request Button */}
       <View style={styles.newRequestContainer}>
         <TouchableOpacity style={styles.newRequestButton} onPress={() => navigation.navigate('LeaveRequest')}>
           <Text style={styles.newRequestButtonText}>New Request</Text>
         </TouchableOpacity>
       </View>
-
+      
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {data.length === 0 && <Text style={styles.lbl}>No data found.</Text>}
         {data.map((item, idx) => (
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 4,
   },
-  removeButton: {
+    removeButton: {
     padding: 6,
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -361,7 +361,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fce2e5ff',
     flexDirection: 'row',
     alignItems: 'center',
-
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
