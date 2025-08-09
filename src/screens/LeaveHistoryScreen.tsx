@@ -72,14 +72,14 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
         </View>
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
-      
+
       {/* New Request Button */}
       <View style={styles.newRequestContainer}>
         <TouchableOpacity style={styles.newRequestButton} onPress={() => navigation.navigate('LeaveRequest')}>
           <Text style={styles.newRequestButtonText}>New Request</Text>
         </TouchableOpacity>
       </View>
-      
+
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {data.length === 0 && <Text style={styles.lbl}>No data found.</Text>}
         {data.map((item, idx) => (
@@ -137,13 +137,22 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
                   <Text style={styles.lbl}>Off or Holidays:</Text>
                   <Text style={styles.vlue}>{item['Off Day Count']}</Text>
                 </View>
-                {/* {item.EditFlag === true && ( */}
+
+
+                <View style={styles.savedLeaveActions}>
+                  {/* {item.EditFlag === true && ( */}
                   <View style={styles.editButtonContainer}>
                     <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('LeaveRequest', { editData: item })}>
                       <Text style={styles.editIcon}>✏️</Text>
                     </TouchableOpacity>
                   </View>
-                {/* )} */}
+                  <View style={styles.editButtonContainer}>
+                    <TouchableOpacity style={styles.removeButton}>
+                      <Text style={[styles.editIcon, { color: 'red' }]}>🗑️</Text>
+                    </TouchableOpacity>
+                  </View>
+                  {/* )} */}
+                </View>
               </View>
             )}
           </View>
@@ -328,6 +337,11 @@ const styles = StyleSheet.create({
     color: '#133F7C',
     fontSize: 12,
   },
+  savedLeaveActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+  },
   editButtonContainer: {
     alignItems: 'flex-end',
     marginTop: 10,
@@ -339,6 +353,21 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 4,
     backgroundColor: '#bdd8fdff',
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  removeButton: {
+    padding: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+    backgroundColor: '#fce2e5ff',
     flexDirection: 'row',
     alignItems: 'center',
 
