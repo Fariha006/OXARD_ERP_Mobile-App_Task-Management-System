@@ -138,13 +138,21 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
                   <Text style={styles.vlue}>{item['Off Day Count']}</Text>
                 </View>
                 {item.EditFlag == 'True' && (
+                <View style={styles.savedLeaveActions}>  
                   <View style={styles.editButtonContainer}>
                     <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('LeaveRequest', { editData: item })}>
                       <Text style={styles.editIcon}>✏️</Text>
                     </TouchableOpacity>
                   </View>
+                  <View style={styles.editButtonContainer}>
+                    <TouchableOpacity style={styles.removeButton}>
+                      <Text style={[styles.editIcon, { color: 'red' }]}>🗑️</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
                 )} 
               </View>
+
             )}
           </View>
         ))}
