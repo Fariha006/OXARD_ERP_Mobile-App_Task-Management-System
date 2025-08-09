@@ -457,8 +457,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                 <Text style={styles.inputLabel}>Requested Date:</Text>
                 <TouchableOpacity
                   style={styles.datePickerButton}
-                  onPress={() => setShowDatePicker(true)}
-                >
+                  onPress={() => setShowDatePicker(true)}>
                   <Text style={styles.datePickerButtonText}>
                     {newRequest.requestedDate.toLocaleDateString()}
                   </Text>
@@ -764,6 +763,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     marginBottom: 15,
+    backgroundColor: 'red',
   },
   inputLabel: {
     fontSize: 15,
