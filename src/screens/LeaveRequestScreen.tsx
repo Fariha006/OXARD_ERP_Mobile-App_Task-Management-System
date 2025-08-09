@@ -41,7 +41,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
       const data = route.params.editData;
       setEditData(data);
       setIsEditMode(true);
-      
+
       // Populate form fields with edit data
       setLeaveReferenceNo(data.ReferenceNo || '');
       setRequestDate(data.StrTransactionDate || '');
@@ -51,9 +51,9 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
       // setEndDate(data.StrTransactionDateTo || '');
       // setLeaveDays(data['Leave Count']?.toString() || '0');
       // setHolidays(data['Off Day Count']?.toString() || '0');
-      
+
       console.log('Edit mode activated with data:', data);
-      
+
       // Fetch detailed leave data for editing
       fetchDetailedLeaveData(data.LeaveRegisterId);
     }
@@ -67,13 +67,13 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
         console.log('Fetching detailed leave data for LeaveRegisterId:', leaveRegisterId);
         const response = await fetchLeaveEditData(token, leaveRegisterId);
         console.log('Detailed leave data response:', response);
-        
+
         if (response && response.Da5011List && Array.isArray(response.Da5011List)) {
           // Map the Da5011List data to savedLeaves format
           const mappedLeaves = response.Da5011List.map((item: any) => ({
             id: item.LeaveRegisterDtlsId?.toString() || '',
             leaveType: item.PayHeadName || '',
-            startDate:  item.StrLeaveStartDate || '',
+            startDate: item.StrLeaveStartDate || '',
             endDate: item.StrLeaveEndDate || '',
             leaveDays: item.DayCount?.toString() || '0',
             holidays: item.offCount?.toString() || '0',
@@ -81,7 +81,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
             startHD: item.HalfDayStartDate === 1,
             endHD: item.HalfDayEndDate === 1
           }));
-          
+
           setSavedLeaves(mappedLeaves);
           console.log('Mapped leaves for editing:', mappedLeaves);
         }
@@ -168,10 +168,10 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
 
   const calculateLeaveDaysAndHolidays = async (start: string, end: string, startHD: boolean, endHD: boolean) => {
     console.log('calculateLeaveDaysAndHolidays called with:', { start, end, startHD, endHD });
-    
+
     // Always set calculating to true when function is called
     setIsCalculating(true);
-    
+
     if (start && end && start <= end) {
       try {
         const token = await UserStorage.getToken();
@@ -179,10 +179,10 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
           // Convert dates to DD-MMM-YYYY format
           const startDateFormatted = formatDateForAPI(start);
           const endDateFormatted = formatDateForAPI(end);
-          
+
           console.log('Calling API with:', { startDateFormatted, endDateFormatted, startHD, endHD });
           const result = await calculateLeaveDays(token, startDateFormatted, endDateFormatted, startHD, endHD);
-          
+
           if (Array.isArray(result) && result.length >= 2) {
             setLeaveDays(result[0].toString());
             setHolidays(result[1].toString());
@@ -235,7 +235,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
     if (parseInt(leaveDays) <= 0) {
       return 'Please select valid dates to calculate leave days';
     }
-    
+
     // Check if start date is greater than previously saved end dates
     if (savedLeaves.length > 0) {
       // Find the latest end date from all saved leaves
@@ -244,16 +244,16 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
         const latestDate = new Date(latest);
         return currentEndDate > latestDate ? leave.endDate : latest;
       }, savedLeaves[0].endDate);
-      
+
       // Compare dates
       const newStartDate = new Date(startDate);
       const latestEnd = new Date(latestEndDate);
-      
+
       if (newStartDate <= latestEnd) {
         return `Start date must be after ${latestEndDate} (last saved leave end date)`;
       }
     }
-    
+
     return null;
   };
 
@@ -309,7 +309,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
             // Update existing leave or add new one
             if (editingLeaveId) {
               // Update existing leave
-              setSavedLeaves(savedLeaves.map(leave => 
+              setSavedLeaves(savedLeaves.map(leave =>
                 leave.id === editingLeaveId ? updatedLeave : leave
               ));
               setValidationMessage('Leave updated successfully!');
@@ -318,7 +318,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
               setSavedLeaves([...savedLeaves, updatedLeave]);
               setValidationMessage('Leave request saved successfully!');
             }
-            
+
             // Reset form
             setSelectedLeaveType(null);
             setStartDate('');
@@ -329,10 +329,10 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
             setHolidays('0');
             setLeaveDropdownOpen(false);
             setEditingLeaveId(null);
-            
+
             setShowValidationMessage(true);
             setTimeout(() => setShowValidationMessage(false), 3000);
-            
+
             // Close the popup after successful save
             setPopupVisible(false);
           } else {
@@ -367,7 +367,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
         console.error('Error fetching leave data for edit:', error);
       }
     }
-    
+
     // Set the form values
     setSelectedLeaveType(leave.payHeadId);
     setStartDate(leave.startDate);
@@ -376,10 +376,10 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
     setEndHD(leave.endHD);
     setLeaveDays(leave.leaveDays);
     setHolidays(leave.holidays);
-    
+
     // Store the leave ID being edited
     setEditingLeaveId(leave.id);
-    
+
     // Open the popup
     setPopupVisible(true);
   };
@@ -402,15 +402,15 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
       if (token) {
         // Calculate total leave days
         const totalLeaveDays = savedLeaves.reduce((sum, leave) => sum + parseInt(leave.leaveDays), 0);
-        
+
         // Get first and last dates
         const sortedLeaves = [...savedLeaves].sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
         const firstStartDate = sortedLeaves[0].startDate;
         const lastEndDate = sortedLeaves[sortedLeaves.length - 1].endDate;
-        
+
         // Get current date in DD-MMM-YYYY format
         const currentDate = formatDateForAPI(new Date().toISOString().split('T')[0]);
-        
+
         const allLeavesData = {
           Mode: "I",
           LeaveRegisterId: "0",
@@ -440,7 +440,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
             setValidationMessage('Leave applied successfully!');
             setShowValidationMessage(true);
             setTimeout(() => setShowValidationMessage(false), 3000);
-            
+
             // Clear saved leaves after successful save
             setSavedLeaves([]);
             setRemarks('');
@@ -481,7 +481,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
 
-             <ScrollView style={styles.scrollContainer}>
+      <ScrollView style={styles.scrollContainer}>
         <View style={styles.formContainer}>
           {/* Leave Reference No */}
           <View style={styles.formGroup}>
@@ -527,82 +527,83 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
           {/* Remarks */}
           <View style={styles.formGroup}>
             <Text style={styles.formLabel}>Remarks</Text>
-                         <TextInput
-               style={[styles.textInput, styles.textArea]}
-               value={remarks}
-               onChangeText={setRemarks}
-               placeholder="Enter remarks"
-               multiline
-               numberOfLines={4}
-               textAlignVertical="top"
-             />
-           </View>
+            <TextInput
+              style={[styles.textInput, styles.textArea]}
+              value={remarks}
+              onChangeText={setRemarks}
+              placeholder="Enter remarks"
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+          </View>
 
-           {/* Select Leaves Button */}
-           <View style={styles.selectLeavesContainer}>
-             <TouchableOpacity style={styles.selectLeavesButton} onPress={handleRightUndoPress}>
-               <Text style={styles.selectLeavesButtonText}>Select Leaves</Text>
-             </TouchableOpacity>
-           </View>
+          {/* Select Leaves Button */}
+          <View style={styles.selectLeavesContainer}>
+            <TouchableOpacity style={styles.selectLeavesButton} onPress={handleRightUndoPress}>
+              <Text style={styles.selectLeavesButtonText}>Select Leaves</Text>
+            </TouchableOpacity>
+          </View>
 
-           {/* Saved Leaves List */}
-           {savedLeaves.length > 0 && (
-             <View style={styles.savedLeavesContainer}>
-               <Text style={styles.savedLeavesTitle}>Saved Leaves</Text>
-               {savedLeaves.map((leave, index) => (
-                 <View key={leave.id} style={styles.savedLeaveItem}>
-                   <View style={styles.savedLeaveInfo}>
-                     <Text style={styles.savedLeaveType}>{leave.leaveType}</Text>
-                     <Text style={styles.savedLeaveDates}>
-                       {leave.startDate} - {leave.endDate}
-                     </Text>
-                     <Text style={styles.savedLeaveDetails}>
-                       Days: {leave.leaveDays} | Holidays: {leave.holidays}
-                       {leave.startHD && ' | Start HD'} {leave.endHD && ' | End HD'}
-                     </Text>
-                   </View>
-                   <View style={styles.savedLeaveActions}>
-                     <TouchableOpacity 
-                       style={styles.editButton} 
-                       onPress={() => handleEditLeave(leave)}
-                     >
-                       <Text style={styles.editButtonText}>Edit</Text>
-                     </TouchableOpacity>
-                     <TouchableOpacity 
-                       style={styles.removeButton} 
-                       onPress={() => handleRemoveLeave(leave.id)}
-                     >
-                       <Text style={styles.removeButtonText}>Remove</Text>
-                     </TouchableOpacity>
-                   </View>
-                 </View>
-               ))}
-               
-               {/* Save All Button */}
-               <View style={styles.saveAllContainer}>
-                 <TouchableOpacity 
-                   style={[styles.saveAllButton, isSavingAll && styles.disabledButton]} 
-                   onPress={handleSaveAllLeaves}
-                   disabled={isSavingAll}
-                 >
-                   {isSavingAll ? (
-                     <ActivityIndicator size="small" color="#fff" />
-                   ) : (
-                     <Text style={styles.saveAllButtonText}>Save All Leaves</Text>
-                   )}
-                 </TouchableOpacity>
-               </View>
-             </View>
-           )}
-         </View>
-       </ScrollView>
+          {/* Saved Leaves List */}
+          {savedLeaves.length > 0 && (
+            <View style={styles.savedLeavesContainer}>
+              <Text style={styles.savedLeavesTitle}>Saved Leaves</Text>
+              {savedLeaves.map((leave, index) => (
+                <View key={leave.id} style={styles.savedLeaveItem}>
+                  <View style={styles.savedLeaveInfo}>
+                    <Text style={styles.savedLeaveType}>{leave.leaveType}</Text>
+                    <Text style={styles.savedLeaveDates}>
+                      {leave.startDate} - {leave.endDate}
+                    </Text>
+                    <Text style={styles.savedLeaveDetails}>
+                      Days: {leave.leaveDays} | Holidays: {leave.holidays}
+                      {leave.startHD && ' | Start HD'} {leave.endHD && ' | End HD'}
+                    </Text>
+                  </View>
+                  <View style={styles.savedLeaveActions}>
 
-       {/* Validation Message for Main Screen */}
-       {showValidationMessage && (
-         <View style={styles.validationContainer}>
-           <Text style={styles.validationText}>{validationMessage}</Text>
-         </View>
-       )}
+                    <View style={styles.editButtonContainer}>
+                      <TouchableOpacity style={styles.editButton} onPress={() => handleEditLeave(leave)}>
+                        <Text style={styles.editIcon}>✏️</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.editButtonContainer}>
+                      <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveLeave(leave.id)}>
+                        {/* <Text style={styles.removeButtonText}>Remove</Text> */}
+                        <Text style={styles.editIcon}>✏️</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              ))}
+
+              {/* Save All Button */}
+              <View style={styles.saveAllContainer}>
+                <TouchableOpacity
+                  style={[styles.saveAllButton, isSavingAll && styles.disabledButton]}
+                  onPress={handleSaveAllLeaves}
+                  disabled={isSavingAll}
+                >
+                  {isSavingAll ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Text style={styles.saveAllButtonText}>Save All Leaves</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+
+      {/* Validation Message for Main Screen */}
+      {showValidationMessage && (
+        <View style={styles.validationContainer}>
+          <Text style={styles.validationText}>{validationMessage}</Text>
+        </View>
+      )}
 
       {/* RightUndo Popup Modal */}
       <Modal
@@ -613,15 +614,15 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
 
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-                         <View style={styles.modalHeader}>
-               <Text style={styles.modalTitle}>
-                 {editingLeaveId ? 'Edit Leave Details' : 'Leave Request Details'}
-               </Text>
-               <TouchableOpacity onPress={handlePopupClose}>
-                 <Text style={styles.closeButton}>✕</Text>
-               </TouchableOpacity>
-             </View>
-            
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {editingLeaveId ? 'Edit Leave Details' : 'Leave Request Details'}
+              </Text>
+              <TouchableOpacity onPress={handlePopupClose}>
+                <Text style={styles.closeButton}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
             <ScrollView style={styles.modalBody}>
               <View style={styles.popupContent}>
                 {/* Leave Type Dropdown */}
@@ -631,8 +632,8 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                     style={styles.dropdown}
                     onPress={() => setLeaveDropdownOpen(!leaveDropdownOpen)}>
                     <Text style={styles.dropdownText}>
-                      {selectedLeaveType !== null && leaveData?.Item2 
-                        ? leaveData.Item2.find((item: any) => item.PayheadId === selectedLeaveType)?.PayHeadName 
+                      {selectedLeaveType !== null && leaveData?.Item2
+                        ? leaveData.Item2.find((item: any) => item.PayheadId === selectedLeaveType)?.PayHeadName
                         : 'Select Leave Type'}
                     </Text>
                     <Text style={styles.dropdownArrow}>▼</Text>
@@ -695,79 +696,79 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                   )}
                 </View>
 
+                <View style={[styles.actionbtnwraper, styles.spcbtwn]}>
+                  <View style={[styles.formGroup, styles.formGroupbtm]}>
+                    <View style={styles.checkboxContainer}>
+                      <Switch
+                        value={startHD}
+                        onValueChange={handleStartHDChange}
+                        trackColor={{ false: '#767577', true: '#133F7C' }}
+                        thumbColor={startHD ? '#fff' : '#f4f3f4'}
+                      />
+                      <Text style={styles.checkboxLabel}>Start HD</Text>
+                    </View>
+                  </View>
+
+                  {/* End HD Checkbox */}
+                  <View style={[styles.formGroup, styles.formGroupbtm]}>
+                    <View style={styles.checkboxContainer}>
+                      <Switch
+                        value={endHD}
+                        onValueChange={handleEndHDChange}
+                        trackColor={{ false: '#767577', true: '#133F7C' }}
+                        thumbColor={endHD ? '#fff' : '#f4f3f4'} />
+                      <Text style={styles.checkboxLabel}>End HD</Text>
+                    </View>
+                  </View>
+                </View>
                 {/* Start HD Checkbox */}
-                <View style={styles.formGroup}>
-                  <View style={styles.checkboxContainer}>
-                    <Switch
-                      value={startHD}
-                      onValueChange={handleStartHDChange}
-                      trackColor={{ false: '#767577', true: '#133F7C' }}
-                      thumbColor={startHD ? '#fff' : '#f4f3f4'}
+
+                <View style={styles.actionbtnwraper}>
+                  {/* Leave Days */}
+                  <View style={[styles.formGroup, styles.marrgt]}>
+                    <Text style={styles.formLabel}>Leave Days</Text>
+                    <TextInput
+                      style={[styles.textInput, styles.readOnlyInput]}
+                      value={leaveDays}
+                      editable={false}
+                      placeholder="Leave Days"
                     />
-                    <Text style={styles.checkboxLabel}>Start HD</Text>
                   </View>
-                </View>
 
-                {/* End HD Checkbox */}
-                <View style={styles.formGroup}>
-                  <View style={styles.checkboxContainer}>
-                    <Switch
-                      value={endHD}
-                      onValueChange={handleEndHDChange}
-                      trackColor={{ false: '#767577', true: '#133F7C' }}
-                      thumbColor={endHD ? '#fff' : '#f4f3f4'}
+                  {/* Loading Indicator */}
+                  {isCalculating && (
+                    <View style={styles.loadingContainer}>
+                      <ActivityIndicator size="small" color="#133F7C" />
+                      <Text style={styles.loadingText}>Calculating leave days...</Text>
+                    </View>
+                  )}
+
+                  {/* Holidays */}
+                  <View style={styles.formGroup}>
+                    <Text style={styles.formLabel}>Holidays</Text>
+                    <TextInput
+                      style={[styles.textInput, styles.readOnlyInput]}
+                      value={holidays}
+                      editable={false}
+                      placeholder="Holidays"
                     />
-                    <Text style={styles.checkboxLabel}>End HD</Text>
                   </View>
-                </View>
-
-                {/* Leave Days */}
-                <View style={styles.formGroup}>
-                  <Text style={styles.formLabel}>Leave Days</Text>
-                  <TextInput
-                    style={[styles.textInput, styles.readOnlyInput]}
-                    value={leaveDays}
-                    editable={false}
-                    placeholder="Leave Days"
-                  />
-                </View>
-
-                {/* Loading Indicator */}
-                {isCalculating && (
-                  <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="small" color="#133F7C" />
-                    <Text style={styles.loadingText}>Calculating leave days...</Text>
-                  </View>
-                )}
-
-                {/* Holidays */}
-                <View style={styles.formGroup}>
-                  <Text style={styles.formLabel}>Holidays</Text>
-                  <TextInput
-                    style={[styles.textInput, styles.readOnlyInput]}
-                    value={holidays}
-                    editable={false}
-                    placeholder="Holidays"
-                  />
                 </View>
               </View>
             </ScrollView>
 
             {/* Modal Buttons */}
             <View style={styles.modalButtons}>
-                             <TouchableOpacity 
-                 style={[styles.saveButton, isSaving && styles.disabledButton]} 
-                 onPress={handleSaveLeave}
-                 disabled={isSaving}
-               >
-                 {isSaving ? (
-                   <ActivityIndicator size="small" color="#fff" />
-                 ) : (
-                   <Text style={styles.saveButtonText}>
-                     {editingLeaveId ? 'Update' : 'Save'}
-                   </Text>
-                 )}
-               </TouchableOpacity>
+              <TouchableOpacity style={[styles.saveButton, isSaving && styles.disabledButton]}
+                onPress={handleSaveLeave} disabled={isSaving}>
+                {isSaving ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.saveButtonText}>
+                    {editingLeaveId ? 'Update' : 'Saves'}
+                  </Text>
+                )}
+              </TouchableOpacity>
               <TouchableOpacity style={styles.cancelButton} onPress={handlePopupClose}>
                 <Text style={styles.cancelButtonText}>Close</Text>
               </TouchableOpacity>
@@ -843,22 +844,42 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  actionbtnwraper: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  spcbtwn: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#DEECFF',
+    borderRadius: 8,
+    padding: 6,
+    marginBottom: 10,
+  },
+  formGroupbtm: {
+    marginBottom: 0,
+  },
+  marrgt: {
+    marginRight: 20,
+  },
   formGroup: {
-    marginBottom: 20,
+    marginBottom: 15,
   },
   formLabel: {
     fontSize: 15,
     color: '#333',
     marginBottom: 5,
-    fontWeight: '600',
   },
   textInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#DEECFF',
     borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#fff',
+    padding: 10,
+    fontSize: 14,
+    color: '#000',
   },
   readOnlyInput: {
     backgroundColor: '#f5f5f5',
@@ -870,56 +891,50 @@ const styles = StyleSheet.create({
   },
   datePicker: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#DEECFF',
     borderRadius: 8,
-    padding: 12,
-    backgroundColor: '#ffffff',
+    padding: 10,
+    backgroundColor: '#FFFFFF',
   },
   datePickerText: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: 14,
+    color: '#000',
   },
   // Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    width: '90%',
-    maxHeight: '80%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    backgroundColor: '#ffffffff',
+    borderRadius: 10,
+    padding: 10,
+    width: '80%',
+    alignItems: 'center',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    width: '100%',
+    marginBottom: 15,
   },
   modalTitle: {
     fontSize: 17,
     color: '#133F7C',
-    fontWeight: '600',
   },
   closeButton: {
     fontSize: 20,
     color: '#930606ff',
   },
   modalBody: {
-    padding: 20,
-    maxHeight: 400,
+    width: '100%',
+    marginBottom: 0,
   },
   popupContent: {
-    paddingVertical: 10,
+    marginBottom: 0,
   },
   popupText: {
     fontSize: 16,
@@ -933,9 +948,11 @@ const styles = StyleSheet.create({
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 20,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: '#d3d3d3ff',
+    marginTop: 0,
+    paddingTop: 10,
+    width:'100%',
   },
   saveButton: {
     backgroundColor: '#133F7C',
@@ -944,10 +961,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   saveButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
   },
   cancelButton: {
     backgroundColor: '#fce2e5ff',
@@ -961,41 +977,40 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   selectLeavesContainer: {
-    alignItems: 'center',
-    marginTop: 20,
+    alignItems: 'flex-end',
+    marginTop: 10,
     marginBottom: 10,
+    paddingRight: 0,
   },
   selectLeavesButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 24,
+    paddingVertical: 6,
+    paddingHorizontal: 20,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#133F7C',
-    backgroundColor: '#133F7C',
+    borderWidth: .5,
+    borderColor: '#90a4c3ff',
   },
   selectLeavesButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+    color: '#133F7C',
+    fontSize: 12,
   },
   dropdown: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#DEECFF',
     borderRadius: 8,
     padding: 10,
+    backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#ffffffff',
   },
   dropdownText: {
-    fontSize: 12,
-    color: '#333',
-    fontWeight: '500',
+    fontSize: 14,
+    color: '#000',
+    flex: 1,
   },
   dropdownArrow: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: 14,
+    color: '#133F7C',
   },
   dropdownListwrap: {
     padding: 5,
@@ -1023,9 +1038,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   checkboxLabel: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#333',
-    marginLeft: 12,
   },
   loadingContainer: {
     flexDirection: 'row',
@@ -1097,11 +1111,25 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     gap: 8,
   },
+  editButtonContainer: {
+    alignItems: 'flex-end',
+    marginTop: 10,
+    paddingRight: 10,
+  },
   editButton: {
-    backgroundColor: '#133F7C',
-    paddingVertical: 4,
+    padding: 8,
     paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 4,
+    backgroundColor: '#bdd8fdff',
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
   },
   editButtonText: {
     color: '#fff',
@@ -1109,10 +1137,19 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   removeButton: {
-    backgroundColor: '#dc3545',
-    paddingVertical: 4,
+    padding: 8,
     paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 4,
+    backgroundColor: '#fce2e5ff',
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
   },
   removeButtonText: {
     color: '#fff',
@@ -1124,17 +1161,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveAllButton: {
-    backgroundColor: '#28a745',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    backgroundColor: '#133F7C',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 8,
-    minWidth: 150,
+    minWidth: 130,
     alignItems: 'center',
   },
   saveAllButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
   },
+  editIcon: {
+    fontSize: 16,
+  },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 });
 
