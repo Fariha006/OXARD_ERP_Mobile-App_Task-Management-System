@@ -551,27 +551,23 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
               {/* <Text style={styles.savedLeavesTitle}>Saved Leaves</Text> */}
               {savedLeaves.map((leave, index) => (
                 <View key={leave.id} style={styles.savedLeaveItem}>
-                  <View style={styles.savedleaveicon}>
-                    <View style={styles.leaviconview}>
-                      <Image source={require('../../assets/images/completed.png')} style={styles.leavicon} resizeMode="contain" />
+                  <View style={styles.savedLeaveInfo}>
+                    <Text style={styles.savedLeaveType}>{leave.leaveType}</Text>
+                    <Text style={styles.savedLeaveDates}>
+                     From {leave.startDate} To {leave.endDate}
+                    </Text>
+                    <Text style={styles.savedLeaveDetails}>
+                      Days: {leave.leaveDays} | Holidays: {leave.holidays}
+                      {leave.startHD && ' | Start HD'} {leave.endHD && ' | End HD'}
+                    </Text>
+                  </View>
+                  <View style={styles.savedLeaveActions}>
+
+                    <View style={styles.editButtonContainer}>
+                      <TouchableOpacity style={styles.editButton} onPress={() => handleEditLeave(leave)}>
+                        <Text style={styles.editIcon}>✏️</Text>
+                      </TouchableOpacity>
                     </View>
-                    <View>
-                      <View style={styles.savedLeaveInfo}>
-                        <Text style={styles.savedLeaveType}>{leave.leaveType}</Text>
-                        <Text style={styles.savedLeaveDates}>
-                          {leave.startDate} - {leave.endDate}
-                        </Text>
-                        <Text style={styles.savedLeaveDetails}>
-                          Days: {leave.leaveDays} | Holidays: {leave.holidays}
-                          {leave.startHD && ' | Start HD'} {leave.endHD && ' | End HD'}
-                        </Text>
-                      </View>
-                      <View style={styles.savedLeaveActions}>
-                        <View style={styles.editButtonContainer}>
-                          <TouchableOpacity style={styles.editButton} onPress={() => handleEditLeave(leave)}>
-                            <Text style={styles.editIcon}>✏️</Text>
-                          </TouchableOpacity>
-                        </View>
 
                         <View style={styles.editButtonContainer}>
                           <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveLeave(leave.id)}>
