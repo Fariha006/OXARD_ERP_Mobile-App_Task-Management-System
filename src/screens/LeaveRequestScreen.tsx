@@ -621,7 +621,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                   <View style={styles.savedLeaveInfo}>
                     <Text style={styles.savedLeaveType}>{leave.leaveType}</Text>
                     <Text style={styles.savedLeaveDates}>
-                      {leave.startDate} - {leave.endDate}
+                     From {leave.startDate} To {leave.endDate}
                     </Text>
                     <Text style={styles.savedLeaveDetails}>
                       Days: {leave.leaveDays} | Holidays: {leave.holidays}
