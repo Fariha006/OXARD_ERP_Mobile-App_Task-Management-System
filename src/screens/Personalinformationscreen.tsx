@@ -149,7 +149,7 @@ export default function Personalinformationscreen({ navigation }: Props) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={[styles.back, styles.toptitle]}>
-          <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <View style={styles.backicon}>
               <Image source={require('../../assets/images/backarow.png')}
                 style={styles.backiconimg} resizeMode="contain" />
@@ -177,7 +177,7 @@ export default function Personalinformationscreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={[styles.back, styles.toptitle]}>
-        <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <View style={styles.backicon}>
             <Image source={require('../../assets/images/backarow.png')}
               style={styles.backiconimg} resizeMode="contain" />
