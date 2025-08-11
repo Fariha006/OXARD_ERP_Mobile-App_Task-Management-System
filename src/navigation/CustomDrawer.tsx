@@ -105,13 +105,20 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
       screen: 'Details',
       navigationParams: { screen: 'Approvals' }
     },
-    {
-      id: 'addbuttons',
-      text: 'Add Buttons',
-      icon: require('../../assets/images/addbtn.png'),
-      screen: 'Details',
-      navigationParams: { screen: 'Details' }
-    }
+    // {
+    //   id: 'signout',
+    //   text: 'Sign Out',
+    //   icon: require('../../assets/images/btmsignout.png'),
+    //   screen: 'Details',
+    //   navigationParams: {screen:'Login'}
+    // }
+    // {
+    //   id: 'addbuttons',
+    //   text: 'Add Buttons',
+    //   icon: require('../../assets/images/addbtn.png'),
+    //   screen: 'Details',
+    //   navigationParams: { screen: 'Details' }
+    // }
   ];
 
   return (
@@ -164,6 +171,15 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
             </TouchableOpacity>
           );
         })}
+        <TouchableOpacity  onPress={() => navigation.navigate('Login')}>
+        <View style={styles.menuItem}>
+        <View style={styles.divmenuIcon}>
+          <Image source={require('../../assets/images/btmsignout.png')}
+          style={styles.menuIcon} resizeMode="contain" />
+        </View>
+        <Text style={styles.menuText}>Sign Out</Text>
+        </View>
+      </TouchableOpacity>
         
       </View>
     </View>
