@@ -61,7 +61,7 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
       text: 'My Requests',
       icon: require('../../assets/images/requst.png'),
       screen: 'Home',
-      navigationParams: { screen: 'CertificateRequest' }
+      navigationParams: { screen: 'RequestDashboard' }
     },
     {
       id: 'payslips',
