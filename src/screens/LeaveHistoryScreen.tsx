@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator } from 'react-native';
-import { getLeaveHistoryData } from '../api/api';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { getLeaveHistoryData, deleteLeaveRequest } from '../api/api';
 import UserStorage from '../utils/userStorage';
 
 export default function LeaveHistoryScreen({ navigation }: { navigation?: any }) {
@@ -35,6 +35,48 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
     setOpenIndexes(openIndexes.includes(idx)
       ? openIndexes.filter(i => i !== idx)
       : [...openIndexes, idx]);
+  };
+
+  const handleDeleteLeaveRequest = async (leaveRegisterId: string) => {
+    Alert.alert(
+      'Delete Leave Request',
+      'Are you sure you want to delete this leave request?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const token = await UserStorage.getToken();
+              if (!token) {
+                Alert.alert('Error', 'No authentication token found. Please login again.');
+                return;
+              }
+              
+              const response = await deleteLeaveRequest(token, leaveRegisterId);
+              
+              // Check if the response indicates success
+              if (response === true || response === 'true' || (response && response.success === true)) {
+                Alert.alert('Success', 'Leave request deleted successfully.');
+                
+                // Refresh the data
+                const result = await getLeaveHistoryData(token);
+                setData(Array.isArray(result) ? result : []);
+              } else {
+                Alert.alert('Error', 'Something went wrong. Please try after some time.');
+              }
+            } catch (error) {
+              console.error('Delete leave request error:', error);
+              Alert.alert('Error', 'Something went wrong. Please try after some time.');
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (loading) {
@@ -145,7 +187,7 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
                     </TouchableOpacity>
                   </View>
                   <View style={styles.editButtonContainer}>
-                    <TouchableOpacity style={styles.removeButton}>
+                    <TouchableOpacity style={styles.removeButton} onPress={() => handleDeleteLeaveRequest(item.LeaveRegisterId)}>
                       <Text style={[styles.editIcon, { color: 'red' }]}>🗑️</Text>
                     </TouchableOpacity>
                   </View>

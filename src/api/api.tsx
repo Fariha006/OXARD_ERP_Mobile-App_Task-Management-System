@@ -996,3 +996,24 @@ export async function fetchLeaveEditData(token: string, leaveRegisterId: string)
     throw error;
   }
 }
+
+export async function deleteLeaveRequest(token: string, leaveRegisterId: string) {
+  try {
+    const apiurl = getApiUrl('/api/MobDa5010/I_U_D_Mode');
+    const requestBody = {
+      "Mode": "D",
+      "LeaveRegisterId": leaveRegisterId
+    };
+    const response = await axios.post<any>(apiurl, requestBody, {
+      headers: {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Delete Leave Request API Error:', error);
+    throw error;
+  }
+}
