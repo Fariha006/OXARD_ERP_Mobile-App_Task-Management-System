@@ -93,7 +93,7 @@ export default function ContractRevisionScreen({ navigation }: { navigation?: an
                   <Text style={styles.vlue}>{item['DesgNam']}</Text>
                 </View>
               ))}
-              
+{/*               
                         <View style={styles.mydeskbtnfirstraw}>
                           <View style={styles.tile}>
                             <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Salary' })}>
@@ -113,7 +113,7 @@ export default function ContractRevisionScreen({ navigation }: { navigation?: an
                               <Text style={styles.title}>Eligibilities</Text>
                             </TouchableOpacity>
                           </View>
-                        </View>
+                        </View> */}
             </View>
           )}
         </View>
