@@ -73,6 +73,22 @@ interface MessageItem {
   designation: string;
 }
 
+interface NotificationListItem {
+  id: string;
+  name: string;
+  role: string;
+  image: any;
+  tags: string;
+}
+
+interface HolidayListItem {
+  id: string;
+  name: string;
+  role: string;
+  image: any;
+  tags: string;
+}
+
 function flattenRest(obj: any, parentKey: string = ''): any {
   let result = { ...obj };
   Object.keys(obj).forEach((key) => {
@@ -155,6 +171,10 @@ export default function HomeScreen({ navigation }: Props) {
   const [bannerData, setBannerData] = useState<BannerItem[]>([]);
   const [memoData, setMemoData] = useState<MemoItem[]>([]);
   const [messageData, setMessageData] = useState<MessageItem[]>([]);
+  const [notificationListData, setNotificationListData] = useState<NotificationListItem[]>([]);
+  const [notificationListCurrentIndex, setNotificationListCurrentIndex] = useState(0);
+  const [holidayListData, setHolidayListData] = useState<HolidayListItem[]>([]);
+  const [holidayListCurrentIndex, setHolidayListCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList<any>>(null);
   const circularFlatListRef = useRef<FlatList<CircularItem>>(null);
   const eventFlatListRef = useRef<FlatList<EventItem>>(null);
@@ -162,6 +182,8 @@ export default function HomeScreen({ navigation }: Props) {
   const bannerFlatListRef = useRef<FlatList<BannerItem>>(null);
   const memoFlatListRef = useRef<FlatList<MemoItem>>(null);
   const messageFlatListRef = useRef<FlatList<MessageItem>>(null);
+  const notificationListFlatListRef = useRef<FlatList<NotificationListItem>>(null);
+  const holidayListFlatListRef = useRef<FlatList<HolidayListItem>>(null);
 
   const fetchData = async () => {
     setError(null);
@@ -181,6 +203,14 @@ export default function HomeScreen({ navigation }: Props) {
       const flattenedData = flattenRest(json);
       const birthdayItems = processBirthdayData(flattenedData);
       setBirthdayData(birthdayItems);
+
+      // Process notification list data (CategoryId = 3)
+      const notificationListItems = processNotificationListData(flattenedData);
+      setNotificationListData(notificationListItems);
+
+      // Process holiday list data (CategoryId = 10)
+      const holidayListItems = processHolidayListData(flattenedData);
+      setHolidayListData(holidayListItems);
 
       // Process circular data (CategoryId = 4)
       const circularItems = processCircularData(flattenedData);
@@ -205,6 +235,7 @@ export default function HomeScreen({ navigation }: Props) {
       // Process message data (CategoryId = 9)
       const messageItems = processMessageData(flattenedData);
       setMessageData(messageItems);
+
     } catch (err) {
       console.error('Fetch error:', err);
       setError('Failed to fetch notifications');
@@ -459,6 +490,69 @@ export default function HomeScreen({ navigation }: Props) {
     return messageItems;
   };
 
+  // Process notification list data (CategoryId = 3)
+  const processNotificationListData = (apiData: any): NotificationListItem[] => {
+    const notificationListItems: NotificationListItem[] = [];
+    let autoIncrementId = 1;
+    const allItems: any[] = [];
+
+    Object.values(apiData).forEach((arr: any) => {
+      if (Array.isArray(arr)) {
+        arr.forEach((item) => {
+          if (item && typeof item === 'object' &&
+            item.CategoryId === 3 &&
+            item.DocType === 'Notifications') {
+            allItems.push(item);
+          }
+        });
+      }
+    });
+
+    allItems.forEach((item) => {
+      notificationListItems.push({
+        id: autoIncrementId.toString(),
+        name: item.DocType || 'Notifications',
+        role: item.Title || '',
+        image: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/birthday.png'),
+        tags: item.NotificationContent || '',
+      });
+      autoIncrementId++;
+    });
+
+    return notificationListItems;
+  };
+
+  // Process holiday list data (CategoryId = 10)
+  const processHolidayListData = (apiData: any): HolidayListItem[] => {
+    const holidayListItems: HolidayListItem[] = [];
+    let autoIncrementId = 1;
+    const allItems: any[] = [];
+
+    Object.values(apiData).forEach((arr: any) => {
+      if (Array.isArray(arr)) {
+        arr.forEach((item) => {
+          if (item && typeof item === 'object' &&
+            item.CategoryId === 10) {
+            allItems.push(item);
+          }
+        });
+      }
+    });
+
+    allItems.forEach((item) => {
+      holidayListItems.push({
+        id: autoIncrementId.toString(),
+        name: item.DocType || 'Holiday List',
+        role: item.Title || 'Holiday List',
+        image: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/birthday.png'),
+        tags: item.NotificationContent || '',
+      });
+      autoIncrementId++;
+    });
+
+    return holidayListItems;
+  };
+
   useEffect(() => {
     setLoading(true);
     fetchData();
@@ -572,6 +666,38 @@ export default function HomeScreen({ navigation }: Props) {
     return () => clearInterval(interval);
   }, [messageCurrentIndex, messageData.length]);
 
+  // Auto-scroll effect for notification list
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (notificationListFlatListRef.current && notificationListData.length > 0) {
+        const nextIndex = (notificationListCurrentIndex + 1) % notificationListData.length;
+        notificationListFlatListRef.current.scrollToIndex({
+          index: nextIndex,
+          animated: true,
+          viewPosition: 0.5
+        });
+        setNotificationListCurrentIndex(nextIndex);
+      }
+    }, 4500); // Scroll every 4.5 seconds
+    return () => clearInterval(interval);
+  }, [notificationListCurrentIndex, notificationListData.length]);
+
+  // Auto-scroll effect for holiday list
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (holidayListFlatListRef.current && holidayListData.length > 0) {
+        const nextIndex = (holidayListCurrentIndex + 1) % holidayListData.length;
+        holidayListFlatListRef.current.scrollToIndex({
+          index: nextIndex,
+          animated: true,
+          viewPosition: 0.5
+        });
+        setHolidayListCurrentIndex(nextIndex);
+      }
+    }, 4000); // Scroll every 4 seconds
+    return () => clearInterval(interval);
+  }, [holidayListCurrentIndex, holidayListData.length]);
+
   // Handle manual scroll to pause auto-scroll temporarily
   const handleScroll = () => {
     // Optional: Add logic to pause auto-scroll when user manually scrolls
@@ -653,6 +779,34 @@ export default function HomeScreen({ navigation }: Props) {
     wait.then(() => {
       if (messageFlatListRef.current) {
         messageFlatListRef.current.scrollToIndex({
+          index: info.index,
+          animated: true,
+          viewPosition: 0.5
+        });
+      }
+    });
+  };
+
+  // Handle scroll errors for notification list
+  const handleNotificationListScrollToIndexFailed = (info: { index: number }) => {
+    const wait = new Promise(resolve => setTimeout(resolve, 500));
+    wait.then(() => {
+      if (notificationListFlatListRef.current) {
+        notificationListFlatListRef.current.scrollToIndex({
+          index: info.index,
+          animated: true,
+          viewPosition: 0.5
+        });
+      }
+    });
+  };
+
+  // Handle scroll errors for holiday list
+  const handleHolidayListScrollToIndexFailed = (info: { index: number }) => {
+    const wait = new Promise(resolve => setTimeout(resolve, 500));
+    wait.then(() => {
+      if (holidayListFlatListRef.current) {
+        holidayListFlatListRef.current.scrollToIndex({
           index: info.index,
           animated: true,
           viewPosition: 0.5
@@ -847,6 +1001,48 @@ export default function HomeScreen({ navigation }: Props) {
     </View>
   );
 
+  const notificationListRenderItem = ({ item }: { item: NotificationListItem }) => (
+    <View style={styles.notificationListItemContainer}>
+      <View style={styles.notificationListItemCard}>
+        <View style={styles.notificationListItemTopRow}>
+          <View style={styles.slideimage}>
+            <Image
+              source={typeof item.image === 'string' ? { uri: item.image } : item.image}
+              style={styles.notificationListItemImage} />
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={styles.lsttitle}>{item.name}</Text>
+            <Text style={styles.role}>{item.role}</Text>
+          </View>
+        </View>
+      </View>
+      <View>
+        <Text style={styles.itemtags}>{item.tags}</Text>
+      </View>
+    </View>
+  );
+
+  const holidayListRenderItem = ({ item }: { item: HolidayListItem }) => (
+    <View style={styles.holidayListItemContainer}>
+      <View style={styles.holidayListItemCard}>
+        <View style={styles.holidayListItemTopRow}>
+          <View style={styles.slideimage}>
+            <Image
+              source={typeof item.image === 'string' ? { uri: item.image } : item.image}
+              style={styles.holidayListItemImage} />
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={styles.lsttitle}>{item.name}</Text>
+            <Text style={styles.role}>{item.role}</Text>
+          </View>
+        </View>
+      </View>
+      <View>
+        <Text style={styles.itemtags}>{item.tags}</Text>
+      </View>
+    </View>
+  );
+
   return (
     <>
       <StatusBar
@@ -1029,6 +1225,52 @@ export default function HomeScreen({ navigation }: Props) {
                   <View style={styles.emptyMessageContainer}>
                     <Text style={styles.emptyMessageText}>
                       {loading ? 'Loading messages...' : 'No messages available'}
+                    </Text>
+                  </View>
+                )}
+              />
+            </View>
+          )}
+
+          {/* Notification List Section */}
+          {notificationListData.length > 0 && (
+            <View style={styles.notificationListSection}>
+              <FlatList
+                ref={notificationListFlatListRef}
+                data={notificationListData}
+                renderItem={notificationListRenderItem}
+                keyExtractor={item => item.id}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: 10 }}
+                onScrollToIndexFailed={handleNotificationListScrollToIndexFailed}
+                ListEmptyComponent={() => (
+                  <View style={styles.emptyNotificationListContainer}>
+                    <Text style={styles.emptyNotificationListText}>
+                      {loading ? 'Loading notification list...' : 'No notification list available'}
+                    </Text>
+                  </View>
+                )}
+              />
+            </View>
+          )}
+
+          {/* Holiday List Section */}
+          {holidayListData.length > 0 && (
+            <View style={styles.holidayListSection}>
+              <FlatList
+                ref={holidayListFlatListRef}
+                data={holidayListData}
+                renderItem={holidayListRenderItem}
+                keyExtractor={item => item.id}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: 10 }}
+                onScrollToIndexFailed={handleHolidayListScrollToIndexFailed}
+                ListEmptyComponent={() => (
+                  <View style={styles.emptyHolidayListContainer}>
+                    <Text style={styles.emptyHolidayListText}>
+                      {loading ? 'Loading holiday list...' : 'No holiday list available'}
                     </Text>
                   </View>
                 )}
@@ -1696,6 +1938,96 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   emptyMessageText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
+  },
+
+  // Notification List styles
+  notificationListSection: {
+    marginVertical: 10,
+  },
+  notificationListItemContainer: {
+    width: 300,
+    marginRight: 15,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  notificationListItemCard: {
+    marginBottom: 10,
+  },
+  notificationListItemTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  notificationListItemImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+  },
+  emptyNotificationListContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  emptyNotificationListText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
+  },
+
+  // Holiday List styles
+  holidayListSection: {
+    marginVertical: 10,
+  },
+  holidayListItemContainer: {
+    width: 300,
+    marginRight: 15,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  holidayListItemCard: {
+    marginBottom: 10,
+  },
+  holidayListItemTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  holidayListItemImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+  },
+  emptyHolidayListContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  emptyHolidayListText: {
     fontSize: 16,
     color: '#888',
     textAlign: 'center',
