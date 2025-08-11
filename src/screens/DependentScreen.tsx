@@ -76,6 +76,7 @@ export default function DependentScreen({ navigation }: { navigation: any }) {
                     source={require('../../assets/images/mydesk/depnds.png')}
                     style={[styles.ltficn, styles.star]} resizeMode="contain" />
                   <Text style={styles.accordionTitle}>{dep.DependentName}</Text>
+                  <Text style={[styles.accordionTitle, { color: '#888', fontSize: 11 }]}>{dep.Relation}</Text>
                 </View>
                 {/* <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text> */}
               </TouchableOpacity>
