@@ -53,8 +53,8 @@ export default function QualificationScreen({ navigation }: Props) {
 
   const toggleAccordion = (key: string) => {
     setOpenIndexes(openIndexes.includes(key)
-      ? openIndexes.filter(i => i !== key)
-      : [...openIndexes, key]);
+      ? [] // Close all accordions if the clicked one is already open
+      : [key]); // Open only the clicked accordion, closing all others
   };
 
   if (loading) {
