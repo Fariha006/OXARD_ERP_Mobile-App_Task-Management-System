@@ -29,8 +29,7 @@ export default function RequestDashboardScreen({ navigation }: Props) {
             <Image
               source={require('../../assets/images/backarow.png')}
               style={styles.backiconimg}
-              resizeMode="contain"
-            />
+              resizeMode="contain"/>
           </View>
         </TouchableOpacity>
         <View style={styles.pagewrap}>
@@ -43,15 +42,13 @@ export default function RequestDashboardScreen({ navigation }: Props) {
         <TouchableOpacity
           style={styles.requestButton}
           onPress={handleLeaveRequest}
-          activeOpacity={0.8}
-        >
+          activeOpacity={0.8}>
           <View style={styles.buttonContent}>
             <View style={styles.iconContainer}>
               <Image
                 source={require('../../assets/images/home/leave.png')}
                 style={styles.buttonIcon}
-                resizeMode="contain"
-              />
+                resizeMode="contain"/>
             </View>
             <View style={styles.textContainer}>
               <Text style={styles.buttonTitle}>Leave Request</Text>
@@ -68,15 +65,13 @@ export default function RequestDashboardScreen({ navigation }: Props) {
         <TouchableOpacity
           style={styles.requestButton}
           onPress={handleCertificateRequest}
-          activeOpacity={0.8}
-        >
+          activeOpacity={0.8}>
           <View style={styles.buttonContent}>
             <View style={styles.iconContainer}>
               <Image
                 source={require('../../assets/images/home/request.png')}
                 style={styles.buttonIcon}
-                resizeMode="contain"
-              />
+                resizeMode="contain"/>
             </View>
             <View style={styles.textContainer}>
               <Text style={styles.buttonTitle}>Certificate Request</Text>
@@ -133,13 +128,13 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flex: 1,
-    padding: 20,
-    justifyContent: 'center',
+    padding: 20,  
+    backgroundColor: '#ffffffff',
   },
   requestButton: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#ffffffff',
     borderRadius: 12,
-    padding: 20,
+    padding: 10,
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: {
@@ -192,10 +187,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#007AFF',
     justifyContent: 'center',
     alignItems: 'center',
+    flexDirection: 'row',
   },
   arrow: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
+    // backgroundColor: '#c8098bff',
+    height: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
   },
 });

@@ -1424,9 +1424,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   lstimage: {
-    width: 50,
-    height: 50,
-    marginRight: 4,
+    width: 40,
+    height: 40,
   },
   messageImage: {
     width: 50,
@@ -1611,7 +1610,6 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingLeft: 20,
     borderRadius: 10,
-    marginBottom: 18,
   },
   messageCard: {
     flexDirection: 'row',
@@ -1949,18 +1947,22 @@ const styles = StyleSheet.create({
   },
   notificationListItemContainer: {
     width: 300,
-    marginRight: 15,
-    backgroundColor: '#fff',
+    marginRight: 8,
+    backgroundColor: '#fedfeaff',
+    // backgroundColor: 'teal',
     borderRadius: 10,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    padding: 10,
+    // shadowColor: '#000',
+    // shadowOffset: {
+    //   width: 0,
+    //   height: 2,
+    // },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 3.84,
+    // elevation: 5,
+    paddingLeft: 20,
+
+    
   },
   notificationListItemCard: {
     marginBottom: 10,
@@ -1971,10 +1973,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   notificationListItemImage: {
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
     borderRadius: 25,
-    marginRight: 12,
   },
   emptyNotificationListContainer: {
     flex: 1,
@@ -1995,17 +1996,19 @@ const styles = StyleSheet.create({
   holidayListItemContainer: {
     width: 300,
     marginRight: 15,
-    backgroundColor: '#fff',
+    backgroundColor: '#d1ecffff',
+    // backgroundColor: 'red',
     borderRadius: 10,
     padding: 15,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    // shadowColor: '#000',
+    // shadowOffset: {
+    //   width: 0,
+    //   height: 2,
+    // },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 3.84,
+    // elevation: 5,
+    marginBottom: 18,
   },
   holidayListItemCard: {
     marginBottom: 10,
@@ -2016,10 +2019,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   holidayListItemImage: {
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
     borderRadius: 25,
-    marginRight: 12,
   },
   emptyHolidayListContainer: {
     flex: 1,

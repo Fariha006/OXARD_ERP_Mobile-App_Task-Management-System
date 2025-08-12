@@ -71,11 +71,13 @@ export default function DependentScreen({ navigation }: { navigation: any }) {
                 style={[styles.accordionHeader,
                 openIndexes.includes(idx) ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
                 onPress={() => toggleAccordion(idx)}>
+                <View style={styles.hdrltficnwrap}>
                 <View style={styles.hdrltficn}>
                   <Image
                     source={require('../../assets/images/mydesk/depnds.png')}
                     style={[styles.ltficn, styles.star]} resizeMode="contain" />
                   <Text style={styles.accordionTitle}>{dep.DependentName}</Text>
+                </View>
                   <Text style={[styles.accordionTitle, { color: '#888', fontSize: 11 }]}>{dep.Relation}</Text>
                 </View>
                 {/* <Text>{openIndexes.includes(idx) ? '▲' : '▼'}</Text> */}
@@ -229,6 +231,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 0,
     marginBottom: 10,
+  },
+  hdrltficnwrap: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
   },
   hdrltficn: {
     flexDirection: 'row',
