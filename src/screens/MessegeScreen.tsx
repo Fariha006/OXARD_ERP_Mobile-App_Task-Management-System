@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, FlatList, Modal, TextInput, Switch, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, FlatList, Modal, TextInput, Switch, Platform, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -31,6 +31,11 @@ export default function MessegeScreen({ navigation }: Props) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editData, setEditData] = useState<any>(null);
   const [selectedNotificationId, setSelectedNotificationId] = useState<string>('');
+  
+  // Dropdown modals
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [filterTypeModalVisible, setFilterTypeModalVisible] = useState(false);
+  const [selectTypeModalVisible, setSelectTypeModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -283,7 +288,7 @@ export default function MessegeScreen({ navigation }: Props) {
 
       <FlatList
         data={data}
-        keyExtractor={(item, idx) => item.NotificationId?.toString() || idx.toString()}
+        keyExtractor={(item, idx) => `notification-${item.NotificationId?.toString() || idx.toString()}`}
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={<Text style={styles.lbl}>No notifications found.</Text>}
         renderItem={({ item, index }) => (
@@ -320,195 +325,134 @@ export default function MessegeScreen({ navigation }: Props) {
               </TouchableOpacity>
             </View>
             
-            <ScrollView style={styles.modalBody}>
-              {/* Category Dropdown */}
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Category</Text>
-                                 <TouchableOpacity
-                   style={styles.dropdown}
-                   onPress={() => setCategoryDropdownOpen(!categoryDropdownOpen)}>
-                  <Text style={styles.dropdownText}>
-                    {selectedCategory !== null ? categories.find(c => c.FieldID === selectedCategory)?.FieldValue : 'Select Category'}
-                  </Text>
-                  <Text style={styles.dropdownArrow}>▼</Text>
-                </TouchableOpacity>
-                                 {categoryDropdownOpen && (
-                  <View style={styles.dropdownListwrap}>
-                    <View style={styles.dropdownList}>
-                      {categories.map(cat => (
-                                                <TouchableOpacity
-                            key={cat.FieldID}
-                            style={styles.dropdownItem}
-                            activeOpacity={0.7}
-                            onPress={() => {
-                              setSelectedCategory(cat.FieldID);
-                              setCategoryDropdownOpen(false);
-                            }}>
-                          <Text style={styles.dropdownText}>{cat.FieldValue}</Text>
-                        </TouchableOpacity>
-                      ))}
+                         <FlatList
+               style={styles.modalBody}
+               data={[{ key: 'form' }]}
+               renderItem={() => (
+                 <View>
+                                       {/* Category Dropdown */}
+                    <View style={styles.formGroup}>
+                      <Text style={styles.formLabel}>Category</Text>
+                      <TouchableOpacity
+                        style={styles.dropdown}
+                        onPress={() => setCategoryModalVisible(true)}>
+                        <Text style={styles.dropdownText}>
+                          {selectedCategory !== null ? categories.find(c => c.FieldID === selectedCategory)?.FieldValue : 'Select Category'}
+                        </Text>
+                        <Text style={styles.dropdownArrow}>▼</Text>
+                      </TouchableOpacity>
                     </View>
-                  </View>
-                 )}
-              </View>
 
-                             {/* Filter Types Dropdown */}
-               <View style={styles.formGroup}>
-                 <Text style={styles.formLabel}>Filter Types</Text>
-                                  <TouchableOpacity
-                    style={styles.dropdown}
-                    onPress={() => setFilterTypeDropdownOpen(!filterTypeDropdownOpen)}
-                  >
-                   <Text style={styles.dropdownText}>
-                     {selectedFilterType !== null ? filterTypes.find(f => f.EmployeeCategoryId === selectedFilterType)?.EmployeeCategory : 'Select Filter Type'}
-                   </Text>
-                   <Text style={styles.dropdownArrow}>▼</Text>
-                 </TouchableOpacity>
-                  {filterTypeDropdownOpen && (
-                    <View style={styles.dropdownListwrap}>
-                      <View style={styles.dropdownList}>
-                        {filterTypes.map(ft => (
-                          <TouchableOpacity
-                            key={ft.EmployeeCategoryId}
-                            style={styles.dropdownItem}
-                            activeOpacity={0.7}
-                            onPress={() => {
-                              setSelectedFilterType(ft.EmployeeCategoryId);
-                              setFilterTypeDropdownOpen(false);
-                              // loadSelectTypes(ft.EmployeeCategoryId);
-                            }}
-                          >
-                            <Text style={styles.dropdownText}>{ft.EmployeeCategory}</Text>
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-                    </View>
-                  )}
-               </View>
+                                                                     {/* Filter Types Dropdown */}
+                     <View style={styles.formGroup}>
+                       <Text style={styles.formLabel}>Filter Types</Text>
+                       <TouchableOpacity
+                         style={styles.dropdown}
+                         onPress={() => setFilterTypeModalVisible(true)}
+                       >
+                         <Text style={styles.dropdownText}>
+                           {selectedFilterType !== null ? filterTypes.find(f => f.EmployeeCategoryId === selectedFilterType)?.EmployeeCategory : 'Select Filter Type'}
+                         </Text>
+                         <Text style={styles.dropdownArrow}>▼</Text>
+                       </TouchableOpacity>
+                     </View>
 
-               {/* Select Types Dropdown */}
-               <View style={styles.formGroup}>
-                 <Text style={styles.formLabel}>Select Types</Text>
-                                  <TouchableOpacity
-                    style={styles.dropdown}
-                    onPress={async () => {
-                      if (!selectTypeDropdownOpen && selectedFilterType !== null) {
-                        try {
-                          const token = await UserStorage.getToken();
-                          if (token) {
-                            const result = await fetchSelectTypes(token, selectedFilterType);
-                            setSelectTypes(result || []);
-                          } else {
-                            console.error('No authentication token found');
-                            setSelectTypes([]);
-                          }
-                        } catch (e) {
-                          console.error('Failed to fetch select types:', e);
-                          setSelectTypes([]);
-                        }
-                      }
-                      setSelectTypeDropdownOpen(!selectTypeDropdownOpen);
-                    }}>
-                    <Text style={styles.dropdownText}>
-                      {selectedSelectTypes.length > 0 
-                        ? `${selectedSelectTypes.length} selected` 
-                        : 'Select Types'}
-                    </Text>
-                   <Text style={styles.dropdownArrow}>▼</Text>
-                 </TouchableOpacity>
-                    {selectTypeDropdownOpen && (
-                      <View style={styles.dropdownListwrap}>
-                        <View style={styles.dropdownList}>
-                          {selectTypes.map(st => (
-                            <TouchableOpacity
-                              key={st.Id}
-                              style={[
-                                styles.dropdownItem,
-                                selectedSelectTypes.includes(st.Id) && styles.dropdownItemSelected
-                              ]}
-                              activeOpacity={0.7}
-                              onPress={() => {
-                                setSelectedSelectTypes(prev => {
-                                  if (prev.includes(st.Id)) {
-                                    return prev.filter(id => id !== st.Id);
-                                  } else {
-                                    return [...prev, st.Id];
-                                  }
-                                });
-                              }}>
-                              <Text style={[
-                                styles.dropdownText,
-                                selectedSelectTypes.includes(st.Id) && styles.dropdownTextSelected
-                              ]}>
-                                {st.Descr}
-                              </Text>
-                              {selectedSelectTypes.includes(st.Id) && (
-                                <Text style={styles.checkmark}>✓</Text>
-                              )}
-                            </TouchableOpacity>
-                          ))}
-                        </View>
-                      </View>
-                  )}
-               </View>
+                                         {/* Select Types Dropdown */}
+                     <View style={styles.formGroup}>
+                       <Text style={styles.formLabel}>Select Types</Text>
+                       <TouchableOpacity
+                         style={styles.dropdown}
+                         onPress={async () => {
+                           if (selectedFilterType !== null) {
+                             try {
+                               const token = await UserStorage.getToken();
+                               if (token) {
+                                 const result = await fetchSelectTypes(token, selectedFilterType);
+                                 setSelectTypes(result || []);
+                                 setSelectTypeModalVisible(true);
+                               } else {
+                                 console.error('No authentication token found');
+                                 setSelectTypes([]);
+                               }
+                             } catch (e) {
+                               console.error('Failed to fetch select types:', e);
+                               setSelectTypes([]);
+                             }
+                                                        } else {
+                               // Show alert or message that Filter Type must be selected first
+                               Alert.alert('Warning', 'Please select Filter Type first');
+                             }
+                         }}>
+                         <Text style={styles.dropdownText}>
+                           {selectedSelectTypes.length > 0 
+                             ? `${selectedSelectTypes.length} selected` 
+                             : 'Select Types'}
+                         </Text>
+                         <Text style={styles.dropdownArrow}>▼</Text>
+                       </TouchableOpacity>
+                     </View>
 
-              {/* Title TextBox */}
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Title</Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={title}
-                  onChangeText={setTitle}
-                  placeholder="Enter title"
-                />
-              </View>
+                   {/* Title TextBox */}
+                   <View style={styles.formGroup}>
+                     <Text style={styles.formLabel}>Title</Text>
+                     <TextInput
+                       style={styles.textInput}
+                       value={title}
+                       onChangeText={setTitle}
+                       placeholder="Enter title"
+                     />
+                   </View>
 
-              {/* Message Rich Text */}
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Message</Text>
-                <TextInput
-                  style={[styles.textInput, styles.textArea]}
-                  value={message}
-                  onChangeText={setMessage}
-                  placeholder="Enter message"
-                  multiline
-                  numberOfLines={4}
-                  textAlignVertical="top"
-                />
-              </View>
+                   {/* Message Rich Text */}
+                   <View style={styles.formGroup}>
+                     <Text style={styles.formLabel}>Message</Text>
+                     <TextInput
+                       style={[styles.textInput, styles.textArea]}
+                       value={message}
+                       onChangeText={setMessage}
+                       placeholder="Enter message"
+                       multiline
+                       numberOfLines={4}
+                       textAlignVertical="top"
+                     />
+                   </View>
 
-              {/* Till Date DatePicker */}
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Till Date</Text>
-                <TouchableOpacity style={styles.datePicker} onPress={showDatePickerModal}>
-                  <Text style={styles.datePickerText}>
-                    {tillDate || 'Select Date'}
-                  </Text>
-                </TouchableOpacity>
-                {showDatePicker && (
-                  <DateTimePicker
-                    value={tillDate ? new Date(tillDate) : new Date()}
-                    mode="date"
-                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={handleDateChange}
-                    minimumDate={new Date()}
-                  />
-                )}
-              </View>
+                   {/* Till Date DatePicker */}
+                   <View style={styles.formGroup}>
+                     <Text style={styles.formLabel}>Till Date</Text>
+                     <TouchableOpacity style={styles.datePicker} onPress={showDatePickerModal}>
+                       <Text style={styles.datePickerText}>
+                         {tillDate || 'Select Date'}
+                       </Text>
+                     </TouchableOpacity>
+                     {showDatePicker && (
+                       <DateTimePicker
+                         value={tillDate ? new Date(tillDate) : new Date()}
+                         mode="date"
+                         display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                         onChange={handleDateChange}
+                         minimumDate={new Date()}
+                       />
+                     )}
+                   </View>
 
-              {/* Send Via Email Checkbox */}
-              <View style={styles.formGroup}>
-                <View style={styles.checkboxContainer}>
-                  <Switch
-                    value={sendViaEmail}
-                    onValueChange={setSendViaEmail}
-                    trackColor={{ false: '#767577', true: '#133F7C' }}
-                    thumbColor={sendViaEmail ? '#fff' : '#f4f3f4'}
-                  />
-                  <Text style={styles.checkboxLabel}>Send Via Email</Text>
-                </View>
-              </View>
-            </ScrollView>
+                   {/* Send Via Email Checkbox */}
+                   <View style={styles.formGroup}>
+                     <View style={styles.checkboxContainer}>
+                       <Switch
+                         value={sendViaEmail}
+                         onValueChange={setSendViaEmail}
+                         trackColor={{ false: '#767577', true: '#133F7C' }}
+                         thumbColor={sendViaEmail ? '#fff' : '#f4f3f4'}
+                       />
+                       <Text style={styles.checkboxLabel}>Send Via Email</Text>
+                     </View>
+                   </View>
+                 </View>
+               )}
+               keyExtractor={(item) => item.key}
+               showsVerticalScrollIndicator={true}
+             />
 
             {/* Modal Buttons */}
             <View style={styles.modalButtons}>
@@ -540,119 +484,247 @@ export default function MessegeScreen({ navigation }: Props) {
               </TouchableOpacity>
             </View>
             
-            <ScrollView style={styles.modalBody}>
-              {/* Category Dropdown */}
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Category</Text>
-                <TouchableOpacity
-                  style={styles.dropdown}
-                  onPress={() => setCategoryDropdownOpen(!categoryDropdownOpen)}>
-                  <Text style={styles.dropdownText}>
-                    {selectedCategory !== null ? categories.find(c => c.FieldID === selectedCategory)?.FieldValue : 'Select Category'}
-                  </Text>
-                  <Text style={styles.dropdownArrow}>▼</Text>
-                </TouchableOpacity>
-                {categoryDropdownOpen && (
-                  <View style={styles.dropdownListwrap}>
-                    <View style={styles.dropdownList}>
-                      {categories.map(cat => (
-                        <TouchableOpacity key={cat.FieldID} style={styles.dropdownItem}
-                          activeOpacity={0.7} onPress={() => { setSelectedCategory(cat.FieldID);
-                            setCategoryDropdownOpen(false);}}>
-                          <Text style={styles.dropdownText}>{cat.FieldValue}</Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
-                )}
-              </View>
-
-              {/* Title TextBox */}
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Title</Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={title}
-                  onChangeText={setTitle}
-                  placeholder="Enter title"
-                />
-              </View>
-
-              {/* Message Rich Text */}
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Message</Text>
-                <TextInput
-                  style={[styles.textInput, styles.textArea]}
-                  value={message}
-                  onChangeText={setMessage}
-                  placeholder="Enter message"
-                  multiline
-                  numberOfLines={4}
-                  textAlignVertical="top"
-                />
-              </View>
-
-              {/* Till Date DatePicker */}
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Till Date</Text>
-                <TouchableOpacity style={styles.datePicker} onPress={showDatePickerModal}>
-                  <Text style={styles.datePickerText}>
-                    {tillDate || 'Select Date'}
-                  </Text>
-                </TouchableOpacity>
-                {showDatePicker && (
-                  <DateTimePicker
-                    value={tillDate ? new Date(tillDate) : new Date()}
-                    mode="date"
-                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={handleDateChange}
-                    minimumDate={new Date()}
-                  />
-                )}
-              </View>
-
-              {/* Send Via Email Checkbox */}
-              <View style={styles.formGroup}>
-                <View style={styles.checkboxContainer}>
-                  <Switch
-                    value={sendViaEmail}
-                    onValueChange={setSendViaEmail}
-                    trackColor={{ false: '#767577', true: '#133F7C' }}
-                    thumbColor={sendViaEmail ? '#fff' : '#f4f3f4'}
-                  />
-                  <Text style={styles.checkboxLabel}>Send Via Email</Text>
-                </View>
-              </View>
-
-              {/* Employee Tags Section */}
-              {editData && editData.Item2 && editData.Item2.length > 0 && (
-                <View style={styles.formGroup}>
-                  <Text style={styles.formLabel}>Employees</Text>
-                  <View style={styles.tagsContainer}>
-                    {editData.Item2.map((employee: any, index: number) => (
-                      <View key={index} style={styles.tag}>
-                        <Text style={styles.tagText}>
-                          {employee.EmpNo} - {employee.EmployeeName}
+                         <FlatList
+               style={styles.modalBody}
+               data={[{ key: 'form' }]}
+               renderItem={() => (
+                 <View>
+                                       {/* Category Dropdown */}
+                    <View style={styles.formGroup}>
+                      <Text style={styles.formLabel}>Category</Text>
+                      <TouchableOpacity
+                        style={styles.dropdown}
+                        onPress={() => setCategoryModalVisible(true)}>
+                        <Text style={styles.dropdownText}>
+                          {selectedCategory !== null ? categories.find(c => c.FieldID === selectedCategory)?.FieldValue : 'Select Category'}
                         </Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              )}
-            </ScrollView>
+                        <Text style={styles.dropdownArrow}>▼</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                   {/* Title TextBox */}
+                   <View style={styles.formGroup}>
+                     <Text style={styles.formLabel}>Title</Text>
+                     <TextInput
+                       style={styles.textInput}
+                       value={title}
+                       onChangeText={setTitle}
+                       placeholder="Enter title"
+                     />
+                   </View>
+
+                   {/* Message Rich Text */}
+                   <View style={styles.formGroup}>
+                     <Text style={styles.formLabel}>Message</Text>
+                     <TextInput
+                       style={[styles.textInput, styles.textArea]}
+                       value={message}
+                       onChangeText={setMessage}
+                       placeholder="Enter message"
+                       multiline
+                       numberOfLines={4}
+                       textAlignVertical="top"
+                     />
+                   </View>
+
+                   {/* Till Date DatePicker */}
+                   <View style={styles.formGroup}>
+                     <Text style={styles.formLabel}>Till Date</Text>
+                     <TouchableOpacity style={styles.datePicker} onPress={showDatePickerModal}>
+                       <Text style={styles.datePickerText}>
+                         {tillDate || 'Select Date'}
+                       </Text>
+                     </TouchableOpacity>
+                     {showDatePicker && (
+                       <DateTimePicker
+                         value={tillDate ? new Date(tillDate) : new Date()}
+                         mode="date"
+                         display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                         onChange={handleDateChange}
+                         minimumDate={new Date()}
+                       />
+                     )}
+                   </View>
+
+                   {/* Send Via Email Checkbox */}
+                   <View style={styles.formGroup}>
+                     <View style={styles.checkboxContainer}>
+                       <Switch
+                         value={sendViaEmail}
+                         onValueChange={setSendViaEmail}
+                         trackColor={{ false: '#767577', true: '#133F7C' }}
+                         thumbColor={sendViaEmail ? '#fff' : '#f4f3f4'}
+                       />
+                       <Text style={styles.checkboxLabel}>Send Via Email</Text>
+                     </View>
+                   </View>
+
+                   {/* Employee Tags Section */}
+                   {editData && editData.Item2 && editData.Item2.length > 0 && (
+                     <View style={styles.formGroup}>
+                       <Text style={styles.formLabel}>Employees</Text>
+                       <View style={styles.tagsContainer}>
+                         {editData.Item2.map((employee: any, index: number) => (
+                           <View key={`employee-${employee.EmpNo || index}`} style={styles.tag}>
+                             <Text style={styles.tagText}>
+                               {employee.EmpNo} - {employee.EmployeeName}
+                             </Text>
+                           </View>
+                         ))}
+                       </View>
+                     </View>
+                   )}
+                 </View>
+               )}
+               keyExtractor={(item) => item.key}
+               showsVerticalScrollIndicator={true}
+             />
 
             {/* Modal Buttons */}
             <View style={styles.modalButtons}>
               <TouchableOpacity style={styles.cancelButton} onPress={handleEditClose}>
                 <Text style={styles.cancelButtonText}>Close</Text>
               </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </SafeAreaView>
-  );
-}
+                         </View>
+           </View>
+         </View>
+       </Modal>
+
+       {/* Category Selection Modal */}
+       <Modal
+         animationType="slide"
+         transparent={true}
+         visible={categoryModalVisible}
+         onRequestClose={() => setCategoryModalVisible(false)}>
+         <View style={styles.modalOverlay}>
+           <View style={styles.modalContent}>
+             <View style={styles.modalHeader}>
+               <Text style={styles.modalTitle}>Select Category</Text>
+               <TouchableOpacity onPress={() => setCategoryModalVisible(false)}>
+                 <Text style={styles.closeButton}>✕</Text>
+               </TouchableOpacity>
+             </View>
+             <FlatList
+               style={styles.modalBody}
+               data={categories}
+               keyExtractor={(item) => item.FieldID.toString()}
+               renderItem={({ item: cat }) => (
+                 <TouchableOpacity
+                   style={styles.dropdownItem}
+                   activeOpacity={0.7}
+                   onPress={() => {
+                     setSelectedCategory(cat.FieldID);
+                     setCategoryModalVisible(false);
+                   }}>
+                   <Text style={styles.dropdownText}>{cat.FieldValue}</Text>
+                 </TouchableOpacity>
+               )}
+               showsVerticalScrollIndicator={true}
+             />
+           </View>
+         </View>
+       </Modal>
+
+       {/* Filter Type Selection Modal */}
+       <Modal
+         animationType="slide"
+         transparent={true}
+         visible={filterTypeModalVisible}
+         onRequestClose={() => setFilterTypeModalVisible(false)}>
+         <View style={styles.modalOverlay}>
+           <View style={styles.modalContent}>
+             <View style={styles.modalHeader}>
+               <Text style={styles.modalTitle}>Select Filter Type</Text>
+               <TouchableOpacity onPress={() => setFilterTypeModalVisible(false)}>
+                 <Text style={styles.closeButton}>✕</Text>
+               </TouchableOpacity>
+             </View>
+             <FlatList
+               style={styles.modalBody}
+               data={filterTypes}
+               keyExtractor={(item) => item.EmployeeCategoryId.toString()}
+               renderItem={({ item: ft }) => (
+                 <TouchableOpacity
+                   style={styles.dropdownItem}
+                   activeOpacity={0.7}
+                   onPress={() => {
+                     setSelectedFilterType(ft.EmployeeCategoryId);
+                     setFilterTypeModalVisible(false);
+                   }}>
+                   <Text style={styles.dropdownText}>{ft.EmployeeCategory}</Text>
+                 </TouchableOpacity>
+               )}
+               showsVerticalScrollIndicator={true}
+             />
+           </View>
+         </View>
+       </Modal>
+
+       {/* Select Types Selection Modal */}
+       <Modal
+         animationType="slide"
+         transparent={true}
+         visible={selectTypeModalVisible}
+         onRequestClose={() => setSelectTypeModalVisible(false)}>
+         <View style={styles.modalOverlay}>
+           <View style={styles.modalContent}>
+             <View style={styles.modalHeader}>
+               <Text style={styles.modalTitle}>Select Types</Text>
+               <TouchableOpacity onPress={() => setSelectTypeModalVisible(false)}>
+                 <Text style={styles.closeButton}>✕</Text>
+               </TouchableOpacity>
+             </View>
+             <FlatList
+               style={styles.modalBody}
+               data={selectTypes}
+               keyExtractor={(item) => item.Id.toString()}
+               renderItem={({ item: st }) => (
+                 <TouchableOpacity
+                   style={[
+                     styles.dropdownItem,
+                     selectedSelectTypes.includes(st.Id) && styles.dropdownItemSelected
+                   ]}
+                   activeOpacity={0.7}
+                   onPress={() => {
+                     setSelectedSelectTypes(prev => {
+                       if (prev.includes(st.Id)) {
+                         return prev.filter(id => id !== st.Id);
+                       } else {
+                         return [...prev, st.Id];
+                       }
+                     });
+                   }}>
+                   <Text style={[
+                     styles.dropdownText,
+                     selectedSelectTypes.includes(st.Id) && styles.dropdownTextSelected
+                   ]}>
+                     {st.Descr}
+                   </Text>
+                   {selectedSelectTypes.includes(st.Id) && (
+                     <Text style={styles.checkmark}>✓</Text>
+                   )}
+                 </TouchableOpacity>
+               )}
+               showsVerticalScrollIndicator={true}
+             />
+             <View style={styles.modalButtons}>
+               <TouchableOpacity 
+                 style={styles.cancelButton} 
+                 onPress={() => setSelectTypeModalVisible(false)}>
+                 <Text style={styles.cancelButtonText}>Close</Text>
+               </TouchableOpacity>
+               <TouchableOpacity 
+                 style={styles.saveButton} 
+                 onPress={() => setSelectTypeModalVisible(false)}>
+                 <Text style={styles.saveButtonText}>OK</Text>
+               </TouchableOpacity>
+             </View>
+           </View>
+         </View>
+       </Modal>
+     </SafeAreaView>
+   );
+ }
 
 const styles = StyleSheet.create({
   container: {
@@ -967,16 +1039,29 @@ const styles = StyleSheet.create({
   dropdownListwrap:{
     padding: 5,
     paddingTop: 2,
+    elevation: 5,
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   dropdownList: {
-    borderRadius: 0,
+    borderRadius: 8,
     marginTop: 1,
     padding: 0,
     paddingTop: 0,
     borderTopWidth: 1,
     borderLeftWidth: 1,
     borderRightWidth: 1,
+    borderBottomWidth: 1,
     borderColor: '#e3e6ffff',
+    backgroundColor: '#fff',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
   },
   dropdownItem: {
     padding: 12,
