@@ -171,7 +171,23 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
             </TouchableOpacity>
           );
         })}
-        <TouchableOpacity  onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity onPress={() => {
+          Alert.alert(
+            'Sign Out',
+            'Do you want to Sign out?',
+            [
+              {
+                text: 'No',
+                style: 'cancel',
+              },
+              {
+                text: 'Yes',
+                style: 'destructive',
+                onPress: () => navigation.navigate('Login'),
+              },
+            ]
+          );
+        }}>
         <View style={styles.menuItem}>
         <View style={styles.divmenuIcon}>
           <Image source={require('../../assets/images/btmsignout.png')}

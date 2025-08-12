@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Image, Alert } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
 import Header from '../components/Header';
@@ -236,7 +236,23 @@ const Footer = () => {
         <Text style={styles.label}>Approval</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.btmmenu} onPress={() => navigation.navigate('Login')}>
+      <TouchableOpacity style={styles.btmmenu} onPress={() => {
+        Alert.alert(
+          'Sign Out',
+          'Do you want to Sign out?',
+          [
+            {
+              text: 'No',
+              style: 'cancel',
+            },
+            {
+              text: 'Yes',
+              style: 'destructive',
+              onPress: () => navigation.navigate('Login'),
+            },
+          ]
+        );
+      }}>
         <View><Image source={require('../../assets/images/btmsignout.png')}
           style={styles.btmicon} resizeMode="contain" />
         </View>
