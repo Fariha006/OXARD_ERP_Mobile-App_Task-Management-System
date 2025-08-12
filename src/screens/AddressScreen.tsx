@@ -10,9 +10,7 @@ import UserStorage from '../utils/userStorage';
 type Props = StackScreenProps<any, 'Address'>;
 
 export default function AddressScreen({ navigation }: Props) {
-  const [currentaccordionOpen, setCurrentaccordionOpen] = useState(false);
-  const [permanentaccordionOpen, setPermanentAccordionOpen] = useState(false);
-  const [emergencyaccordionOpen, setEmergencyAccordionOpen] = useState(false);
+  const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [addressInfo, setAddressInfo] = useState<AddressInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -71,16 +69,16 @@ export default function AddressScreen({ navigation }: Props) {
             <View style={styles.accordion}>
 
               <TouchableOpacity
-                style={[styles.accordionHeader, currentaccordionOpen ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
-                onPress={() => setCurrentaccordionOpen(!currentaccordionOpen)}>
+                style={[styles.accordionHeader, openAccordion === 'current' ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
+                onPress={() => setOpenAccordion(openAccordion === 'current' ? null : 'current')}>
                 <View style={styles.hdrltficn}>
                   <Image source={require('../../assets/images/innerpage/location1.png')}
                     style={[styles.ltficn, styles.star]} resizeMode="contain" />
                   <Text style={styles.accordionTitle}>Current Address</Text>
                 </View>
-                {/* <Text>{permanentaccordionOpen ? '▲' : '▼'}</Text> */}
+                {/* <Text>{openAccordion === 'current' ? '▲' : '▼'}</Text> */}
               </TouchableOpacity>
-              {currentaccordionOpen && (
+              {openAccordion === 'current' && (
                 <View style={styles.accordionContent}>
 
                   <View style={styles.odd}>
@@ -143,16 +141,16 @@ export default function AddressScreen({ navigation }: Props) {
             {/* Permanent Address Accordion */}
             <View style={styles.accordion}>
               <TouchableOpacity
-                style={[styles.accordionHeader, permanentaccordionOpen ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
-                onPress={() => setPermanentAccordionOpen(!permanentaccordionOpen)}>
+                style={[styles.accordionHeader, openAccordion === 'permanent' ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
+                onPress={() => setOpenAccordion(openAccordion === 'permanent' ? null : 'permanent')}>
                 <View style={styles.hdrltficn}>
                   <Image source={require('../../assets/images/innerpage/location1.png')}
                     style={[styles.ltficn, styles.star]} resizeMode="contain" />
                   <Text style={styles.accordionTitle}>Permanent Address</Text>
                 </View>
-                {/* <Text>{permanentaccordionOpen ? '▲' : '▼'}</Text> */}
+                {/* <Text>{openAccordion === 'permanent' ? '▲' : '▼'}</Text> */}
               </TouchableOpacity>
-              {permanentaccordionOpen && (
+              {openAccordion === 'permanent' && (
                 <View style={styles.accordionContent}>
                   <View style={styles.odd}>
                     <Text style={styles.lbl}>Address :</Text>
@@ -189,16 +187,16 @@ export default function AddressScreen({ navigation }: Props) {
             {/* Emergency Address Accordion */}
             <View style={styles.accordion}>
               <TouchableOpacity
-                style={[styles.accordionHeader, emergencyaccordionOpen ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
-                onPress={() => setEmergencyAccordionOpen(!emergencyaccordionOpen)}>
+                style={[styles.accordionHeader, openAccordion === 'emergency' ? styles.accordionHeaderOpen : styles.accordionHeaderClosed]}
+                onPress={() => setOpenAccordion(openAccordion === 'emergency' ? null : 'emergency')}>
                 <View style={styles.hdrltficn}>
                   <Image source={require('../../assets/images/innerpage/location1.png')}
                     style={[styles.ltficn, styles.star]} resizeMode="contain" />
                   <Text style={styles.accordionTitle}>Emergency Contact</Text>
                 </View>
-                {/* <Text>{emergencyaccordionOpen ? '▲' : '▼'}</Text> */}
+                {/* <Text>{openAccordion === 'emergency' ? '▲' : '▼'}</Text> */}
               </TouchableOpacity>
-              {emergencyaccordionOpen && (
+              {openAccordion === 'emergency' && (
                 <View style={styles.accordionContent}>
                   <View style={styles.odd}>
                     <Text style={styles.lbl}>Contact Person :</Text>
