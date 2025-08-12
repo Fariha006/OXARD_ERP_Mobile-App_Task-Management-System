@@ -55,8 +55,8 @@ export default function CertificateRequestScreen({ navigation }: Props) {
 
   const toggleAccordion = (idx: number) => {
     setOpenIndexes(openIndexes.includes(idx)
-      ? openIndexes.filter(i => i !== idx)
-      : [...openIndexes, idx]);
+      ? [] // Close all accordions if the clicked one is already open
+      : [idx]); // Open only the clicked accordion, closing all others
   };
 
   const handleNewRequest = () => {
