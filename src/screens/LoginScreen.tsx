@@ -14,6 +14,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { loginUser, LoginRequest, UserData, MenuItem } from '../api/api';
 import UserStorage from '../utils/userStorage';
 import { useDrawer } from '../context/DrawerContext';
+import { useIsFocused } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 export default function LoginScreen({ navigation }: Props) {
@@ -24,7 +25,7 @@ export default function LoginScreen({ navigation }: Props) {
   const [passwordError, setPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { refreshDrawer } = useDrawer();
-
+  const isFocused = useIsFocused();
   const validateFields = () => {
     let isValid = true;
     
@@ -107,11 +108,13 @@ export default function LoginScreen({ navigation }: Props) {
 
   return (
     <>
+    {isFocused && (
       <StatusBar 
         backgroundColor="#ffffff" 
         barStyle="dark-content" 
         translucent={false}
       />
+      )}
       <SafeAreaView style={styles.container}>
         <KeyboardAvoidingView
           style={styles.inner}
