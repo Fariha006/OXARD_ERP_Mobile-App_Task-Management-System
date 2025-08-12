@@ -567,7 +567,7 @@ export default function HomeScreen({ navigation }: Props) {
     { id: 6, title: 'Messages', image: require('../../assets/images/home/msgs.png'), route: 'Main', screen: 'Messege' },
     { id: 7, title: 'Leave Outstandings ', image: require('../../assets/images/home/leave.png'), route: 'Main', screen: 'LeaveOutstanding' },
     { id: 8, title: 'Approval', image: require('../../assets/images/home/aprovb.png'), route: 'Main', screen: 'Approval' },
-    { id: 9, title: 'Add ', image: require('../../assets/images/home/addbtn.png'), route: 'Main', screen: 'Add' },
+    // { id: 9, title: 'Add ', image: require('../../assets/images/home/addbtn.png'), route: 'Main', screen: 'Add' },
   ];
 
   // Auto-scroll effect for birthday - moved after DATA declaration
