@@ -512,12 +512,13 @@ export default function MessegeScreen({ navigation }: Props) {
 
             {/* Modal Buttons */}
             <View style={styles.modalButtons}>
+            <TouchableOpacity style={styles.cancelButton} onPress={handleClose}>
+                <Text style={styles.cancelButtonText}>Close</Text>
+              </TouchableOpacity>
               <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
                 <Text style={styles.saveButtonText}>Save</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.cancelButton} onPress={handleClose}>
-                <Text style={styles.cancelButtonText}>Close</Text>
-              </TouchableOpacity>
+              
             </View>
           </View>
         </View>

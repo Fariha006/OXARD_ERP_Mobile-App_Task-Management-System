@@ -146,7 +146,10 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
               onPress={() => toggleAccordion(idx)}>
               <View style={styles.hdrltficn}>
                 <Image source={require('../../assets/images/innerpage/payslip.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
-                <Text style={styles.accordionTitle}>{item.ReferenceNo}</Text>
+                <View style={styles.headerContent}>
+                  <Text style={styles.accordionTitle}>{item.ReferenceNo}</Text>
+                  <Text style={styles.accordiondate}>Type {item.PayslipType} year {item.Year}</Text>
+                </View>
                 <Text style={styles.accordiondate}>{item.TransactionDate}</Text>
               </View>
               <View style={styles.rightbtn}>
@@ -266,6 +269,9 @@ const styles = StyleSheet.create({
   star: {
     width: 20,
     height: 22,
+  },
+  headerContent: {
+    marginLeft: 5,
   },
   accordionHeader: {
     flexDirection: 'row',
