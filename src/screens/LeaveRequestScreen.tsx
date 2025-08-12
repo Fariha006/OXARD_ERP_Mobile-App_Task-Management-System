@@ -34,12 +34,17 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
   const [isSavingAll, setIsSavingAll] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editData, setEditData] = useState<any>(null);
+  const [editType, setEditType] = useState<any>(null);
 
   // Check if we're in edit mode and populate form with edit data
   useEffect(() => {
-    if (route.params?.editData) {
+    if (route.params?.editData && route.params?.type) {
       const data = route.params.editData;
+      const type = route.params.type;
+
+    
       setEditData(data);
+      setEditType(type);
       setIsEditMode(true);
 
       // Populate form fields with edit data
@@ -552,7 +557,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
         <View style={styles.formContainer}>
           {/* Leave Reference No */}
           <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>Leave Reference No</Text>
+            <Text style={styles.formLabel}>Leave Reference No{editType}</Text>
             <TextInput
               style={[styles.textInput, styles.readOnlyInput]}
               value={leaveReferenceNo}
@@ -606,11 +611,13 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
           </View>
 
           {/* Select Leaves Button */}
-          <View style={styles.selectLeavesContainer}>
+          {editType != 'view' && (
+          <View style={styles.selectLeavesContainer} >
             <TouchableOpacity style={styles.selectLeavesButton} onPress={handleRightUndoPress}>
               <Text style={styles.selectLeavesButtonText}>Select Leaves</Text>
             </TouchableOpacity>
           </View>
+          )}
 
           {/* Saved Leaves List */}
           {savedLeaves.length > 0 && (
@@ -633,6 +640,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                           {leave.startHD && ' | Start HD'} {leave.endHD && ' | End HD'}
                         </Text>
                       </View>
+                      {editType != 'view' && (
                       <View style={styles.savedLeaveActions}>
                         <View style={styles.editButtonContainer}>
                           <TouchableOpacity style={styles.editButton} onPress={() => handleEditLeave(leave)}>
@@ -646,11 +654,13 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                           </TouchableOpacity>
                         </View>
                       </View>
+                      )}
                     </View>
                   </View>
                 </View>
               ))}
               {/* Save All Button */}
+              {editType != 'view' && (
               <View style={styles.saveAllContainer}>
                 <TouchableOpacity
                   style={[styles.saveAllButton, isSavingAll && styles.disabledButton]}
@@ -664,6 +674,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                   )}
                 </TouchableOpacity>
               </View>
+              )}
             </View>
           )}
         </View>

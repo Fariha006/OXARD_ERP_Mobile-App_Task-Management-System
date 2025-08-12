@@ -131,7 +131,10 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
               <View style={styles.hdrltficn}>
                 <View style={styles.iconanddetail}>
                   <Image source={require('../../assets/images/innerpage/leaverqst.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
-                  <Text style={styles.accordionTitle}>{item.ReferenceNo} {item.StrTransactionDate}</Text>
+                  <View style={styles.headerContent}>
+                    <Text style={styles.accordionTitle}>{item.ReferenceNo}</Text>
+                    <Text style={styles.dateInfo}>Start date: {item.StrTransactionDateFrom} | End date: {item.StrTransactionDateTo}</Text>
+                  </View>
                 </View>
                 <View>
                   <Text style={[
@@ -179,10 +182,16 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
                   <Text style={styles.lbl}>Off or Holidays:</Text>
                   <Text style={styles.vlue}>{item['Off Day Count']}</Text>
                 </View>
-                {item.EditFlag == 'True' && (
+                {item.EditFlag == 'True' ? (
                 <View style={styles.savedLeaveActions}>  
+                    <View style={styles.editButtonContainer}>
+                  <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('LeaveRequest', { editData: item,type: 'view' })}>
+                      <Text style={styles.editIcon}>👁️</Text>
+                    </TouchableOpacity>
+                   
+                  </View>
                   <View style={styles.editButtonContainer}>
-                    <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('LeaveRequest', { editData: item })}>
+                    <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('LeaveRequest', { editData: item,type: 'edit' })}>
                       <Text style={styles.editIcon}>✏️</Text>
                     </TouchableOpacity>
                   </View>
@@ -192,7 +201,16 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
                     </TouchableOpacity>
                   </View>
                 </View>
-                )} 
+                ) : (
+                  <View style={styles.savedLeaveActions}>  
+                  <View style={styles.editButtonContainer}>
+                  <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('LeaveRequest', { editData: item,type: 'view' })}>
+                      <Text style={styles.editIcon}>👁️</Text>
+                    </TouchableOpacity>
+                   
+                  </View>
+                  </View>
+                )}
               </View>
 
             )}
@@ -269,6 +287,11 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     marginLeft: 5,
+  },
+  dateInfo: {
+    fontSize: 10,
+    color: 'gray',
+    marginTop: 2,
   },
   approvalStatus: {
     fontSize: 10,

@@ -11,7 +11,7 @@ export type RootStackParamList = {
   Home: undefined;
   Details: { userId: string }; // Example of passing params
   Login: undefined;
-  LeaveRequest: { editData?: any };
+  LeaveRequest: { editData?: any, type?: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
