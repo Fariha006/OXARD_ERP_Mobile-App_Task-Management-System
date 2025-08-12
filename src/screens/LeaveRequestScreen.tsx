@@ -10,7 +10,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'LeaveRequest'>;
 
 export default function LeaveRequestScreen({ navigation, route }: Props) {
   const [leaveReferenceNo, setLeaveReferenceNo] = useState('LR-2024-001');
-  const [requestDate, setRequestDate] = useState('');
+  const [requestDate, setRequestDate] = useState(new Date().toISOString().split('T')[0]);
   const [rejoinStatus, setRejoinStatus] = useState('OPEN');
   const [remarks, setRemarks] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -509,6 +509,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
 
         if (result) {
           if (result.IsSuccess === true) {
+            navigation.navigate('Main', { screen: 'LeaveHistory' });
             setValidationMessage('Leave applied successfully!');
             setShowValidationMessage(true);
             setTimeout(() => setShowValidationMessage(false), 3000);
@@ -622,7 +623,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
           {/* Saved Leaves List */}
           {savedLeaves.length > 0 && (
             <View style={styles.savedLeavesContainer}>
-              <Text style={styles.savedLeavesTitle}>Saved Leaves</Text>
+              <Text style={styles.savedLeavesTitle}>Leave Details</Text>
               {savedLeaves.map((leave, index) => (
                 <View style={styles.savedLeaveItem}>
                   <View key={leave.id} style={styles.savedleaveicon}>
@@ -670,7 +671,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                   {isSavingAll ? (
                     <ActivityIndicator size="small" color="#fff" />
                   ) : (
-                    <Text style={styles.saveAllButtonText}>Save All Leaves</Text>
+                    <Text style={styles.saveAllButtonText}>Save</Text>
                   )}
                 </TouchableOpacity>
               </View>
@@ -841,19 +842,20 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
 
             {/* Modal Buttons */}
             <View style={styles.modalButtons}>
+            <TouchableOpacity style={styles.cancelButton} onPress={handlePopupClose}>
+                <Text style={styles.cancelButtonText}>Close</Text>
+              </TouchableOpacity>
               <TouchableOpacity style={[styles.saveButton, isSaving && styles.disabledButton]}
                 onPress={handleSaveLeave} disabled={isSaving}>
                 {isSaving ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
                   <Text style={styles.saveButtonText}>
-                    {editingLeaveId ? 'Update' : 'Saves'}
+                    {editingLeaveId ? 'Update' : 'Add to List'}
                   </Text>
                 )}
               </TouchableOpacity>
-              <TouchableOpacity style={styles.cancelButton} onPress={handlePopupClose}>
-                <Text style={styles.cancelButtonText}>Close</Text>
-              </TouchableOpacity>
+          
             </View>
 
             {/* Validation Message */}

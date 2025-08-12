@@ -3,6 +3,7 @@ import {
   View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList,
   SafeAreaView, ActivityIndicator, Alert, Modal, TextInput
 } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -169,10 +170,10 @@ export default function ApprovalsScreen({ navigation }: Props) {
                     </View>
                     <View style={styles.actionButtons}>
                       <TouchableOpacity 
-                        style={styles.viewBtn} 
+                        style={styles.moreBtn} 
                         onPress={() => openViewModal(item2.DecisionId || '0')}
                       >
-                        <Text style={styles.viewBtnText}>View</Text>
+                        <MaterialIcons name="more-vert" size={24} color="#133F7C" />
                       </TouchableOpacity>
                       {item2.ReportFlag === 1 && (
                         <TouchableOpacity style={styles.downloadBtn} onPress={() => {/* TODO: implement download logic */ }}>
@@ -214,15 +215,15 @@ export default function ApprovalsScreen({ navigation }: Props) {
             />
 
             <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.acceptButton]}
-                onPress={() => submitDecision('1')}
+
+            <TouchableOpacity
+                style={[styles.modalButton, styles.closeButton]}
+                onPress={closeModal}
                 disabled={submitting}
               >
-                <Text style={styles.modalButtonText}>
-                  {submitting ? 'Submitting...' : 'Accept'}
-                </Text>
+                <Text style={styles.modalButtonText}>Close</Text>
               </TouchableOpacity>
+          
 
               <TouchableOpacity
                 style={[styles.modalButton, styles.rejectButton]}
@@ -233,14 +234,16 @@ export default function ApprovalsScreen({ navigation }: Props) {
                   {submitting ? 'Submitting...' : 'Reject'}
                 </Text>
               </TouchableOpacity>
-
               <TouchableOpacity
-                style={[styles.modalButton, styles.closeButton]}
-                onPress={closeModal}
+                style={[styles.modalButton, styles.acceptButton]}
+                onPress={() => submitDecision('1')}
                 disabled={submitting}
               >
-                <Text style={styles.modalButtonText}>Close</Text>
+                <Text style={styles.modalButtonText}>
+                  {submitting ? 'Submitting...' : 'Accept'}
+                </Text>
               </TouchableOpacity>
+           
             </View>
           </View>
         </View>
@@ -391,6 +394,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  moreBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
   },
   viewBtn: {
     backgroundColor: '#133F7C',
