@@ -847,7 +847,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   editIcon: {
-    fontSize: 16,
+    fontSize: 10,
   },
   rowDetails: {
     fontSize: 14,
@@ -862,7 +862,7 @@ const styles = StyleSheet.create({
   rowLabel: {
     fontSize: 11,
     color: 'gray',
-    paddingLeft: 12,
+    // paddingLeft: 10,
     fontWeight: '600',
     marginBottom: 1,
   },

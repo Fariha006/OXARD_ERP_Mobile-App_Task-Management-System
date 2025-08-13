@@ -148,9 +148,9 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
                 <Image source={require('../../assets/images/innerpage/payslip.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
                 <View style={styles.headerContent}>
                   <Text style={styles.accordionTitle}>{item.ReferenceNo}</Text>
-                  <Text style={styles.accordiondate}>Type {item.PayslipType} year {item.Year}</Text>
+                  <Text style={styles.accordionhdrsubtitle}> {item.PayslipType} ({item.Month}, {item.Year})</Text>
                 </View>
-                <Text style={styles.accordiondate}>{item.TransactionDate}</Text>
+                {/* <Text style={styles.accordiondate}>{item.TransactionDate}</Text> */}
               </View>
               <View style={styles.rightbtn}>
                 <TouchableOpacity
@@ -287,8 +287,8 @@ const styles = StyleSheet.create({
   },
   dwnloadicon: {},
     downloadimage: {
-    width: 16,
-    height: 18,
+    width: 24,
+    height: 26,
     },
     accordionHeaderOpen: {
       backgroundColor: '#E2EDFC',
@@ -306,6 +306,11 @@ const styles = StyleSheet.create({
   accordiondate: {
     fontSize: 11,
     marginLeft: 12,
+    color: 'gray',
+  },
+  accordionhdrsubtitle: {
+    fontSize: 11,
+    marginLeft: 1,
     color: 'gray',
   },
   accordionContent: {

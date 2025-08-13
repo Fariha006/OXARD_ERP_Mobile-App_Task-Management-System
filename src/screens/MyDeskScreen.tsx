@@ -52,7 +52,7 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
         </TouchableOpacity>
         <View style={styles.pagewrap}>
-          <Text style={styles.pagetitle}>Notifications</Text>
+          <Text style={styles.pagetitle}>My Desk</Text>
         </View>
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>

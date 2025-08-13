@@ -140,9 +140,9 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
           <Text style={styles.Username}>{userData?.EmployeeName || 'User Name'}</Text>
           <Text style={styles.Useremail}>{userData?.DesgNam || ''}</Text>
         </View>
-        <View style={styles.downarows}>
+        {/* <View style={styles.downarows}>
           <Image source={require('../../assets/images/arrowdown.png')} />
-        </View>
+        </View> */}
       </View>
       <View style={styles.drawwraper}>
        
@@ -162,7 +162,7 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
               key={item.id}
               onPress={() => navigation.navigate('Main', item.navigationParams)}
             >
-              <View style={[styles.menuItem, index === 0 ? styles.menuItemactive : null]}>
+              <View style={[styles.menuItem, index === 0 ? styles.menuItem : null]}>
                 <View style={styles.divmenuIcon}>
                   <Image source={item.icon} style={styles.menuIcon} />
                 </View>
@@ -188,7 +188,7 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
             ]
           );
         }}>
-        <View style={styles.menuItem}>
+        <View style={styles.menuItemsignout}>
         <View style={styles.divmenuIcon}>
           <Image source={require('../../assets/images/btmsignout.png')}
           style={styles.menuIcon} resizeMode="contain" />
@@ -205,9 +205,9 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
 export default CustomDrawer;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 0, paddingLeft: 0, backgroundColor: '#ffffff' },
-  headsep: { height: 20, backgroundColor: '#F1F6FD', marginBottom: 17, },
-  drawwraper: { paddingLeft: 5, paddingRight: 5, },
+  container: { flex: 1, paddingTop: 0, paddingLeft: 15, backgroundColor: "#E5EEFD" },
+  headsep: { height: 20, backgroundColor: '#E5EEFD', marginBottom: 17, },
+  drawwraper: { paddingLeft: 1, paddingRight: 5, },
   title: { fontSize: 18, marginBottom: 20 },
   userimagewraper:
   {
@@ -256,16 +256,38 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center', 
-    borderRadius: 4,
+    borderRadius: 10,
     paddingTop: 8,
     paddingBottom: 8,
     paddingLeft: 10,
-    marginBottom: 10,
+    marginBottom: 2,
+ 
+
+  },
+  menuItemsignout:{ 
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center', 
+    borderRadius: 10,
+    paddingTop: 25,
+    paddingBottom: 8,
+    paddingLeft: 10,
+    marginBottom: 2,
+    
+    borderBottomColor: 'transparent',
+    borderTopColor: '#CECECE',
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderStyle: 'solid',
+    borderWidth: 1,
+    marginTop: 17,
+    
+
   },
   menuItemactive:{ 
     backgroundColor: '#C8D2E1',
   },
   divmenuIcon:{ width:22,marginRight:12,},
   menuIcon:{ width:'100%',},
-  menuText: { color: '#000000', fontSize: 16, fontWeight: '500'},
+  menuText: { color: '#000000', fontSize: 12, fontWeight: '500'},
 });

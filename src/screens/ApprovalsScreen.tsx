@@ -173,7 +173,11 @@ export default function ApprovalsScreen({ navigation }: Props) {
                         style={styles.moreBtn} 
                         onPress={() => openViewModal(item2.DecisionId || '0')}
                       >
-                        <MaterialIcons name="more-vert" size={24} color="#133F7C" />
+                         <View style={styles.dwnloadicon}>
+                            <Image source={require('../../assets/images/innerpage/clicktoopen.png')} style={styles.downloadimage} resizeMode="contain" />
+                            {/* <Text style={styles.downloadBtnText}> {downloadingId === item.PayslipId ? 'Downloading...' : 'Download'}</Text> */}
+                          </View>
+                        {/* <MaterialIcons name="more-vert" size={24} color="#133F7C" /> */}
                       </TouchableOpacity>
                       {item2.ReportFlag === 1 && (
                         <TouchableOpacity style={styles.downloadBtn} onPress={() => {/* TODO: implement download logic */ }}>
@@ -343,8 +347,8 @@ const styles = StyleSheet.create({
   },
   dwnloadicon: {},
     downloadimage: {
-    width: 16,
-    height: 18,
+    width: 24,
+    height: 26,
     },
   accordionHeaderClosed: {
     borderColor: '#DEECFF',
