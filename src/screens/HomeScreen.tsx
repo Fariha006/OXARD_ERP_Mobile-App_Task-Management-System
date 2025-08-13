@@ -1494,7 +1494,6 @@ const styles = StyleSheet.create({
   },
   eventContainer: {
     backgroundColor: '#e8e5fd',
-    // backgroundColor: '#2200ffff',
     width: width -10,
     marginRight: 2,
     padding: 10,
@@ -1510,6 +1509,8 @@ const styles = StyleSheet.create({
   eventTopRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
+    width: '100%',
+    paddingRight: 20,
   },
   eventImage: {
     width: 50,
