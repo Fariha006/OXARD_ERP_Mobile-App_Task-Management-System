@@ -917,7 +917,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
+    backgroundColor: '#E5EEFD',
     borderRadius: 12,
     width: '90%',
     maxHeight: '80%',
@@ -1000,6 +1001,7 @@ const styles = StyleSheet.create({
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 10,
   },
   checkboxLabel: {
     fontSize: 16,

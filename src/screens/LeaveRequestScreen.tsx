@@ -387,7 +387,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
             } else {
               // Add new leave
               setSavedLeaves([...savedLeaves, updatedLeave]);
-              setValidationMessage('Leave request saved successfully!');
+              //setValidationMessage('Leave request saved successfully!');
             }
 
             // Reset form
@@ -682,11 +682,11 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
       </ScrollView>
 
       {/* Validation Message for Main Screen */}
-      {showValidationMessage && (
+      {/* {showValidationMessage && (
         <View style={styles.validationContainer}>
           <Text style={styles.validationText}>{validationMessage}</Text>
         </View>
-      )}
+      )} */}
 
       {/* RightUndo Popup Modal */}
       <Modal

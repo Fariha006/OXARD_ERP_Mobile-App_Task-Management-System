@@ -40,7 +40,7 @@ export default function RequestDashboardScreen({ navigation }: Props) {
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity
-          style={styles.requestButton}
+          style={styles.requestButton} 
           onPress={handleLeaveRequest}
           activeOpacity={0.8}>
           <View style={styles.buttonContent}>
@@ -51,15 +51,15 @@ export default function RequestDashboardScreen({ navigation }: Props) {
                 resizeMode="contain"/>
             </View>
             <View style={styles.textContainer}>
-              <Text style={styles.buttonTitle}>Leave Request</Text>
+              <Text style={styles.buttonTitle}>Leave Requests</Text>
               <Text style={styles.buttonSubtitle}>
                 Apply for leave and manage your time off
               </Text>
             </View>
           </View>
-          <View style={styles.arrowContainer}>
+          {/* <View style={styles.arrowContainer}>
             <Text style={styles.arrow}>→</Text>
-          </View>
+          </View> */}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -74,15 +74,15 @@ export default function RequestDashboardScreen({ navigation }: Props) {
                 resizeMode="contain"/>
             </View>
             <View style={styles.textContainer}>
-              <Text style={styles.buttonTitle}>Certificate Request</Text>
+              <Text style={styles.buttonTitle}>Certificate Requests</Text>
               <Text style={styles.buttonSubtitle}>
                 Request certificates and documents
               </Text>
             </View>
           </View>
-          <View style={styles.arrowContainer}>
-            <Text style={styles.arrow}>→</Text>
-          </View>
+            {/* <View style={styles.arrowContainer}>
+              <Text style={styles.arrow}>→</Text>
+            </View> */}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -132,7 +132,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffffff',
   },
   requestButton: {
-    backgroundColor: '#ffffffff',
+    // backgroundColor: '#ffffffff',
+    backgroundColor: '#E5EEFD',
     borderRadius: 12,
     padding: 10,
     marginBottom: 16,
@@ -176,7 +177,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   buttonSubtitle: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#666666',
     lineHeight: 20,
   },

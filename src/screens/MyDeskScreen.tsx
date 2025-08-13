@@ -284,8 +284,8 @@ const styles = StyleSheet.create({
     paddingRight: 0,
     paddingTop: 0,
     paddingBottom: 10,
-    marginLeft:6,
-    marginRight:6,
+    marginLeft:20,
+    marginRight:20,
   },
   tile: {
     width: 82,
