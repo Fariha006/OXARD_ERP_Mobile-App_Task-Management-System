@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, Alert, Platform, Modal } from 'react-native';
 import { getPayslips, downloadPayslipPdf } from '../api/api';
 import UserStorage from '../utils/userStorage';
 import RNFS from 'react-native-fs';
+import Pdf from 'react-native-pdf';
 import { Buffer } from 'buffer';
 
 // Add these declarations at the top for web compatibility
@@ -19,6 +20,9 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
   const [error, setError] = useState<string | null>(null);
   const [openIndexes, setOpenIndexes] = useState<number[]>([]);
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
+  const [pdfSource, setPdfSource] = useState<{ uri: string } | null>(null);
+  const [base64Data, setBase64Data] = useState<string>('');
+  const [pdfModalVisible, setPdfModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -86,20 +90,47 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
         const base64data = await downloadPayslipPdf('da6110', payslipId.toString(), token);
         console.log('PDF base64 preview (mobile):', base64data.substring(0, 40));
         if (!base64data.startsWith('JVBERi0')) {
-          Alert.alert('Warning', 'PDF base64 does not start with JVBERi0. The file may be invalid.');
+          Alert.alert('Warning', 'Invalid PDF file data.');
+          return;
         }
-        const fileName = `Payslip_${referenceNo}.pdf`;
-        const path =
-          Platform.OS === 'android'
-            ? `${RNFS.DownloadDirectoryPath}/${fileName}`
-            : `${RNFS.DocumentDirectoryPath}/${fileName}`;
-        await RNFS.writeFile(path, base64data, 'base64');
-        Alert.alert('Success', `Payslip saved to ${path}`);
+        
+        // Prepare inline Base64 source for react-native-pdf
+        const source = { uri: `data:application/pdf;base64,${base64data}` };
+        setPdfSource(source);
+        setBase64Data(base64data);
+        setPdfModalVisible(true);
       }
     } catch (err) {
       Alert.alert('Error', 'Failed to download payslip.');
     } finally {
       setDownloadingId(null);
+    }
+  };
+
+  const handleClosePdf = () => {
+    setPdfModalVisible(false);
+    setPdfSource(null);
+    setBase64Data('');
+  };
+
+  const handleSavePdf = async (referenceNo: string) => {
+    if (!base64Data) {
+      Alert.alert('Error', 'No PDF data to save.');
+      return;
+    }
+
+    try {
+      const fileName = `Payslip_${referenceNo}.pdf`;
+      const path =
+        Platform.OS === 'android'
+          ? `${RNFS.DownloadDirectoryPath}/${fileName}`
+          : `${RNFS.DocumentDirectoryPath}/${fileName}`;
+
+      await RNFS.writeFile(path, base64Data, 'base64');
+      Alert.alert('Success', `PDF saved to ${path}`);
+    } catch (error) {
+      console.error('Error saving PDF:', error);
+      Alert.alert('Error', 'Failed to save PDF to device.');
     }
   };
 
@@ -208,6 +239,50 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
           </View>
         ))}
       </ScrollView>
+
+      {/* PDF Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={pdfModalVisible}
+        onRequestClose={handleClosePdf}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Payslip Report</Text>
+              <TouchableOpacity onPress={handleClosePdf}>
+                <Text style={styles.modalCloseButton}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.pdfContainer}>
+              {pdfSource && (
+                <Pdf
+                  source={pdfSource}
+                  style={styles.pdfViewer}
+                  onError={(error) => {
+                    console.log('PDF render error:', error);
+                    Alert.alert('Error', 'Failed to display PDF.');
+                  }}
+                  onLoadComplete={(numberOfPages, filePath) => {
+                    console.log(`PDF loaded: ${numberOfPages} pages`);
+                  }}
+                />
+              )}
+            </View>
+            
+            {/* PDF Action Buttons */}
+            <View style={styles.pdfActionButtons}>
+              <TouchableOpacity style={styles.closeButton} onPress={handleClosePdf}>
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveButton} onPress={() => handleSavePdf(data.find(item => item.PayslipId === downloadingId)?.ReferenceNo || '')}>
+                <Text style={styles.saveButtonText}>Save PDF</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -366,5 +441,86 @@ const styles = StyleSheet.create({
   downloadBtn: {
     borderRadius: 8,
     marginRight: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#E5EEFD',
+    borderRadius: 12,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    width: '95%',
+    height: '70%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#133F7C',
+  },
+  modalCloseButton: {
+    fontSize: 20,
+    color: '#666',
+    fontWeight: 'bold',
+  },
+  pdfContainer: {
+    flex: 1,
+    padding: 10,
+  },
+  pdfViewer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  pdfActionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0'
+  },
+  closeButton: {
+    backgroundColor: '#fce2e5ff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    flex: 0.48
+  },
+  closeButtonText: {
+    color: '#7c1313ff',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
+  saveButton: {
+    backgroundColor: '#133F7C',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    flex: 0.48
+  },
+  saveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center'
   }
 });
