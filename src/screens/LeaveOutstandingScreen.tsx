@@ -1,23 +1,28 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Platform, Alert, ActivityIndicator, Image } from 'react-native';
+import {
+  View, Text, StyleSheet, TouchableOpacity, SafeAreaView,
+  Platform, Alert, ActivityIndicator, Image, Modal
+} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import RNFS from 'react-native-fs';
-import { Buffer } from 'buffer';
 import { downloadLeaveOutstandingPdf } from '../api/api';
 import UserStorage from '../utils/userStorage';
+import Pdf from 'react-native-pdf';
+import RNFS from 'react-native-fs';
 
 const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [pdfSource, setPdfSource] = useState<{ uri: string } | null>(null);
+  const [base64Data, setBase64Data] = useState<string>('');
+  const [pdfModalVisible, setPdfModalVisible] = useState(false);
 
-  const onChange = (event: any, selectedDate?: Date) => {
+  const onChange = (_event: any, selectedDate?: Date) => {
     setShowPicker(Platform.OS === 'ios');
     if (selectedDate) setDate(selectedDate);
   };
 
   const formatDate = (d: Date) => {
-    // Format as yyyy-MM-dd
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
@@ -27,37 +32,72 @@ const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
   const handleDownload = async () => {
     setDownloading(true);
     try {
-      const formattedDate = date.toISOString().split('T')[0];
+      const formattedDate = formatDate(date);
       const token = await UserStorage.getToken();
+
       if (!token) {
         Alert.alert('No authentication token found. Please login again.');
-        setDownloading(false);
         return;
       }
+
       const base64data = await downloadLeaveOutstandingPdf('da5010', formattedDate, token);
       if (!base64data.startsWith('JVBERi0')) {
-        Alert.alert('Warning', 'PDF base64 does not start with JVBERi0. The file may be invalid.');
+        Alert.alert('Warning', 'Invalid PDF file data.');
+        return;
       }
-      const fileName = `LeaveOutstanding_${formattedDate}.pdf`;
-      const path =
-        Platform.OS === 'android'
-          ? `${RNFS.DownloadDirectoryPath}/${fileName}`
-          : `${RNFS.DocumentDirectoryPath}/${fileName}`;
-      await RNFS.writeFile(path, base64data, 'base64');
-      Alert.alert('Success', `PDF saved to ${path}`);
+
+             // Prepare inline Base64 source for react-native-pdf
+       const source = { uri: `data:application/pdf;base64,${base64data}` };
+       setPdfSource(source);
+       setBase64Data(base64data);
+       setPdfModalVisible(true);
+
     } catch (err) {
+      console.error(err);
       Alert.alert('Error', 'Failed to download PDF.');
     } finally {
       setDownloading(false);
     }
-  };
+     };
 
-  return (
+   const handleClosePdf = () => {
+     setPdfModalVisible(false);
+     setPdfSource(null);
+     setBase64Data('');
+   };
+
+   const handleSavePdf = async () => {
+     if (!base64Data) {
+       Alert.alert('Error', 'No PDF data to save.');
+       return;
+     }
+
+     try {
+       const formattedDate = formatDate(date);
+       const fileName = `LeaveOutstanding_${formattedDate}.pdf`;
+       const path =
+         Platform.OS === 'android'
+           ? `${RNFS.DownloadDirectoryPath}/${fileName}`
+           : `${RNFS.DocumentDirectoryPath}/${fileName}`;
+
+       await RNFS.writeFile(path, base64Data, 'base64');
+       Alert.alert('Success', `PDF saved to ${path}`);
+     } catch (error) {
+       console.error('Error saving PDF:', error);
+       Alert.alert('Error', 'Failed to save PDF to device.');
+     }
+   };
+
+   return (
     <SafeAreaView style={styles.container}>
       <View style={[styles.back, styles.toptitle]}>
         <TouchableOpacity onPress={() => navigation?.goBack && navigation.goBack()}>
           <View style={styles.backicon}>
-            <Image source={require('../../assets/images/backarow.png')} style={styles.backiconimg} resizeMode="contain" />
+            <Image
+              source={require('../../assets/images/backarow.png')}
+              style={styles.backiconimg}
+              resizeMode="contain"
+            />
           </View>
         </TouchableOpacity>
         <View style={styles.pagewrap}>
@@ -65,10 +105,11 @@ const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
         </View>
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
+
       <View style={styles.formGroup}>
         <Text style={styles.label}>As on Date</Text>
         <TouchableOpacity style={styles.dateInput} onPress={() => setShowPicker(true)}>
-          <Text style={styles.dateText}>{date.toISOString().split('T')[0]}</Text>
+          <Text style={styles.dateText}>{formatDate(date)}</Text>
         </TouchableOpacity>
         {showPicker && (
           <DateTimePicker
@@ -79,86 +120,157 @@ const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
           />
         )}
       </View>
+
       <TouchableOpacity style={styles.downloadBtn} onPress={handleDownload} disabled={downloading}>
         {downloading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Image source={require('../../assets/images/innerpage/download.png')} resizeMode="contain" />
-          // <Text style={styles.downloadBtnText}>Download</Text>
-
+          <Image
+            source={require('../../assets/images/innerpage/download.png')}
+            resizeMode="contain"
+          />
         )}
-      </TouchableOpacity>
+             </TouchableOpacity>
+
+      {/* PDF Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={pdfModalVisible}
+        onRequestClose={handleClosePdf}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Leave Outstanding Report</Text>
+              <TouchableOpacity onPress={handleClosePdf}>
+                <Text style={styles.modalCloseButton}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.pdfContainer}>
+              {pdfSource && (
+                <Pdf
+                  source={pdfSource}
+                  style={styles.pdfViewer}
+                  onError={(error) => {
+                    console.log('PDF render error:', error);
+                    Alert.alert('Error', 'Failed to display PDF.');
+                  }}
+                  onLoadComplete={(numberOfPages, filePath) => {
+                    console.log(`PDF loaded: ${numberOfPages} pages`);
+                  }}
+                />
+              )}
+            </View>
+            
+            {/* PDF Action Buttons */}
+            <View style={styles.pdfActionButtons}>
+              <TouchableOpacity style={styles.closeButton} onPress={handleClosePdf}>
+                <Text style={styles.closeButtonText}>Close PDF</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveButton} onPress={handleSavePdf}>
+                <Text style={styles.saveButtonText}>Save PDF</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  container: { flex: 1, backgroundColor: '#f9f9f9', alignItems: 'center' },
+  back: { flexDirection: 'row', alignItems: 'flex-start', marginTop: 10 },
+  toptitle: { flexDirection: 'row', justifyContent: 'space-between', width: '100%' },
+  pagewrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  pagetitle: { fontSize: 22, color: '#133F7C' },
+  backicon: { marginLeft: 20 },
+  backiconimg: { width: 25, height: 25 },
+  rightclick: { width: 110 },
+  formGroup: { width: '90%', marginBottom: 24, marginTop: 40 },
+  label: { fontSize: 16, color: '#343434ff', marginBottom: 8 },
+  dateInput: { borderWidth: 0.5, borderColor: '#637b9cff', borderRadius: 8, padding: 12, backgroundColor: '#fff' },
+  dateText: { fontSize: 16, color: '#000' },
+  downloadBtn: { paddingVertical: 8, paddingHorizontal: 20, borderRadius: 8, borderWidth: 1, borderColor: '#cacacaff' },
+  pdfActionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0'
+  },
+  closeButton: {
+    backgroundColor: '#fce2e5ff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    flex: 0.48
+  },
+  closeButtonText: {
+    color: '#7c1313ff',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
+  saveButton: {
+    backgroundColor: '#133F7C',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    flex: 0.48
+  },
+  saveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
+  modalOverlay: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  back: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
-    marginTop: 10,
+  modalContent: {
+    backgroundColor: '#E5EEFD',
+    borderRadius: 12,
+    width: '95%',
+    height: '70%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  toptitle: {
+  modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingRight: 10,
-    width: '100%',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
-  pagewrap: {
-    width: '100%',
-    paddingRight: 50,
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  pagetitle: {
-    fontSize: 22,
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
     color: '#133F7C',
   },
-  backicon: {
-    marginLeft: 20,
+  modalCloseButton: {
+    fontSize: 20,
+    color: '#666',
+    fontWeight: 'bold',
   },
-  backiconimg: {
-    width: 25,
-    height: 25,
+  pdfContainer: {
+    flex: 1,
+    padding: 10,
   },
-  rightclick: {
-    width: 110,
-  },
-  formGroup: {
-    width: '90%',
-    marginBottom: 24,
-    marginTop: 40,
-  },
-  label: {
-    fontSize: 16,
-    color: '#343434ff',
-    marginBottom: 8,
-  },
-  dateInput: {
-    borderWidth: .5,
-    borderColor: '#637b9cff',
-    borderRadius: 8,
-    padding: 12,
+  pdfViewer: {
+    flex: 1,
     backgroundColor: '#fff',
-  },
-  dateText: {
-    fontSize: 16,
-    color: '#000',
-  },
-  downloadBtn: {
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#cacacaff',
   }
 });
 
