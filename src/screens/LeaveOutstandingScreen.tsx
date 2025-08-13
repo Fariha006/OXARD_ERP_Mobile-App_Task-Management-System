@@ -166,7 +166,7 @@ const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
             {/* PDF Action Buttons */}
             <View style={styles.pdfActionButtons}>
               <TouchableOpacity style={styles.closeButton} onPress={handleClosePdf}>
-                <Text style={styles.closeButtonText}>Close PDF</Text>
+                <Text style={styles.closeButtonText}>Close</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveButton} onPress={handleSavePdf}>
                 <Text style={styles.saveButtonText}>Save PDF</Text>
@@ -238,6 +238,8 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: '#E5EEFD',
     borderRadius: 12,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
     width: '95%',
     height: '70%',
     shadowColor: '#000',
