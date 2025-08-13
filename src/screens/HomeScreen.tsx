@@ -1353,7 +1353,7 @@ const styles = StyleSheet.create({
     marginBottom: 1,
   },
   tile: {
-    width: '10%',
+    width: '11%',
     aspectRatio: 1,
     backgroundColor: '#E5EEFD',
     borderRadius: 10,
