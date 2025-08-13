@@ -52,7 +52,7 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
   return (
     <>
     <StatusBar 
-    backgroundColor="#133F7C" 
+    backgroundColor="#E5EEFD" 
     barStyle="light-content" 
     translucent={false}
   />
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginTop: 30,
+    marginTop: 20,
   },
   Iconnotfction: {
     backgroundColor: '#ffffff',

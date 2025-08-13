@@ -26,6 +26,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
   const [leaveDays, setLeaveDays] = useState('0');
   const [holidays, setHolidays] = useState('0');
   const [leaveDropdownOpen, setLeaveDropdownOpen] = useState(false);
+  const [leaveTypeModalVisible, setLeaveTypeModalVisible] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [savedLeaves, setSavedLeaves] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -188,6 +189,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
     setHolidays('0');
     setIsCalculating(false);
     setEditingLeaveId(null);
+    setLeaveTypeModalVisible(false);
   };
 
   const handleStartDateChange = (event: any, selectedDate?: Date) => {
@@ -387,7 +389,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
             } else {
               // Add new leave
               setSavedLeaves([...savedLeaves, updatedLeave]);
-              setValidationMessage('Leave request saved successfully!');
+              //setValidationMessage('Leave request saved successfully!');
             }
 
             // Reset form
@@ -682,11 +684,11 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
       </ScrollView>
 
       {/* Validation Message for Main Screen */}
-      {showValidationMessage && (
+      {/* {showValidationMessage && (
         <View style={styles.validationContainer}>
           <Text style={styles.validationText}>{validationMessage}</Text>
         </View>
-      )}
+      )} */}
 
       {/* RightUndo Popup Modal */}
       <Modal
@@ -713,7 +715,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                   <Text style={styles.formLabel}>Leave Type</Text>
                   <TouchableOpacity
                     style={styles.dropdown}
-                    onPress={() => setLeaveDropdownOpen(!leaveDropdownOpen)}>
+                    onPress={() => setLeaveTypeModalVisible(true)}>
                     <Text style={styles.dropdownText}>
                       {selectedLeaveType !== null && leaveData?.Item2
                         ? leaveData.Item2.find((item: any) => item.PayheadId === selectedLeaveType)?.PayHeadName
@@ -721,24 +723,6 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                     </Text>
                     <Text style={styles.dropdownArrow}>▼</Text>
                   </TouchableOpacity>
-                  {leaveDropdownOpen && leaveData?.Item2 && (
-                    <View style={styles.dropdownListwrap}>
-                      <View style={styles.dropdownList}>
-                        {leaveData.Item2.map((item: any) => (
-                          <TouchableOpacity
-                            key={item.PayheadId}
-                            style={styles.dropdownItem}
-                            activeOpacity={0.7}
-                            onPress={() => {
-                              setSelectedLeaveType(item.PayheadId);
-                              setLeaveDropdownOpen(false);
-                            }}>
-                            <Text style={styles.dropdownText}>{item.PayHeadName}</Text>
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-                    </View>
-                  )}
                 </View>
 
                 {/* Start Date */}
@@ -867,6 +851,41 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
           </View>
         </View>
       </Modal>
+
+      {/* Leave Type Selection Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={leaveTypeModalVisible}
+        onRequestClose={() => setLeaveTypeModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select Leave Type</Text>
+              <TouchableOpacity onPress={() => setLeaveTypeModalVisible(false)}>
+                <Text style={styles.closeButton}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              style={styles.modalBody}
+              data={leaveData?.Item2 || []}
+              keyExtractor={(item) => item.PayheadId.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.dropdownItem}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    setSelectedLeaveType(item.PayheadId);
+                    setLeaveTypeModalVisible(false);
+                  }}>
+                  <Text style={styles.dropdownText}>{item.PayHeadName}</Text>
+                </TouchableOpacity>
+              )}
+              showsVerticalScrollIndicator={true}
+            />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -992,7 +1011,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    backgroundColor: '#ffffffff',
+    backgroundColor: '#E5EEFD',
     borderRadius: 10,
     padding: 10,
     width: '80%',

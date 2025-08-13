@@ -198,6 +198,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 0,
     paddingHorizontal: 10,
+    backgroundColor: '#ffffff',
   },
   inputusr: {
     marginBottom: 15,
@@ -214,7 +215,7 @@ const styles = StyleSheet.create({
     marginLeft: 2,
   },
 button: {
-  marginTop: 22,
+  marginTop: 30,
   borderColor: '#D60808',
   backgroundColor: '#D60808',
   width: 163,

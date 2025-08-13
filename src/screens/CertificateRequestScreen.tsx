@@ -27,6 +27,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showCertificateDropdown, setShowCertificateDropdown] = useState(false);
+  const [certificateTypeModalVisible, setCertificateTypeModalVisible] = useState(false);
   const [selectedCertificateType, setSelectedCertificateType] = useState('');
   const [certificateTypes, setCertificateTypes] = useState<any[]>([]);
   const [loadingCertificateTypes, setLoadingCertificateTypes] = useState(false);
@@ -216,6 +217,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
 
   const handleCancelRequest = () => {
     setModalVisible(false);
+    setCertificateTypeModalVisible(false);
     resetForm();
   };
 
@@ -240,7 +242,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
   const handleCertificateTypeSelect = (type: any) => {
     setSelectedCertificateType(type.CertificateName);
     setNewRequest({ ...newRequest, certificateType: type.ReportId.toString() });
-    setShowCertificateDropdown(false);
+    setCertificateTypeModalVisible(false);
   };
 
   const handleEditRequest = async (item: any) => {
@@ -483,37 +485,13 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                 <Text style={styles.inputLabel}>Certificate Type:</Text>
                 <TouchableOpacity
                   style={styles.dropdownButton}
-                  onPress={() => setShowCertificateDropdown(!showCertificateDropdown)}
+                  onPress={() => setCertificateTypeModalVisible(true)}
                   disabled={loadingCertificateTypes}>
                   <Text style={styles.dropdownButtonText}>
                     {loadingCertificateTypes ? 'Loading...' : (selectedCertificateType || 'Select certificate type')}
                   </Text>
-                  <Text style={styles.dropdownArrow}>
-                    {showCertificateDropdown ? '▲' : '▼'}
-                  </Text>
+                  <Text style={styles.dropdownArrow}>▼</Text>
                 </TouchableOpacity>
-                {showCertificateDropdown && (
-                  <View style={styles.dropdownListwrap}>
-                    <View style={styles.dropdownList}>
-                      {certificateTypes.length === 0 ? (
-                        <View style={styles.dropdownItem}>
-                          <Text style={styles.dropdownItemText}>
-                            {loadingCertificateTypes ? 'Loading...' : 'No certificate types available'}
-                          </Text>
-                        </View>
-                      ) : (
-                        certificateTypes.map((type, index) => (
-                          <TouchableOpacity
-                            key={index}
-                            style={[styles.dropdownItem, styles.dropdownItems]}
-                            onPress={() => handleCertificateTypeSelect(type)}>
-                            <Text style={styles.dropdownItemText}>{type.CertificateName}</Text>
-                          </TouchableOpacity>
-                        ))
-                      )}
-                    </View>
-                  </View>
-                )}
               </View>
             </View>
 
@@ -532,6 +510,45 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                 </Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Certificate Type Selection Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={certificateTypeModalVisible}
+        onRequestClose={() => setCertificateTypeModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select Certificate Type</Text>
+              <TouchableOpacity onPress={() => setCertificateTypeModalVisible(false)}>
+                <Text style={styles.closeButton}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              style={styles.modalBody}
+              data={certificateTypes}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.dropdownItem}
+                  activeOpacity={0.7}
+                  onPress={() => handleCertificateTypeSelect(item)}>
+                  <Text style={styles.dropdownItemText}>{item.CertificateName}</Text>
+                </TouchableOpacity>
+              )}
+              showsVerticalScrollIndicator={true}
+              ListEmptyComponent={
+                <View style={styles.dropdownItem}>
+                  <Text style={styles.dropdownItemText}>
+                    {loadingCertificateTypes ? 'Loading...' : 'No certificate types available'}
+                  </Text>
+                </View>
+              }
+            />
           </View>
         </View>
       </Modal>
@@ -743,18 +760,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    padding: 10,
-    width: '80%',
-    alignItems: 'center',
+    backgroundColor: '#E5EEFD',
+    borderRadius: 12,
+    width: '90%',
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: '100%',
-    marginBottom: 15,
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
   modalTitle: {
     fontSize: 17,
@@ -765,11 +787,11 @@ const styles = StyleSheet.create({
     color: '#930606ff',
   },
   modalBody: {
-    width: '100%',
-    marginBottom: 20,
+    padding: 20,
+    maxHeight: 400,
   },
   inputContainer: {
-    marginBottom: 15,
+    marginBottom: 20,
   },
   inputLabel: {
     fontSize: 15,
@@ -778,11 +800,11 @@ const styles = StyleSheet.create({
   },
   textInput: {
     borderWidth: 1,
-    borderColor: '#DEECFF',
+    borderColor: '#ddd',
     borderRadius: 8,
-    padding: 10,
-    fontSize: 14,
-    color: '#000',
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: '#fff',
   },
   textArea: {
     minHeight: 80,
@@ -791,37 +813,40 @@ const styles = StyleSheet.create({
   modalFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
   },
   datePickerButton: {
     borderWidth: 1,
-    borderColor: '#DEECFF',
+    borderColor: '#ddd',
     borderRadius: 8,
-    padding: 10,
-    backgroundColor: '#FFFFFF',
+    padding: 12,
+    backgroundColor: '#ffffff',
   },
   datePickerButtonText: {
-    fontSize: 14,
-    color: '#000',
+    fontSize: 16,
+    color: '#333',
   },
   dropdownButton: {
     borderWidth: 1,
-    borderColor: '#DEECFF',
+    borderColor: '#ddd',
     borderRadius: 8,
     padding: 10,
-    backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: '#ffffffff',
   },
   dropdownButtonText: {
-    fontSize: 14,
-    color: '#000',
+    fontSize: 12,
+    color: '#333',
+    fontWeight: '500',
     flex: 1,
   },
   dropdownArrow: {
-    fontSize: 14,
-    color: '#133F7C',
+    fontSize: 12,
+    color: '#666',
   },
   dropdownListwrap: {
     padding: 5,
@@ -838,9 +863,11 @@ const styles = StyleSheet.create({
     borderColor: '#e3e6ffff',
   },
   dropdownItem: {
-    padding: 0,
+    padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: '#eee',
+    minHeight: 44,
+    justifyContent: 'center',
   },
   dropdownItems: {
     borderColor: '#e3e6ffff',
@@ -850,8 +877,9 @@ const styles = StyleSheet.create({
     borderRightWidth: 0,
   },
   dropdownItemText: {
-    fontSize: 14,
-    color: '#000',
+    fontSize: 12,
+    color: '#333',
+    fontWeight: '500',
   },
   readonlyInput: {
     backgroundColor: '#F5F5F5',
@@ -941,8 +969,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   submitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: 'bold',
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
