@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     marginBottom: 17,
   },
   downarows: {},
-  Useremail: { color: '#6D6F71', fontSize: 13, fontWeight: '300' },
+  Useremail: { color: 'black', fontSize: 13, fontWeight: '300' },
   Username: { color: '#133F7C', fontWeight: 'bold', fontSize: 15, },
   menuItem:{ 
     display: 'flex',
