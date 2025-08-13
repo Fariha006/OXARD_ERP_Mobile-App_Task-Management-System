@@ -198,6 +198,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 0,
     paddingHorizontal: 10,
+    backgroundColor: '#ffffff',
   },
   inputusr: {
     marginBottom: 15,
