@@ -1424,8 +1424,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   lstimage: {
-    width: 40,
-    height: 40,
+    width: 50,
+    height: 50,
+    marginRight: 4,
   },
   messageImage: {
     width: 50,
@@ -1946,21 +1947,12 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   notificationListItemContainer: {
-    width: 300,
+    width: width -10,
     marginRight: 8,
-    backgroundColor: '#fedfeaff',
-    // backgroundColor: 'teal',
-    borderRadius: 10,
     padding: 10,
-    // shadowColor: '#000',
-    // shadowOffset: {
-    //   width: 0,
-    //   height: 2,
-    // },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 3.84,
-    // elevation: 5,
-    paddingLeft: 20,
+    paddingLeft: 20,    
+    borderRadius: 10,
+    backgroundColor: '#fedfeaff',
 
     
   },
@@ -1994,20 +1986,12 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   holidayListItemContainer: {
-    width: 300,
-    marginRight: 15,
-    backgroundColor: '#d1ecffff',
-    // backgroundColor: 'red',
+    width: width -10,
+    marginRight: 8,
+    padding: 10,
+    paddingLeft: 20,    
     borderRadius: 10,
-    padding: 15,
-    // shadowColor: '#000',
-    // shadowOffset: {
-    //   width: 0,
-    //   height: 2,
-    // },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 3.84,
-    // elevation: 5,
+    backgroundColor: '#d1ecffff',
     marginBottom: 18,
   },
   holidayListItemCard: {
