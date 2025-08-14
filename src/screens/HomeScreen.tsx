@@ -1716,7 +1716,8 @@ const styles = StyleSheet.create({
 
   // Circular styles
   circularSection: {
-    marginVertical: 3,
+    marginVertical: 5,
+    marginTop: 7,
   },
   circularHeader: {
     paddingHorizontal: 12,
@@ -1745,7 +1746,7 @@ const styles = StyleSheet.create({
 
   // Event styles
   eventSection: {
-    marginVertical: 1,
+    marginVertical: 2,
   },
   eventTextContainer: {
     flex: 1,
@@ -1791,7 +1792,7 @@ const styles = StyleSheet.create({
 
   // Announcement styles
   announcementSection: {
-    marginVertical: 1,
+    marginVertical: 5,
   },
   announcementContentContainer: {
     backgroundColor: '#f1f6ff',
@@ -1818,7 +1819,7 @@ const styles = StyleSheet.create({
 
   // Banner styles
   bannerSection: {
-    marginVertical: 1,
+    marginVertical: 2,
   },
   bannerCard: {
     flexDirection: 'row',
@@ -1855,7 +1856,7 @@ const styles = StyleSheet.create({
 
   // Memo styles
   memoSection: {
-    marginVertical: 1,
+    marginVertical: 5,
   },
   memoTopRow: {
     flexDirection: 'row',
@@ -1905,7 +1906,7 @@ const styles = StyleSheet.create({
 
   // Message styles
   messageSection: {
-    marginVertical: 1,
+    marginVertical: 2,
   },
   messageTextContainer: {
     flex: 1,
@@ -1978,7 +1979,7 @@ const styles = StyleSheet.create({
 
   // Notification List styles
   notificationListSection: {
-    marginVertical: 1,
+    marginVertical: 5,
   },
   notificationListItemContainer: {
     width: width -10,
@@ -2017,7 +2018,8 @@ const styles = StyleSheet.create({
 
   // Holiday List styles
   holidayListSection: {
-    marginVertical: 1,
+    marginVertical: 5,
+    marginBottom: 15,
   },
   holidayListItemContainer: {
     width: width -10,
