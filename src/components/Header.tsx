@@ -52,7 +52,7 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
   return (
     <>
     <StatusBar 
-    backgroundColor="#E5EEFD" 
+    backgroundColor="#133F7C" 
     barStyle="light-content" 
     translucent={false}
   />
