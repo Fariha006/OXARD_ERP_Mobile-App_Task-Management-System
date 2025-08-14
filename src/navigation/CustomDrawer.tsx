@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center', 
-    borderRadius: 10,
+    
     paddingTop: 8,
     paddingBottom: 8,
     paddingLeft: 10,
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center', 
-    borderRadius: 10,
+   
     paddingTop: 25,
     paddingBottom: 8,
     paddingLeft: 10,

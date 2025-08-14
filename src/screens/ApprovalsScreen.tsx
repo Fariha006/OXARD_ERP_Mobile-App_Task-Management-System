@@ -345,7 +345,9 @@ const styles = StyleSheet.create({
   accordionHeaderOpen: {
     backgroundColor: '#E2EDFC',
   },
-  dwnloadicon: {},
+  dwnloadicon: {
+    marginLeft: 15,
+  },
     downloadimage: {
     width: 24,
     height: 26,
@@ -448,7 +450,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#E2EDFC',
     borderRadius: 10,
     padding: 20,
     margin: 20,
@@ -469,6 +471,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   remarksInput: {
+    backgroundColor: '#ffffff',
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 5,

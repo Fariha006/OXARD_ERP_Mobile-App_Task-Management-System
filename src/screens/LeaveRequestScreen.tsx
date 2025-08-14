@@ -937,7 +937,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   formContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: '#E2EDFC',
     borderRadius: 10,
     padding: 16,
     marginBottom: 12,
@@ -983,6 +983,7 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 14,
     color: '#000',
+    backgroundColor: '#ffffff',
   },
   readOnlyInput: {
     backgroundColor: '#f5f5f5',
