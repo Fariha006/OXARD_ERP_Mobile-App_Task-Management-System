@@ -533,7 +533,7 @@ export default function HomeScreen({ navigation }: Props) {
       if (Array.isArray(arr)) {
         arr.forEach((item) => {
           if (item && typeof item === 'object' &&
-            item.CategoryId === 10) {
+            item.CategoryId === 10 && item.DocType !=null) {
             allItems.push(item);
           }
         });
