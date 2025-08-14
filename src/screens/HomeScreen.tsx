@@ -256,7 +256,7 @@ export default function HomeScreen({ navigation }: Props) {
     Object.values(apiData).forEach((arr: any) => {
       if (Array.isArray(arr)) {
         arr.forEach((item) => {
-          if (item && typeof item === 'object' && item.CategoryId === 2) {
+          if (item && typeof item === 'object' && item.CategoryId === 2 && item.DocType !=null) {
             allItems.push(item);
           }
         });
@@ -566,7 +566,7 @@ export default function HomeScreen({ navigation }: Props) {
     { id: 5, title: 'Directory', image: require('../../assets/images/home/directory.png'), route: 'Main', screen: 'EmployeeDirectory' },
     { id: 6, title: 'Messages', image: require('../../assets/images/home/msgs.png'), route: 'Main', screen: 'Messege' },
     { id: 7, title: 'Leave Outstandings ', image: require('../../assets/images/home/leave.png'), route: 'Main', screen: 'LeaveOutstanding' },
-    { id: 8, title: 'Approval', image: require('../../assets/images/home/aprovb.png'), route: 'Main', screen: 'Approval' },
+    //{ id: 8, title: 'Approval', image: require('../../assets/images/home/aprovb.png'), route: 'Main', screen: 'Approval' },
     // { id: 9, title: 'Add ', image: require('../../assets/images/home/addbtn.png'), route: 'Main', screen: 'Add' },
   ];
 
@@ -1314,6 +1314,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     paddingRight: 0,
     paddingLeft: 0,
+  
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
@@ -1346,14 +1347,14 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingRight: 15, paddingLeft: 6,
+    paddingRight: 15, paddingLeft: 1,
     marginRight: 10,
   },
   image: {
     marginBottom: 1,
   },
   tile: {
-    width: '11%',
+    width: '13%',
     aspectRatio: 1,
     backgroundColor: '#E5EEFD',
     borderRadius: 10,

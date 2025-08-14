@@ -24,6 +24,9 @@ interface NotificationItem {
   CategoryId: number;
   NotificationContent: string;
   DocType: string;
+  Title: string;
+  EmployeeName: string;
+  Designation: string;
 }
 
 interface AccordionSection {
@@ -207,6 +210,9 @@ export default function NotificationScreen({ navigation }: Props) {
                     >
                       <Text style={styles.lbl}>{item.Title}</Text>
                       <Text style={styles.vlue}>{item.NotificationContent}</Text>
+                      {item.CategoryId ==9 && (
+                        <Text style={styles.messegesby}>{item.EmployeeName} | {item.Designation}</Text>
+                      )}
                     </View>
                   ))}
                 </View>
@@ -297,7 +303,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   accordionContent: {
-    marginTop: 1,
+    marginTop: 10,
     paddingHorizontal: 6,
   },
   odd: {
@@ -305,24 +311,38 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     paddingVertical: 4,
     paddingHorizontal: 8,
+  
   },
   even: {
-    backgroundColor: '#F1F6FD',
+    backgroundColor: '#E2EDFC',
     marginBottom: 5,
     paddingVertical: 4,
     paddingHorizontal: 8,
+    paddingBottom: 10,
+    paddingTop: 10,
+
+    
   },
   lbl: {
     fontSize: 11,
-    color: 'gray',
+    color: '#000000',
     paddingLeft: 12,
     fontWeight: '600',
+    marginBottom:5,
   },
   vlue: {
     fontSize: 11,
     // fontWeight: '600',
     color: '#000000',
     paddingLeft: 12,
+  },
+   messegesby: {
+    fontSize: 11,
+    // fontWeight: '600',
+    color: 'gray',
+    paddingLeft: 12,
+    marginTop: 5,
+    fontWeight: '600',
   },
   loadingContainer: {
     flex: 1,
