@@ -160,6 +160,7 @@ export default function HomeScreen({ navigation }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [circularCurrentIndex, setCircularCurrentIndex] = useState(0);
+  const [eventCurrentIndex, setEventCurrentIndex] = useState(0);
   const [announcementCurrentIndex, setAnnouncementCurrentIndex] = useState(0);
   const [bannerCurrentIndex, setBannerCurrentIndex] = useState(0);
   const [memoCurrentIndex, setMemoCurrentIndex] = useState(0);
@@ -618,6 +619,22 @@ export default function HomeScreen({ navigation }: Props) {
     return () => clearInterval(interval);
   }, [announcementCurrentIndex, announcementData.length]);
 
+  // Auto-scroll effect for events
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (eventFlatListRef.current && eventData.length > 0) {
+        const nextIndex = (eventCurrentIndex + 1) % eventData.length;
+        eventFlatListRef.current.scrollToIndex({
+          index: nextIndex,
+          animated: true,
+          viewPosition: 0.5
+        });
+        setEventCurrentIndex(nextIndex);
+      }
+    }, 3200); // Scroll every 3.2 seconds (between announcements and banners)
+    return () => clearInterval(interval);
+  }, [eventCurrentIndex, eventData.length]);
+
   // Auto-scroll effect for banners
   useEffect(() => {
     const interval = setInterval(() => {
@@ -737,6 +754,20 @@ export default function HomeScreen({ navigation }: Props) {
     wait.then(() => {
       if (announcementFlatListRef.current) {
         announcementFlatListRef.current.scrollToIndex({
+          index: info.index,
+          animated: true,
+          viewPosition: 0.5
+        });
+      }
+    });
+  };
+
+  // Handle scroll errors for events
+  const handleEventScrollToIndexFailed = (info: { index: number }) => {
+    const wait = new Promise(resolve => setTimeout(resolve, 500));
+    wait.then(() => {
+      if (eventFlatListRef.current) {
+        eventFlatListRef.current.scrollToIndex({
           index: info.index,
           animated: true,
           viewPosition: 0.5
@@ -1129,6 +1160,7 @@ export default function HomeScreen({ navigation }: Props) {
                 horizontal={true}
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingHorizontal: 10 }}
+                onScrollToIndexFailed={handleEventScrollToIndexFailed}
                 ListEmptyComponent={() => (
                   <View style={styles.emptyEventContainer}>
                     <Text style={styles.emptyEventText}>
@@ -1496,9 +1528,9 @@ const styles = StyleSheet.create({
   eventContainer: {
     backgroundColor: '#e8e5fd',
     width: width -10,
-    marginRight: 2,
+    marginRight: 8,
     padding: 10,
-    paddingLeft: 10,
+    paddingLeft: 20,
     borderRadius: 10,
   },
   eventCard: {
