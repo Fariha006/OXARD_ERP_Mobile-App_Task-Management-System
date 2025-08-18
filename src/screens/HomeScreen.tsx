@@ -6,7 +6,7 @@ import {
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { getNotifications, getFileUrl } from '../api/api';
+import { getNotifications, getFileUrl, managetoken } from '../api/api';
 import UserStorage from '../utils/userStorage';
 const { width } = Dimensions.get('window');
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
@@ -557,6 +557,30 @@ export default function HomeScreen({ navigation }: Props) {
   useEffect(() => {
     setLoading(true);
     fetchData();
+    
+    // Save FCM token to backend when HomeScreen loads
+    const saveFcmTokenToBackend = async () => {
+      try {
+        const fcmToken = await UserStorage.getFcmToken();
+        const bearerToken = await UserStorage.getToken();
+        
+        if (fcmToken) {
+          console.log('🔄 Saving FCM token to backend from HomeScreen...');
+          const result = await managetoken(fcmToken, bearerToken || undefined);
+          if (result.success) {
+            console.log('✅ FCM token saved to backend successfully');
+          } else {
+            console.error('❌ Failed to save FCM token to backend:', result.message);
+          }
+        } else {
+          console.log('⚠️ No FCM token found in storage');
+        }
+      } catch (error) {
+        console.error('❌ Error saving FCM token to backend:', error);
+      }
+    };
+    
+    saveFcmTokenToBackend();
   }, []);
 
   const tiles = [

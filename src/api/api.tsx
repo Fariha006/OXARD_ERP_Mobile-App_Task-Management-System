@@ -244,83 +244,74 @@ class ApiService {
     }
   }
 
-  //manage token
-    // Get personal information API call
-    async managetoken(token: string): Promise<any> {
-      try {
-        const apiurl = 'http://localhost:50962/api/Login/savetocken';
-        console.log('Personal Info API URL:', apiurl);
-        console.log('Personal Info Token:', token ? `Bearer ${token.substring(0, 20)}...` : 'No token provided');
+  // Save FCM token to backend
+  async managetoken(token: string, bearerToken?: string): Promise<any> {
+    try {
+      const apiurl = getApiUrl('/api/Login/SaveToken');
+      console.log('Save FCM Token API URL:', apiurl);
+      console.log('FCM Token to save:', token ? `${token.substring(0, 20)}...` : 'No token provided');
+      console.log('Bearer Token:', bearerToken ? `Bearer ${bearerToken.substring(0, 20)}...` : 'No bearer token provided');
+      
+      const requestBody = {
+        "Token": token
+      };
+      
+      console.log('Save FCM Token Request Body:', requestBody);
+      
+      const headers = {
+        ...API_CONFIG.DEFAULT_HEADERS,
+        'Authorization': `Bearer ${bearerToken}`,
+      };
+      
+      const response = await axios.post<any>(apiurl, requestBody, {
+        headers,
+        timeout: API_CONFIG.TIMEOUT,
+      });
+  
+      console.log('Save FCM Token API Response:', response.data);
+  
+      return {
+        success: true,
+        message: 'FCM token saved successfully',
+        data: response.data,
+      };
+    } catch (error: any) {
+      console.error('Save FCM Token API Error:', error);
+      
+      if (error.response) {
+        // Server responded with error status
+        console.error('Server Error Status:', error.response.status);
+        console.error('Server Error Data:', error.response.data);
+        console.error('Server Error Headers:', error.response.headers);
         
-        const requestBody = {
-          "token":token
+        if (error.response.status === 401) {
+          return {
+            success: false,
+            message: 'Authentication failed. Please login again. (401 Unauthorized)',
+          };
+        }
+        
+        return {
+          success: false,
+          message: error.response.data?.message || `Server error: ${error.response.status}`,
         };
-        
-        console.log('Personal Info Request Body:', requestBody);
-        
-        const response = await axios.post<any>(apiurl, requestBody, {
-         
-          headers: {
-            ...API_CONFIG.DEFAULT_HEADERS,
-            'Authorization': `Bearer ${token}`,
-          },
-          timeout: API_CONFIG.TIMEOUT,
-        });
-  
-        console.log('Personal Info API Response:', response.data);
-  
-        // Check if we have personal info data
-        if (response.data && response.data.length > 0) {
-          const personalInfo = response.data[0];
-          
-          return {
-            success: true,
-            message: 'Personal information retrieved successfully',
-            personalInfo: personalInfo,
-          };
-        } else {
-          return {
-            success: false,
-            message: 'No personal information received',
-          };
-        }
-      } catch (error: any) {
-        console.error('Personal Info API Error:', error);
-        
-        if (error.response) {
-          // Server responded with error status
-          console.error('Server Error Status:', error.response.status);
-          console.error('Server Error Data:', error.response.data);
-          console.error('Server Error Headers:', error.response.headers);
-          
-          if (error.response.status === 401) {
-            return {
-              success: false,
-              message: 'Authentication failed. Please login again. (401 Unauthorized)',
-            };
-          }
-          
-          return {
-            success: false,
-            message: error.response.data?.message || `Server error: ${error.response.status}`,
-          };
-        } else if (error.request) {
-          // Network error
-          console.error('Network Error:', error.request);
-          return {
-            success: false,
-            message: 'Network error. Please check your internet connection.',
-          };
-        } else {
-          // Other error
-          console.error('Other Error:', error.message);
-          return {
-            success: false,
-            message: 'An unexpected error occurred.',
-          };
-        }
+      } else if (error.request) {
+        // Network error
+        console.error('Network Error:', error.request);
+        return {
+          success: false,
+          message: 'Network error. Please check your internet connection.',
+        };
+      } else {
+        // Other error
+        console.error('Other Error:', error.message);
+        return {
+          success: false,
+          message: 'An unexpected error occurred.',
+        };
       }
     }
+  }
 
   // Get personal information API call
   async getPersonalInfo(token: string): Promise<PersonalInfoResponse> {
@@ -893,7 +884,7 @@ export const saveCertificateRequest = (mode: string, certificateId: string, cert
 export const getMesseges = (token: string) => apiService.getMesseges(token);
 export const submitApproval = (decisionId: string, decision: string, remarks: string, token: string) => apiService.submitApproval(decisionId, decision, remarks, token);
 export { getFileUrl };
-export const managetoken = (token: string) => apiService.managetoken(token);
+export const managetoken = (token: string, bearerToken?: string) => apiService.managetoken(token, bearerToken);
 
 export async function fetchMessageCategories(token: string) {
   try {

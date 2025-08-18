@@ -6,6 +6,7 @@ const STORAGE_KEYS = {
   USER_TOKEN: 'userToken',
   USER_DATA: 'userData',
   MENU_ITEMS: 'menuItems',
+  FCM_TOKEN: 'fcmToken',
 };
 
 // User storage utility class
@@ -67,6 +68,27 @@ class UserStorage {
     } catch (error) {
       console.error('Error storing menu items:', error);
       throw error;
+    }
+  }
+
+  // Store FCM token
+  static async storeFcmToken(token: string): Promise<void> {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.FCM_TOKEN, token);
+      console.log('FCM token stored successfully');
+    } catch (error) {
+      console.error('Error storing FCM token:', error);
+      throw error;
+    }
+  }
+
+  // Get FCM token
+  static async getFcmToken(): Promise<string | null> {
+    try {
+      return await AsyncStorage.getItem(STORAGE_KEYS.FCM_TOKEN);
+    } catch (error) {
+      console.error('Error getting FCM token:', error);
+      return null;
     }
   }
 

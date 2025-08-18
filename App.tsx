@@ -27,6 +27,7 @@ import messaging from '@react-native-firebase/messaging';
 import { API_CONFIG } from './src/config/apiConfig';
 import { managetoken } from './src/api/api';
 import notifee, { AndroidImportance } from '@notifee/react-native';
+import UserStorage from './src/utils/userStorage';
 const Drawer = createDrawerNavigator();
 
 async function createChannel() {
@@ -51,28 +52,15 @@ async function requestUserPermission(): Promise<boolean> {
 async function getFcmToken(): Promise<void> {
   try {
     const token = await messaging().getToken();
-    console.log('📌 FCM Token:', token);
-   // Alert.alert('FCM Token:', token);
-    //const response = await managetoken(token); 
-   // console.log('✅ Token saved successfully:', response); 
-    // Send the token to your backend API
-    // const response = await fetch(`http://localhost:50962/api/Login/savetocken`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({ token: token })
-    // });
+    console.log('🔑 FCM Token:', token);
     
-    // if (!response.ok) {
-    //   throw new Error(`HTTP error! status: ${response.status}`);
-    // }
+    // Save FCM token to AsyncStorage
+    await UserStorage.storeFcmToken(token);
+    console.log('✅ FCM token saved to storage');
     
-    // const result = await response.json();
-    // console.log('✅ Token saved successfully:', result);
   } catch (error) {
-    console.error('❌ Error getting FCM token or saving to backend:', error);
-    Alert.alert('Error', 'Failed to save FCM token to server');
+    console.error('❌ Error getting FCM token:', error);
+    Alert.alert('Error', 'Failed to get FCM token');
   }
 }
 
@@ -103,18 +91,14 @@ export default function App() {
       //   },
       // });
 
-      await notifee.displayNotification({
-        title: 'Special Offer!',
-        body: 'Check out our latest deals.',
-        android: {
-          channelId: 'default',
-          largeIcon: 'https://example.com/your-image.png',
-          style: {
-            type: notifee.AndroidStyle.BIGPICTURE,
-            picture: 'https://onesoftapps.com/assets/images/logo.png'
-          }
-        }
-      });
+             await notifee.displayNotification({
+         title: 'Special Offer!',
+         body: 'Check out our latest deals.',
+         android: {
+           channelId: 'default',
+           largeIcon: 'https://example.com/your-image.png',
+         }
+       });
     
     
     });
