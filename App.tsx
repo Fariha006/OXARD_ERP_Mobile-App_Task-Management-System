@@ -22,7 +22,7 @@ import DetailsScreen from './src/screens/DetailsScreen';
 import Header from './src/components/Header';
 import CustomDrawer from './src/navigation/CustomDrawer';
 import SplashScreen from './src/components/SplashScreen';
-import { DrawerProvider } from './src/context/DrawerContext';
+import { DrawerProvider } from './src/context/DrawerContext'; 
 import messaging from '@react-native-firebase/messaging';
 import { API_CONFIG } from './src/config/apiConfig';
 import { managetoken } from './src/api/api';
@@ -41,7 +41,7 @@ async function createChannel() {
 
 
 async function requestUserPermission(): Promise<boolean> {
-  if (Platform.OS === 'android') {
+  if (Platform.OS === 'android' && Platform.Version >= 33) {
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
     );
@@ -52,6 +52,7 @@ async function requestUserPermission(): Promise<boolean> {
 async function getFcmToken(): Promise<void> {
   try {
     const token = await messaging().getToken();
+    //Alert.alert('FCM Token:', token);
     console.log('🔑 FCM Token:', token);
     
     // Save FCM token to AsyncStorage
@@ -60,7 +61,7 @@ async function getFcmToken(): Promise<void> {
     
   } catch (error) {
     console.error('❌ Error getting FCM token:', error);
-    Alert.alert('Error', 'Failed to get FCM token');
+  //  Alert.alert('Error', 'Failed to get FCM token');
   }
 }
 
@@ -72,6 +73,9 @@ export default function App() {
       const hasPermission = await requestUserPermission();
       if (hasPermission) {
         await getFcmToken();
+      }
+      else{
+        //Alert.alert('Permission not granted');
       }
 
       // Foreground messages
@@ -96,7 +100,7 @@ export default function App() {
          body: 'Check out our latest deals.',
          android: {
            channelId: 'default',
-           largeIcon: 'https://example.com/your-image.png',
+         //  largeIcon: 'https://example.com/your-image.png',
          }
        });
     
