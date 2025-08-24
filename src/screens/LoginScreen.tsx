@@ -55,7 +55,15 @@ export default function LoginScreen({ navigation }: Props) {
       console.log('LoginScreen: Token to store:', token ? `Token exists (length: ${token.length})` : 'No token');
       console.log('LoginScreen: Token preview:', token ? `${token.substring(0, 50)}...` : 'No token');
       
-      await UserStorage.storeSessionData(userData, menuItems, token);
+      // Add AttendanceId to user data
+      const userDataWithAttendance = {
+        ...userData,
+        AttendanceId: `ATT_${userData.EmpId}_${Date.now()}`
+      };
+      
+      console.log('LoginScreen: User data with AttendanceId:', userDataWithAttendance);
+      
+      await UserStorage.storeSessionData(userDataWithAttendance, menuItems, token);
       console.log('LoginScreen: User data stored successfully');
       
       // Verify the token was stored correctly
