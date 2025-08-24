@@ -590,7 +590,7 @@ export default function HomeScreen({ navigation }: Props) {
     { id: 4, title: 'Approval', image: require('../../assets/images/home/aproval.png'), route: 'Main', screen: 'Approvals' },
     { id: 5, title: 'Directory', image: require('../../assets/images/home/directory.png'), route: 'Main', screen: 'EmployeeDirectory' },
     { id: 6, title: 'Messages', image: require('../../assets/images/home/msgs.png'), route: 'Main', screen: 'Messege' },
-    { id: 7, title: 'Leave Outstandings ', image: require('../../assets/images/home/leave.png'), route: 'Main', screen: 'LeaveOutstanding' },
+    { id: 7, title: 'Leave Balance ', image: require('../../assets/images/home/leave.png'), route: 'Main', screen: 'LeaveOutstanding' },
     //{ id: 8, title: 'Approval', image: require('../../assets/images/home/aprovb.png'), route: 'Main', screen: 'Approval' },
     // { id: 9, title: 'Add ', image: require('../../assets/images/home/addbtn.png'), route: 'Main', screen: 'Add' },
   ];

@@ -93,7 +93,7 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
     },
     {
       id: 'leaveoutstanding',
-      text: 'Leave Outstanding',
+      text: 'Leave Balance',
       icon: require('../../assets/images/messages.png'),
       screen: 'Details',
       navigationParams: { screen: 'Details' }

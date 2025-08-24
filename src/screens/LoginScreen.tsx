@@ -7,7 +7,8 @@ import {
   Image,
   SafeAreaView,
   KeyboardAvoidingView,
-  Platform,TouchableOpacity,Text,Alert,StatusBar
+  Platform,TouchableOpacity,Text,Alert,StatusBar,
+  ScrollView
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -120,6 +121,10 @@ export default function LoginScreen({ navigation }: Props) {
           style={styles.inner}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
+          <ScrollView
+    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+    keyboardShouldPersistTaps="handled"
+  >
         {/* Logo */}
         <Image
           source={require('../../assets/images/loginlogo.webp')} // Make sure logo.png is inside assets folder
@@ -168,6 +173,7 @@ export default function LoginScreen({ navigation }: Props) {
             </Text>
           </TouchableOpacity>
         </View>
+        </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </>
@@ -199,6 +205,7 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     paddingHorizontal: 10,
     backgroundColor: '#ffffff',
+    color: '#000000',
   },
   inputusr: {
     marginBottom: 15,

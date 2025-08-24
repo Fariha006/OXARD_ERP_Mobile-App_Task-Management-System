@@ -95,14 +95,14 @@ export default function App() {
       //   },
       // });
 
-             await notifee.displayNotification({
-         title: 'Special Offer!',
-         body: 'Check out our latest deals.',
-         android: {
-           channelId: 'default',
-         //  largeIcon: 'https://example.com/your-image.png',
-         }
-       });
+      //        await notifee.displayNotification({
+      //    title: 'Special Offer!',
+      //    body: 'Check out our latest deals.',
+      //    android: {
+      //      channelId: 'default',
+      //    //  largeIcon: 'https://example.com/your-image.png',
+      //    }
+      //  });
     
     
     });
