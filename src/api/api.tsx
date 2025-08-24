@@ -853,6 +853,66 @@ class ApiService {
       throw error;
     }
   }
+
+  // Submit attendance (check-in/check-out) API call
+  async submitAttendance(attendanceData: {
+    Mode: string;
+    AttendanceId: string;
+    Latitude: string;
+    Longitude: string;
+    Place: string;
+    PunchDate: string;
+    PunchTime: string;
+  }, token: string): Promise<any> {
+    try {
+      const apiurl = getApiUrl('/api/MobDa5100/I_U_D_Mode');
+      console.log('Submit Attendance API URL:', apiurl);
+      console.log('Submit Attendance Request Body:', attendanceData);
+      
+      const response = await axios.post<any>(apiurl, attendanceData, {
+        headers: {
+          ...API_CONFIG.DEFAULT_HEADERS,
+          'Authorization': `Bearer ${token}`,
+        },
+        timeout: API_CONFIG.TIMEOUT,
+      });
+      
+      console.log('Submit Attendance API Response:', response.data);
+      
+      // Check if response has the expected format
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+        const statusItem = response.data[0];
+        if (statusItem.Status === 'Success') {
+          return { 
+            success: true, 
+            message: 'Attendance submitted successfully',
+            attendanceId: statusItem.AttendanceId 
+          };
+        } else {
+          throw new Error(statusItem.Status || 'Attendance submission failed');
+        }
+      } else {
+        throw new Error('Invalid response format from server');
+      }
+    } catch (error: any) {
+      console.error('Submit Attendance API Error:', error);
+      
+      if (error.response) {
+        // Server responded with error status
+        console.error('Server Error Status:', error.response.status);
+        console.error('Server Error Data:', error.response.data);
+        throw new Error(error.response.data?.message || `Server error: ${error.response.status}`);
+      } else if (error.request) {
+        // Network error
+        console.error('Network Error:', error.request);
+        throw new Error('Network error. Please check your internet connection.');
+      } else {
+        // Other error
+        console.error('Other Error:', error.message);
+        throw new Error(error.message || 'An unexpected error occurred.');
+      }
+    }
+  }
 }
 
 // Create and export API service instance
@@ -884,6 +944,7 @@ export const getCertificateDetails = (certificateId: string, token: string) => a
 export const saveCertificateRequest = (mode: string, certificateId: string, certificateTypeId: string, requestedDate: string, token: string) => apiService.saveCertificateRequest(mode, certificateId, certificateTypeId, requestedDate, token);
 export const getMesseges = (token: string) => apiService.getMesseges(token);
 export const submitApproval = (decisionId: string, decision: string, remarks: string, token: string) => apiService.submitApproval(decisionId, decision, remarks, token);
+export const submitAttendance = (attendanceData: any, token: string) => apiService.submitAttendance(attendanceData, token);
 export { getFileUrl };
 export const managetoken = (token: string, bearerToken?: string) => apiService.managetoken(token, bearerToken);
 

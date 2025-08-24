@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, Switch } from 'react-native';
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
 import UserStorage from '../utils/userStorage';
-import { MenuItem } from '../api/api';
+import { MenuItem, submitAttendance } from '../api/api';
 import { getFileUrl } from '../config/apiConfig';
 import { useDrawer } from '../context/DrawerContext';
 
@@ -11,6 +11,7 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [userData, setUserData] = useState<any>(null);
   const [isCheckedIn, setIsCheckedIn] = useState(false);
+  const [isAttendanceLoading, setIsAttendanceLoading] = useState(false);
   const { isDrawerRefreshing } = useDrawer();
 
   useEffect(() => {
@@ -35,7 +36,7 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
         console.log('CustomDrawer: User data set successfully');
         
         // Debug AttendanceId issues
-        await UserStorage.debugAttendanceId();
+       // await UserStorage.debugAttendanceId();
         
         // Get updated user data after potential fix
         const updatedUserData = await UserStorage.getUserData();
@@ -58,12 +59,74 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
   };
 
   const isMenuItemVisible = (menuText: string): boolean => {
-
-   
     return menuItems.some(item => 
       item.MenuDisplayCaption && 
       item.MenuDisplayCaption.toLowerCase().replace(/\s/g, '') === menuText.toLowerCase().replace(/\s/g, '')
     );
+  };
+
+  // Handle attendance (check-in/check-out)
+  const handleAttendance = async () => {
+    if (isAttendanceLoading) return; // Prevent multiple clicks
+    
+    setIsAttendanceLoading(true);
+    try {
+      const token = await UserStorage.getToken();
+      if (!token) {
+        Alert.alert('Error', 'No authentication token found. Please login again.');
+        return;
+      }
+
+      const currentUserData = await UserStorage.getUserData();
+      if (!currentUserData) {
+        Alert.alert('Error', 'User data not found. Please login again.');
+        return;
+      }
+
+      // Get current date and time
+      const now = new Date();
+      const punchDate = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+      const punchTime = now.toTimeString().split(' ')[0]; // HH:MM:SS format
+
+      // Determine if this is check-in or check-out
+      const isCurrentlyCheckedIn = currentUserData.AttendanceId &&  Number(currentUserData.AttendanceId) > 0;
+      
+      const attendanceData = {
+        Mode: isCurrentlyCheckedIn ? "U" : "I",
+        AttendanceId: isCurrentlyCheckedIn ? currentUserData.AttendanceId.toString() : "0",
+        Latitude: "12.9716", // You can replace with actual GPS coordinates
+        Longitude: "77.5946", // You can replace with actual GPS coordinates
+        Place: " ", // You can replace with actual place name
+        PunchDate: punchDate,
+        PunchTime: punchTime
+      };
+
+      console.log('Submitting attendance data:', attendanceData);
+
+      const response = await submitAttendance(attendanceData, token);
+      
+      if (response.success) {
+        // Update the AttendanceId in storage
+        await UserStorage.updateAttendanceId(response.attendanceId);
+        
+        // Update local state
+        setIsCheckedIn(!isCurrentlyCheckedIn);
+        
+        // Show success message
+        const action = isCurrentlyCheckedIn ? 'Check-out' : 'Check-in';
+        Alert.alert('Success', `${action} successful!`);
+        
+        // Reload user data to reflect changes
+        loadUserData();
+      } else {
+        Alert.alert('Error', response.message || 'Attendance submission failed');
+      }
+    } catch (error: any) {
+      console.error('Attendance submission error:', error);
+      Alert.alert('Error', error.message || 'Failed to submit attendance');
+    } finally {
+      setIsAttendanceLoading(false);
+    }
   };
 
   // Menu items configuration
@@ -159,17 +222,19 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
            <Text style={styles.Username}>{userData?.EmployeeName || 'User Name'}</Text>
            <Text style={styles.Useremail}>{userData?.DesgNam || ''}</Text>
          </View>
-         <TouchableOpacity 
-           style={[
-             styles.attendanceSwitch,
-             isCheckedIn ? styles.checkedInSwitch : styles.checkedOutSwitch
-           ]}
-           onPress={() => setIsCheckedIn(!isCheckedIn)}
-         >
-           <Text style={styles.attendanceSwitchText}>
-             {isCheckedIn ? 'CHECK OUT' : 'CHECK IN'}
-           </Text>
-         </TouchableOpacity>
+                   <TouchableOpacity 
+            style={[
+              styles.attendanceSwitch,
+              isCheckedIn ? styles.checkedInSwitch : styles.checkedOutSwitch,
+              isAttendanceLoading && styles.loadingSwitch
+            ]}
+            onPress={handleAttendance}
+            disabled={isAttendanceLoading}
+          >
+            <Text style={styles.attendanceSwitchText}>
+              {isAttendanceLoading ? 'PROCESSING...' : (isCheckedIn ? 'CHECK OUT' : 'CHECK IN')}
+            </Text>
+          </TouchableOpacity>
        </View>
       <View style={styles.drawwraper}>
        
@@ -342,6 +407,9 @@ const styles = StyleSheet.create({
   },
   checkedOutSwitch: {
     backgroundColor: '#4ecdc4',
+  },
+  loadingSwitch: {
+    backgroundColor: '#cccccc',
   },
   attendanceSwitchText: {
     color: '#ffffff',

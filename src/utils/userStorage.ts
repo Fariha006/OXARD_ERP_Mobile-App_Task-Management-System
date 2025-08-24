@@ -198,19 +198,32 @@ class UserStorage {
       if (userData) {
         console.log('Debug - Current AttendanceId:', userData.AttendanceId);
         console.log('Debug - AttendanceId type:', typeof userData.AttendanceId);
-        console.log('Debug - AttendanceId length check:', userData.AttendanceId?.length);
         
-        // If AttendanceId is not a string or is empty, regenerate it
-        if (!userData.AttendanceId || typeof userData.AttendanceId !== 'string' || userData.AttendanceId.length === 0) {
-          console.log('Debug - Regenerating AttendanceId...');
-          const newAttendanceId = `ATT_${userData.EmpId}_${Date.now()}`;
-          userData.AttendanceId = newAttendanceId;
+        // If AttendanceId is not a number or is 0, set it to 0 (not checked in)
+        if (!userData.AttendanceId || typeof userData.AttendanceId !== 'number' || userData.AttendanceId === 0) {
+          console.log('Debug - Setting AttendanceId to 0 (not checked in)');
+          userData.AttendanceId = 0;
           await this.storeUserData(userData);
-          console.log('Debug - New AttendanceId stored:', newAttendanceId);
+          console.log('Debug - AttendanceId set to 0');
         }
       }
     } catch (error) {
       console.error('Debug - Error checking AttendanceId:', error);
+    }
+  }
+
+  // Update AttendanceId in stored user data
+  static async updateAttendanceId(newAttendanceId: number): Promise<void> {
+    try {
+      const userData = await this.getUserData();
+      if (userData) {
+        userData.AttendanceId = newAttendanceId;
+        await this.storeUserData(userData);
+        console.log('UserStorage: AttendanceId updated to:', newAttendanceId);
+      }
+    } catch (error) {
+      console.error('UserStorage: Error updating AttendanceId:', error);
+      throw error;
     }
   }
 }
