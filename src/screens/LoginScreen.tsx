@@ -58,7 +58,7 @@ export default function LoginScreen({ navigation }: Props) {
       // Add AttendanceId to user data
       const userDataWithAttendance = {
         ...userData,
-        AttendanceId: `ATT_${userData.EmpId}_${Date.now()}`
+        AttendanceId:userData.AttendanceId
       };
       
       console.log('LoginScreen: User data with AttendanceId:', userDataWithAttendance);

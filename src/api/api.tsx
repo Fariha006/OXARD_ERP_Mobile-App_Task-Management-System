@@ -48,7 +48,7 @@ export interface UserData {
   Token: string;
   TokenStatus: string;
   UserLgnPwd: string | null;
-  AttendanceId?: string;
+  AttendanceId: string;
 }
 
 // Personal information interface

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image,Alert  } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, Switch } from 'react-native';
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
 import UserStorage from '../utils/userStorage';
 import { MenuItem } from '../api/api';
@@ -10,6 +10,7 @@ import { useDrawer } from '../context/DrawerContext';
 const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [userData, setUserData] = useState<any>(null);
+  const [isCheckedIn, setIsCheckedIn] = useState(false);
   const { isDrawerRefreshing } = useDrawer();
 
   useEffect(() => {
@@ -32,6 +33,24 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
       if (storedUserData) {
         setUserData(storedUserData);
         console.log('CustomDrawer: User data set successfully');
+        
+        // Debug AttendanceId issues
+        await UserStorage.debugAttendanceId();
+        
+        // Get updated user data after potential fix
+        const updatedUserData = await UserStorage.getUserData();
+        
+        // Set check-in status based on AttendanceId
+        console.log('CustomDrawer: AttendanceId check:', updatedUserData?.AttendanceId);
+        console.log('CustomDrawer: AttendanceId type:', typeof updatedUserData?.AttendanceId);
+        
+        if (updatedUserData?.AttendanceId && Number(updatedUserData.AttendanceId) > 0) {
+          setIsCheckedIn(true);
+          console.log('CustomDrawer: User is checked in');
+        } else {
+          setIsCheckedIn(false);
+          console.log('CustomDrawer: User is not checked in');
+        }
       }
     } catch (error) {
       console.error('CustomDrawer: Error loading user data:', error);
@@ -133,17 +152,25 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
         
         </View>
       </View>
-      <View style={styles.Usrnmanddownarow}>
-        <View>
-          {/* <Text style={styles.Username}>George Fernandes</Text>
-          <Text style={styles.Useremail}>georgefernandes88@gmail.com</Text> */}
-          <Text style={styles.Username}>{userData?.EmployeeName || 'User Name'}</Text>
-          <Text style={styles.Useremail}>{userData?.DesgNam || ''}</Text>
-        </View>
-        {/* <View style={styles.downarows}>
-          <Image source={require('../../assets/images/arrowdown.png')} />
-        </View> */}
-      </View>
+             <View style={styles.Usrnmanddownarow}>
+         <View style={styles.userInfoContainer}>
+           {/* <Text style={styles.Username}>George Fernandes</Text>
+           <Text style={styles.Useremail}>georgefernandes88@gmail.com</Text> */}
+           <Text style={styles.Username}>{userData?.EmployeeName || 'User Name'}</Text>
+           <Text style={styles.Useremail}>{userData?.DesgNam || ''}</Text>
+         </View>
+         <TouchableOpacity 
+           style={[
+             styles.attendanceSwitch,
+             isCheckedIn ? styles.checkedInSwitch : styles.checkedOutSwitch
+           ]}
+           onPress={() => setIsCheckedIn(!isCheckedIn)}
+         >
+           <Text style={styles.attendanceSwitchText}>
+             {isCheckedIn ? 'CHECK OUT' : 'CHECK IN'}
+           </Text>
+         </TouchableOpacity>
+       </View>
       <View style={styles.drawwraper}>
        
       
@@ -290,4 +317,45 @@ const styles = StyleSheet.create({
   divmenuIcon:{ width:22,marginRight:12,},
   menuIcon:{ width:'100%',},
   menuText: { color: '#000000', fontSize: 12, fontWeight: '500'},
+  attendanceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    paddingRight: 10,
+  },
+  attendanceText: {
+    color: '#133F7C',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  attendanceSwitch: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    minWidth: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkedInSwitch: {
+    backgroundColor: '#ff6b6b',
+  },
+  checkedOutSwitch: {
+    backgroundColor: '#4ecdc4',
+  },
+  attendanceSwitchText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  designationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 4,
+    paddingRight: 10,
+  },
+  userInfoContainer: {
+    flex: 1,
+  },
 });

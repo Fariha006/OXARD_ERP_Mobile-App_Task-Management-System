@@ -51,6 +51,8 @@ class UserStorage {
       if (userDataString) {
         const parsedData = JSON.parse(userDataString) as UserData;
         console.log('UserStorage: Parsed user data:', parsedData);
+        console.log('UserStorage: AttendanceId type:', typeof parsedData.AttendanceId);
+        console.log('UserStorage: AttendanceId value:', parsedData.AttendanceId);
         return parsedData;
       }
       console.log('UserStorage: No user data found');
@@ -186,6 +188,29 @@ class UserStorage {
     } catch (error) {
       console.error('Error getting employee photo URL:', error);
       return null;
+    }
+  }
+
+  // Debug method to check and fix AttendanceId issues
+  static async debugAttendanceId(): Promise<void> {
+    try {
+      const userData = await this.getUserData();
+      if (userData) {
+        console.log('Debug - Current AttendanceId:', userData.AttendanceId);
+        console.log('Debug - AttendanceId type:', typeof userData.AttendanceId);
+        console.log('Debug - AttendanceId length check:', userData.AttendanceId?.length);
+        
+        // If AttendanceId is not a string or is empty, regenerate it
+        if (!userData.AttendanceId || typeof userData.AttendanceId !== 'string' || userData.AttendanceId.length === 0) {
+          console.log('Debug - Regenerating AttendanceId...');
+          const newAttendanceId = `ATT_${userData.EmpId}_${Date.now()}`;
+          userData.AttendanceId = newAttendanceId;
+          await this.storeUserData(userData);
+          console.log('Debug - New AttendanceId stored:', newAttendanceId);
+        }
+      }
+    } catch (error) {
+      console.error('Debug - Error checking AttendanceId:', error);
     }
   }
 }
