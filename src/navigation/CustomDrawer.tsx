@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, Switch } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, Switch, PermissionsAndroid, Platform } from 'react-native';
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
 import UserStorage from '../utils/userStorage';
 import { MenuItem, submitAttendance } from '../api/api';
 import { getFileUrl } from '../config/apiConfig';
 import { useDrawer } from '../context/DrawerContext';
+import Geolocation from '@react-native-community/geolocation';
 
 
 const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
@@ -12,11 +13,76 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
   const [userData, setUserData] = useState<any>(null);
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [isAttendanceLoading, setIsAttendanceLoading] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState<{latitude: string, longitude: string} | null>(null);
   const { isDrawerRefreshing } = useDrawer();
 
   useEffect(() => {
     loadUserData();
+    requestLocationPermission();
   }, [isDrawerRefreshing]); // Refresh when drawer refresh is triggered
+
+  // Request location permission
+  const requestLocationPermission = async () => {
+    if (Platform.OS === 'ios') {
+      // iOS permission is handled in Info.plist
+      getCurrentLocation();
+    } else {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Permission',
+            message: 'This app needs access to your location for attendance tracking.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          }
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          getCurrentLocation();
+        } else {
+          console.log('Location permission denied');
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+    }
+  };
+
+  // Get current location
+  const getCurrentLocation = () => {
+    // For now, use default coordinates
+    // To implement real GPS functionality, install and use:
+    // npm install @react-native-community/geolocation
+    // Then replace this with actual GPS code:
+    
+    Geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setCurrentLocation({
+          latitude: latitude.toString(),
+          longitude: longitude.toString()
+        });
+        console.log('Current GPS location:', { latitude, longitude });
+      },
+      (error) => {
+        console.error('GPS Error:', error);
+        // Fallback to default coordinates
+        setCurrentLocation({
+          latitude: "12.9716",
+          longitude: "77.5946"
+        });
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    );
+   
+    
+   /* setCurrentLocation({
+      latitude: "12.9716",
+      longitude: "77.5946"
+    });*/
+    console.log('Using default location coordinates');
+  };
 
   const loadUserData = async () => {
     try {
@@ -71,6 +137,8 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
     
     setIsAttendanceLoading(true);
     try {
+      // Refresh location before submitting attendance
+      getCurrentLocation();
       const token = await UserStorage.getToken();
       if (!token) {
         Alert.alert('Error', 'No authentication token found. Please login again.');
@@ -91,11 +159,14 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
       // Determine if this is check-in or check-out
       const isCurrentlyCheckedIn = currentUserData.AttendanceId &&  Number(currentUserData.AttendanceId) > 0;
       
+      // Get current location or use default
+      const location = currentLocation || { latitude: "12.9716", longitude: "77.5946" };
+      
       const attendanceData = {
         Mode: isCurrentlyCheckedIn ? "U" : "I",
         AttendanceId: isCurrentlyCheckedIn ? currentUserData.AttendanceId.toString() : "0",
-        Latitude: "12.9716", // You can replace with actual GPS coordinates
-        Longitude: "77.5946", // You can replace with actual GPS coordinates
+        Latitude: location.latitude,
+        Longitude: location.longitude,
         Place: " ", // You can replace with actual place name
         PunchDate: punchDate,
         PunchTime: punchTime
@@ -219,8 +290,13 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
          <View style={styles.userInfoContainer}>
            {/* <Text style={styles.Username}>George Fernandes</Text>
            <Text style={styles.Useremail}>georgefernandes88@gmail.com</Text> */}
-           <Text style={styles.Username}>{userData?.EmployeeName || 'User Name'}</Text>
-           <Text style={styles.Useremail}>{userData?.DesgNam || ''}</Text>
+                       <Text style={styles.Username}>{userData?.EmployeeName || 'User Name'}</Text>
+            <Text style={styles.Useremail}>{userData?.DesgNam || ''}</Text>
+            {/* {currentLocation && (
+              <Text style={styles.locationText}>
+                📍 Lat: {currentLocation.latitude}, Long: {currentLocation.longitude}
+              </Text>
+            )} */}
          </View>
                    <TouchableOpacity 
             style={[
@@ -425,5 +501,11 @@ const styles = StyleSheet.create({
   },
   userInfoContainer: {
     flex: 1,
+  },
+  locationText: {
+    color: '#666666',
+    fontSize: 10,
+    fontWeight: '400',
+    marginTop: 2,
   },
 });
