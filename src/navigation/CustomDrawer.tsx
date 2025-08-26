@@ -258,6 +258,13 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
       screen: 'Details',
       navigationParams: { screen: 'Approvals' }
     },
+  {
+      id: 'settings',
+      text: 'Settings',
+      icon: require('../../assets/images/settings.png'),
+      screen: 'Details',
+      navigationParams: { screen: 'Settings' }
+    },
     // {
     //   id: 'signout',
     //   text: 'Sign Out',
@@ -318,12 +325,15 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
 
 {menuItemsConfig.map((item, index) => {
           // Check if this menu item should be visible
+       
+       if(item.id != 'settings'){
           const isVisible = isMenuItemVisible(item.text);
           
           // If not visible, don't render the TouchableOpacity
           if (!isVisible) {
             return null;
           }
+        }
 
           return (
             <TouchableOpacity 

@@ -27,6 +27,7 @@ import EmployeeDirectoryScreen from '../screens/EmployeeDirectoryScreen';
 import MessegeScreen from '../screens/MessegeScreen';
 import LeaveRequestScreen from '../screens/LeaveRequestScreen';
 import RequestDashboardScreen from '../screens/RequestDashboardScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 const Stack = createStackNavigator();
 
@@ -195,6 +196,13 @@ const InnerStack = () => (
         <Stack.Screen
           name="RequestDashboard"
           component={RequestDashboardScreen}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
+        <Stack.Screen
+          name="Settings"
+          component={SettingsScreen}
           options={({ navigation, route }) => ({
             header: () => <Header navigation={navigation} route={route} />
           })}

@@ -76,13 +76,21 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
           {userData?.CompNam
             }
         </Text>
-        {/* Notification Icon */}
-        <TouchableOpacity
-          style={styles.Iconnotfction}
-          onPress={() => navigation.navigate('Main', { screen: 'Notification' })}
-        >
-          <Image source={require('../../assets/images/notification.png')} style={styles.menuIcon} />
-        </TouchableOpacity>
+                 {/* Notification Icon */}
+         <TouchableOpacity
+           style={styles.Iconnotfction}
+           onPress={() => navigation.navigate('Main', { screen: 'Notification' })}
+         >
+           <Image source={require('../../assets/images/notification.png')} style={styles.menuIcon} />
+         </TouchableOpacity>
+         
+         {/* Settings Icon */}
+         <TouchableOpacity
+           style={[styles.Iconnotfction, { marginLeft: 8 }]}
+           onPress={() => navigation.navigate('Settings')}
+         >
+           <Ionicons name="settings-outline" size={16} color="#133F7C" />
+         </TouchableOpacity>
       </View>
 
       {/* Show profile section only on the Home screen */}
@@ -132,7 +140,7 @@ const styles = StyleSheet.create({
     // backgroundColor: 'pink',
     padding: 2,
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: 20,
   },
