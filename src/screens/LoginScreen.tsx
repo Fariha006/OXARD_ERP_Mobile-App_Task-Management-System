@@ -16,8 +16,11 @@ import { loginUser, LoginRequest, UserData, MenuItem } from '../api/api';
 import UserStorage from '../utils/userStorage';
 import { useDrawer } from '../context/DrawerContext';
 import { useIsFocused } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ReactNativeBiometrics from "react-native-biometrics";
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
+const rnBiometrics = new ReactNativeBiometrics();
 export default function LoginScreen({ navigation }: Props) {
 
   const [username, setUsername] = useState('');
@@ -89,20 +92,29 @@ export default function LoginScreen({ navigation }: Props) {
 
       const response = await loginUser(loginData);
 
-      if (response.success && response.userData && response.menuItems && response.token) {
-        console.log('LoginScreen: Login successful:', response.userData);
-        console.log('LoginScreen: Menu items:', response.menuItems);
-        console.log('LoginScreen: Token from API:', response.token ? `Token exists (length: ${response.token.length})` : 'No token');
-        console.log('LoginScreen: Token preview:', response.token ? `${response.token.substring(0, 50)}...` : 'No token');
-        
-        // Store user data, menu items, and token
-        await storeUserData(response.userData, response.menuItems, response.token);
-        
-        // Trigger drawer refresh after storing data
-        refreshDrawer();
-        
-        // Navigate to Home with user data
-        navigation.navigate('Main', { screen: 'Home' });
+             if (response.success && response.userData && response.menuItems && response.token) {
+         console.log('LoginScreen: Login successful:', response.userData);
+         console.log('LoginScreen: Menu items:', response.menuItems);
+         console.log('LoginScreen: Token from API:', response.token ? `Token exists (length: ${response.token.length})` : 'No token');
+         console.log('LoginScreen: Token preview:', response.token ? `${response.token.substring(0, 50)}...` : 'No token');
+         
+         // Store user data, menu items, and token
+         await storeUserData(response.userData, response.menuItems, response.token);
+         
+         // Store username and password for biometric authentication
+         try {
+           await AsyncStorage.setItem('savedUsername', username.trim());
+           await AsyncStorage.setItem('savedPassword', password.trim());
+           console.log('LoginScreen: Username and password stored for biometric authentication');
+         } catch (error) {
+           console.error('LoginScreen: Error storing credentials:', error);
+         }
+         
+         // Trigger drawer refresh after storing data
+         refreshDrawer();
+         
+         // Navigate to Home with user data
+         navigation.navigate('Home');
       } else {
         console.log('LoginScreen: Login failed:', response.message);
         Alert.alert('Login Failed', response.message || 'Invalid credentials');
@@ -181,6 +193,25 @@ export default function LoginScreen({ navigation }: Props) {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Or Sign In With Section */}
+        <View style={styles.orSignInSection}>
+          <Text style={styles.orSignInText}>Or sign in with</Text>
+          <TouchableOpacity 
+            style={styles.biometricButton}
+            onPress={() => {
+              // Handle biometric authentication here
+              console.log('Biometric authentication pressed');
+            }}
+            disabled={isLoading}
+          >
+            <Image 
+              source={require('../../assets/images/biometric-icon.png')} 
+              style={styles.biometricIcon}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        </View>
         </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -251,7 +282,27 @@ loginbutton: {
 },
   buttonText:{
     color: '#ffffff',
-}
+  },
+  orSignInSection: {
+    marginTop: 30,
+    alignItems: 'center',
+  },
+  orSignInText: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  biometricButton: {
+    width: 90,
+    height: 90,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  biometricIcon: {
+    width: 80,
+    height: 80,
+  },
 });
 
 
