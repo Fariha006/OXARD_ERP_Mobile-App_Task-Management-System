@@ -165,8 +165,10 @@ export default function ApprovalsScreen({ navigation }: Props) {
                   <View key={jdx} style={jdx % 2 === 0 ? styles.odd : styles.even}>
                     <View>
                       <Text style={styles.lbl}>Reference No: <Text style={styles.vlue}>{item2.ReferenceNo || '-'}</Text></Text>
+                      <Text style={styles.lbl}>Requested By: <Text style={styles.vlue}>{item2.EmpNo || '-'} {item2.EmployeeName || ''}</Text></Text>
                       <Text style={styles.lbl}>Transaction Date: <Text style={styles.vlue}>{item2.TransactionDate ? item2.TransactionDate.split('T')[0] : '-'}</Text></Text>
-                      <Text style={styles.lbl}>Decision Level: <Text style={styles.vlue}>{item2.DecisionLevel ?? '-'}</Text></Text>
+                      <Text style={styles.lbl}>Request Details: <Text style={styles.vlue}>{item2.Description ?? ' '}</Text></Text>
+                      <Text style={styles.lbl}>Approval level: <Text style={styles.vlue}>{item2.DecisionLevel ?? '-'}</Text></Text>
                     </View>
                     <View style={styles.actionButtons}>
                       <TouchableOpacity 

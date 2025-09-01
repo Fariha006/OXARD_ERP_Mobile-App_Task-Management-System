@@ -18,7 +18,7 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
 
   useEffect(() => {
     loadUserData();
-    requestLocationPermission();
+   // requestLocationPermission();
   }, [isDrawerRefreshing]); // Refresh when drawer refresh is triggered
 
   // Request location permission
@@ -66,7 +66,7 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
         console.log('Current GPS location:', { latitude, longitude });
       },
       (error) => {
-        console.error('GPS Error:', error);
+       // console.error('GPS Error:', error);
         // Fallback to default coordinates
         setCurrentLocation({
           latitude: "12.9716",

@@ -18,6 +18,7 @@ import { useDrawer } from '../context/DrawerContext';
 import { useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeBiometrics from "react-native-biometrics";
+import BiometricSettings from '../utils/biometricSettings';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 const rnBiometrics = new ReactNativeBiometrics();
@@ -77,7 +78,7 @@ export default function LoginScreen({ navigation }: Props) {
     }
   };
 
-  const handleSignIn = async () => {
+    const handleSignIn = async () => {
     if (!validateFields()) {
       return;
     }
@@ -114,14 +115,87 @@ export default function LoginScreen({ navigation }: Props) {
          refreshDrawer();
          
          // Navigate to Home with user data
-         navigation.navigate('Home');
+         //navigation.navigate('Home');
+         navigation.navigate('Main', { screen: 'Home' });
+        } else {
+          console.log('LoginScreen: Login failed:', response.message);
+          Alert.alert('Login Failed', response.message || 'Invalid credentials');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+  const handleBiometricLogin = async () => {
+    try {
+      // Check if biometric authentication is enabled
+      const isBiometricEnabled = await BiometricSettings.isBiometricEnabled();
+      if (!isBiometricEnabled) {
+        Alert.alert('Biometric Authentication', 'Biometric authentication is not enabled. Please enable it in settings.');
+        return;
+      }
+
+      // Check if biometric is available on device
+      const { available, biometryType } = await rnBiometrics.isSensorAvailable();
+      if (!available) {
+        Alert.alert('Biometric Authentication', 'Biometric authentication is not available on this device.');
+        return;
+      }
+
+      // Get stored credentials
+      const savedUsername = await AsyncStorage.getItem('savedUsername');
+      const savedPassword = await AsyncStorage.getItem('savedPassword');
+
+      if (!savedUsername || !savedPassword) {
+        Alert.alert('Biometric Authentication', 'No saved credentials found. Please login with username and password first.');
+        return;
+      }
+
+      setIsLoading(true);
+
+      // Prompt for biometric authentication
+      const { success, error } = await rnBiometrics.simplePrompt({
+        promptMessage: `Authenticate with ${biometryType}`,
+        cancelButtonText: 'Cancel'
+      });
+
+      if (success) {
+        // Biometric authentication successful, proceed with login
+        const loginData: LoginRequest = {
+          UserNam: savedUsername,
+          UserLgnPwd: savedPassword
+        };
+
+        const response = await loginUser(loginData);
+
+        if (response.success && response.userData && response.menuItems && response.token) {
+          console.log('LoginScreen: Biometric login successful:', response.userData);
+          console.log('LoginScreen: Menu items:', response.menuItems);
+          console.log('LoginScreen: Token from API:', response.token ? `Token exists (length: ${response.token.length})` : 'No token');
+          console.log('LoginScreen: Token preview:', response.token ? `${response.token.substring(0, 50)}...` : 'No token');
+          
+          // Store user data, menu items, and token
+          await storeUserData(response.userData, response.menuItems, response.token);
+          
+          // Trigger drawer refresh after storing data
+          refreshDrawer();
+          
+          // Navigate to Home with user data
+          navigation.navigate('Main', { screen: 'Home' });
+        } else {
+          console.log('LoginScreen: Biometric login failed:', response.message);
+          Alert.alert('Login Failed', response.message || 'Invalid credentials');
+        }
       } else {
-        console.log('LoginScreen: Login failed:', response.message);
-        Alert.alert('Login Failed', response.message || 'Invalid credentials');
+        console.log('Biometric authentication failed:', error);
+        Alert.alert('Authentication Failed', 'Biometric authentication was cancelled or failed.');
       }
     } catch (error) {
-      console.error('Login error:', error);
-      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+      console.error('Biometric login error:', error);
+      Alert.alert('Error', 'An unexpected error occurred during biometric authentication.');
     } finally {
       setIsLoading(false);
     }
@@ -196,15 +270,12 @@ export default function LoginScreen({ navigation }: Props) {
 
         {/* Or Sign In With Section */}
         <View style={styles.orSignInSection}>
-          <Text style={styles.orSignInText}>Or sign in with</Text>
-          <TouchableOpacity 
-            style={styles.biometricButton}
-            onPress={() => {
-              // Handle biometric authentication here
-              console.log('Biometric authentication pressed');
-            }}
-            disabled={isLoading}
-          >
+          <Text style={styles.orSignInText}>or sign in with</Text>
+                     <TouchableOpacity 
+             style={styles.biometricButton}
+             onPress={handleBiometricLogin}
+             disabled={isLoading}
+           >
             <Image 
               source={require('../../assets/images/biometric-icon.png')} 
               style={styles.biometricIcon}
@@ -284,18 +355,18 @@ loginbutton: {
     color: '#ffffff',
   },
   orSignInSection: {
-    marginTop: 30,
+    marginTop: 5,
     alignItems: 'center',
   },
   orSignInText: {
     fontSize: 14,
     color: '#666666',
-    marginBottom: 10,
+    //marginBottom: 5,
     textAlign: 'center',
   },
   biometricButton: {
-    width: 90,
-    height: 90,
+    width: 80,
+    height: 80,
     justifyContent: 'center',
     alignItems: 'center',
   },

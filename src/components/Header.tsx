@@ -85,12 +85,12 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
          </TouchableOpacity>
          
          {/* Settings Icon */}
-         <TouchableOpacity
+         {/* <TouchableOpacity
            style={[styles.Iconnotfction, { marginLeft: 8 }]}
            onPress={() => navigation.navigate('Settings')}
          >
            <Ionicons name="settings-outline" size={16} color="#133F7C" />
-         </TouchableOpacity>
+         </TouchableOpacity> */}
       </View>
 
       {/* Show profile section only on the Home screen */}
