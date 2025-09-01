@@ -1446,8 +1446,9 @@ const styles = StyleSheet.create({
     //   shadowOpacity: 0.1,
     //   shadowRadius: 4,
     //   elevation: 5,
-    width: width -10, // fixed width for horizontal cards
-    marginRight: 8,
+    width: width -24, // fixed width for horizontal cards
+    // marginRight: 8,
+    marginRight:1,
     padding: 10,
     paddingLeft: 20,
     backgroundColor: '#e5eefd',
