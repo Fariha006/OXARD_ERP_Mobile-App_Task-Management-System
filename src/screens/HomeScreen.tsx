@@ -1117,7 +1117,7 @@ export default function HomeScreen({ navigation }: Props) {
                      <Image source={tile.image} style={styles.image} />
                      <Text style={styles.title}>{tile.title}</Text>
                    </View>
-                   {tile.title === 'Approval' && (
+                   {(tile.title === 'Approval' || tile.title === 'Messages') && (
                      <View style={styles.badge}>
                        <Text style={styles.badgeText}>20</Text>
                      </View>
