@@ -106,6 +106,10 @@ export default function DocumentsScreen({ navigation }: { navigation?: any }) {
                     <View key={'NationalCardNo'} style={styles.even}>
                       <Text style={styles.lbl}>National CardNo :</Text>
                       <Text style={styles.vlue}>{d['National CardNo']}</Text>
+                    </View>,
+                    <View key={'NationalCardExpiryDate'} style={styles.odd}>
+                      <Text style={styles.lbl}>National Card Expiry Date :</Text>
+                      <Text style={styles.vlue}>{d['NationalCardExpDate']}</Text>
                     </View>
                   ]
                 ))}
