@@ -1111,12 +1111,19 @@ export default function HomeScreen({ navigation }: Props) {
             contentContainerStyle={styles.scrollContainer}
             showsVerticalScrollIndicator={false} horizontal={true} showsHorizontalScrollIndicator={false}>
             <View style={styles.grid}>
-              {tiles.map((tile) => (
-                <TouchableOpacity onPress={() => navigation.navigate(tile.route as any, { screen: tile.screen })} key={tile.id} style={styles.tile}>
-                  <Image source={tile.image} style={styles.image} />
-                  <Text style={styles.title}>{tile.title}</Text>
-                </TouchableOpacity>
-              ))}
+                             {tiles.map((tile) => (
+                 <TouchableOpacity onPress={() => navigation.navigate(tile.route as any, { screen: tile.screen })} key={tile.id} style={styles.tile}>
+                   <View style={styles.tileContent}>
+                     <Image source={tile.image} style={styles.image} />
+                     <Text style={styles.title}>{tile.title}</Text>
+                   </View>
+                   {tile.title === 'Approval' && (
+                     <View style={styles.badge}>
+                       <Text style={styles.badgeText}>20</Text>
+                     </View>
+                   )}
+                 </TouchableOpacity>
+               ))}
             </View>
           </ScrollView>
         </View>
@@ -1430,6 +1437,27 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 11,
     textAlign: 'center',
+  },
+  tileContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badge: {
+    position: 'absolute',
+    top: 0,
+    right: -5,
+    backgroundColor: '#FF4444',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
 
   // =============================================================================
