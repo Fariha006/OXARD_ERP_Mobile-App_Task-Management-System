@@ -1149,3 +1149,22 @@ export async function deleteLeaveRequest(token: string, leaveRegisterId: string)
     throw error;
   }
 }
+
+// Download file function
+export async function downloadFile(filePath: string, token: string): Promise<string> {
+  try {
+    // Construct the full URL with proper backslash handling
+    const baseUrl = API_CONFIG.BASE_URL.endsWith('/') ? API_CONFIG.BASE_URL : `${API_CONFIG.BASE_URL}/`;
+    const path = filePath.startsWith('/') ? filePath.substring(1) : filePath;
+    const fullFileUrl = `${baseUrl}${path}`;
+    
+    console.log('Downloading file from URL:', fullFileUrl);
+    
+    // For direct download, we just return the URL
+    // The actual download will be handled by the system when opening the URL
+    return fullFileUrl;
+  } catch (error: any) {
+    console.error('Download File API Error:', error);
+    throw error;
+  }
+}

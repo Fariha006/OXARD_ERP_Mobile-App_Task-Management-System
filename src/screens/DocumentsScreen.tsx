@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator } from 'react-native';
-import { getDocumentData } from '../api/api';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, Modal, FlatList, Alert, Linking } from 'react-native';
+import { getDocumentData, downloadFile, getFileUrl } from '../api/api';
 import UserStorage from '../utils/userStorage';
+import RNFS from 'react-native-fs';
 
 const ACCORDIONS = [
   { key: 'nationalid', label: 'National Id', item: 'Item1' },
@@ -17,6 +18,9 @@ export default function DocumentsScreen({ navigation }: { navigation?: any }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openIndexes, setOpenIndexes] = useState<string[]>([]);
+  const [showFileModal, setShowFileModal] = useState(false);
+  const [fileList, setFileList] = useState<{name: string, path: string}[]>([]);
+  const [selectedSectionTitle, setSelectedSectionTitle] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,6 +48,95 @@ export default function DocumentsScreen({ navigation }: { navigation?: any }) {
     setOpenIndexes(openIndexes.includes(key)
       ? [] // Close all accordions if the clicked one is already open
       : [key]); // Open only the clicked accordion, closing all others
+  };
+
+  const handleDocumentIconClick = (sectionData: any, sectionTitle: string) => {
+    if (sectionData && sectionData.FileNameSelected && sectionData.FilePaths) {
+      // Split the FileNameSelected by #NewFile# and filter out empty strings
+      const fileNames = sectionData.FileNameSelected
+        .split('#NewFile#')
+        .filter((fileName: string) => fileName.trim() !== '');
+      
+      // Split the FilePaths by #NewFile# and filter out empty strings
+      const filePaths = sectionData.FilePaths
+        .split('#NewFile#')
+        .filter((filePath: string) => filePath.trim() !== '');
+      
+      // Combine file names and paths into objects
+      const filesWithPaths = fileNames.map((name: string, index: number) => ({
+        name: name,
+        path: filePaths[index] || ''
+      }));
+      
+      
+      setFileList(filesWithPaths);
+      setSelectedSectionTitle(sectionTitle);
+      setShowFileModal(true);
+    }
+  };
+
+  const hasDocuments = (sectionData: any) => {
+    return sectionData && sectionData.FileNameSelected && sectionData.FilePaths;
+  };
+
+  const handleFileDownload = async (filePath: string, fileName: string) => {
+    try {
+      // Construct the full file URL using the server URL from API configuration
+      const baseUrl =getFileUrl('/'+filePath)
+      // const cleanFilePath = filePath.startsWith('/') ? filePath.substring(1) : filePath;
+      // const url = `${baseUrl}${cleanFilePath}`;
+      
+      console.log('Downloading file from URL:', baseUrl);
+      
+      const path = RNFS.DownloadDirectoryPath + "/" + fileName; // save in Downloads folder (Android)
+      const result = await RNFS.downloadFile({
+        fromUrl: baseUrl,
+        toFile: path,
+      }).promise;
+
+      if (result.statusCode === 200) {
+        Alert.alert("Success", `File saved to: ${path}`);
+      } else {
+        Alert.alert("Failed", "Download failed");
+      }
+
+      return;
+
+
+
+
+      // Alert.alert(filePath);
+      // const token = await UserStorage.getToken();
+      // if (!token) {
+      //   Alert.alert('Error', 'No authentication token found. Please login again.');
+      //   return;
+      // }
+
+      // console.log('Downloading file:', fileName);
+      // console.log('File path:', filePath);
+      
+      // // Get the full file URL
+      // const fullFileUrl = await downloadFile(filePath, token);
+      
+      // // For direct download, we can add the token as a query parameter or header
+      // // Since Linking.openURL doesn't support custom headers, we'll use query parameter
+      // const downloadUrl = `${fullFileUrl}?token=${encodeURIComponent(token)}`;
+      
+      // // Check if the URL can be opened
+      // const canOpen = await Linking.canOpenURL(downloadUrl);
+      
+      // if (canOpen) {
+      //   // Open the file URL directly for download
+      //   await Linking.openURL(downloadUrl);
+      //   Alert.alert('Success', `Downloading file: ${fileName}`);
+      // } else {
+      //   Alert.alert('Error', 'Cannot open this file type');
+      // }
+    } catch (error) {
+      console.error('Download error:', error);
+      Alert.alert(filePath);
+     // Alert.alert('Error', 'Failed to download file');
+    }
   };
 
   if (loading) {
@@ -90,7 +183,21 @@ export default function DocumentsScreen({ navigation }: { navigation?: any }) {
                 <Image source={require('../../assets/images/innerpage/documentd.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
                 <Text style={styles.accordionTitle}>{label}</Text>
               </View>
-              {/* <Text>{openIndexes.includes(key) ? '▲' : '▼'}</Text> */}
+              <View style={styles.headerRight}>
+                {data && data[item] && Array.isArray(data[item]) && data[item].length > 0 && hasDocuments(data[item][0]) && (
+                  <TouchableOpacity 
+                    onPress={() => handleDocumentIconClick(data[item][0], label)}
+                    style={styles.documentIconContainer}
+                  >
+                    <Image 
+                      source={require('../../assets/images/innerpage/download.png')} 
+                      style={styles.documentIcon} 
+                      resizeMode="contain" 
+                    />
+                  </TouchableOpacity>
+                )}
+                {/* <Text>{openIndexes.includes(key) ? '▲' : '▼'}</Text> */}
+              </View>
             </TouchableOpacity>
             {openIndexes.includes(key) && (
               <View style={styles.accordionContent}>
@@ -258,6 +365,47 @@ export default function DocumentsScreen({ navigation }: { navigation?: any }) {
           </View>
         ))}
       </ScrollView>
+
+      {/* File List Modal */}
+      <Modal
+        visible={showFileModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowFileModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Documents - {selectedSectionTitle}</Text>
+              <TouchableOpacity 
+                onPress={() => setShowFileModal(false)}
+                style={styles.closeButton}
+              >
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={fileList}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity 
+                  style={styles.fileItem}
+                  onPress={() => handleFileDownload(item.path, item.name)}
+                >
+                  <Image 
+                    source={require('../../assets/images/innerpage/documentd.png')} 
+                    style={styles.fileIcon} 
+                    resizeMode="contain" 
+                  />
+                  <Text style={styles.fileName}>{item.name}</Text>
+                </TouchableOpacity>
+              )}
+              style={styles.fileList}
+              showsVerticalScrollIndicator={true}
+            />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -389,5 +537,85 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#FF0000',
     textAlign: 'center',
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  documentIconContainer: {
+    padding: 2,
+    marginLeft: 8,
+  },
+  documentIcon: {
+    width: 16,
+    height: 16,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    padding: 20,
+    margin: 20,
+    maxHeight: '80%',
+    minWidth: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#133F7C',
+    flex: 1,
+  },
+  closeButton: {
+    padding: 5,
+    marginLeft: 10,
+  },
+  closeButtonText: {
+    fontSize: 20,
+    color: '#666',
+    fontWeight: 'bold',
+  },
+  fileList: {
+    maxHeight: 400,
+  },
+  fileItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+    backgroundColor: '#FAFAFA',
+    marginVertical: 2,
+    borderRadius: 6,
+  },
+  fileIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 12,
+  },
+  fileName: {
+    fontSize: 14,
+    color: '#333',
+    fontWeight: '600',
+    flex: 1,
   },
 });
