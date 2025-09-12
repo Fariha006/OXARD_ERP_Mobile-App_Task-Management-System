@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, FlatList, Modal, TextInput, Switch, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { pick, types, keepLocalCopy } from '@react-native-documents/picker';
+
+
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { getMesseges, fetchMessageCategories, fetchSelectTypes, saveMessage, fetchMessageForEdit, fetchLeaveData, calculateLeaveDays, saveLeaveRequest, saveAllLeaves, fetchLeaveEditData } from '../api/api';
+import { getMesseges, fetchMessageCategories, fetchSelectTypes, saveMessage, fetchMessageForEdit, fetchLeaveData, calculateLeaveDays, saveLeaveRequest, saveAllLeaves, fetchLeaveEditData, uploadDocument } from '../api/api';
 import UserStorage from '../utils/userStorage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LeaveRequest'>;
@@ -36,6 +39,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editData, setEditData] = useState<any>(null);
   const [editType, setEditType] = useState<any>(null);
+  const [selectedDocument, setSelectedDocument] = useState<any>(null);
 
   // Check if we're in edit mode and populate form with edit data
   useEffect(() => {
@@ -190,6 +194,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
     setIsCalculating(false);
     setEditingLeaveId(null);
     setLeaveTypeModalVisible(false);
+    setSelectedDocument(null);
   };
 
   const handleStartDateChange = (event: any, selectedDate?: Date) => {
@@ -459,6 +464,36 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
 
   const handleRemoveLeave = (leaveId: string) => {
     setSavedLeaves(savedLeaves.filter(leave => leave.id !== leaveId));
+  };
+
+  const handleDocumentPicker = async () => {
+    try {
+      const [file] = await pick({ types: [types.allFiles], allowMultiSelection: false });
+      if (file.uri) {
+        // if you need a local copy:
+        const [copyResult] = await keepLocalCopy({ files: [{ uri: file.uri, fileName: file.name?file.name:'' }], destination: 'documentDirectory' });
+        setSelectedDocument(file);
+        
+        // Upload document to API
+        const token = await UserStorage.getToken();
+        if (token) {
+          try {
+            const uploadResult = await uploadDocument(token, file);
+            console.log('Document uploaded successfully:', uploadResult);
+            setValidationMessage('Document uploaded successfully!');
+            setShowValidationMessage(true);
+            setTimeout(() => setShowValidationMessage(false), 3000);
+          } catch (uploadError) {
+            console.error('Document upload error:', uploadError);
+            setValidationMessage('Failed to upload document. Please try again.');
+            setShowValidationMessage(true);
+            setTimeout(() => setShowValidationMessage(false), 3000);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Document picker error:', error);
+    }
   };
 
   const handleSaveAllLeaves = async () => {
@@ -820,7 +855,23 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                       placeholder="Holidays"
                     />
                   </View>
+
+                  {/* Document Upload */}
+              
                 </View>
+
+                <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Select Document</Text>
+                    <TouchableOpacity style={styles.fileUploadButton} onPress={handleDocumentPicker}>
+                      <Text style={styles.fileUploadButtonText}>
+                        {selectedDocument ? `📎 ${selectedDocument.name}` : '📎 Select Document'}
+                      </Text>
+                    </TouchableOpacity>
+                 
+                </View>
+
+
+                
               </View>
             </ScrollView>
 
@@ -1296,6 +1347,21 @@ const styles = StyleSheet.create({
   },
   editIcon: {
     fontSize: 12,
+  },
+  fileUploadButton: {
+    borderWidth: 1,
+    borderColor: '#DEECFF',
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: '#FFFFFF',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fileUploadButtonText: {
+    fontSize: 14,
+    color: '#133F7C',
+    fontWeight: '500',
   },
 
 

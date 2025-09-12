@@ -1150,6 +1150,42 @@ export async function deleteLeaveRequest(token: string, leaveRegisterId: string)
   }
 }
 
+export async function uploadDocument(token: string, file: any, leaveRegisterId?: string) {
+  try {
+    //const apiurl = getApiUrl('/api/Document/Upload');
+    const apiurl ='http://localhost:50963/api/Document/Upload';
+    
+    // Create FormData for file upload
+    const formData = new FormData();
+    formData.append('file', {
+      uri: file.uri,
+      type: file.type || 'application/octet-stream',
+      name: file.name || 'document',
+    } as any);
+    
+    if (leaveRegisterId) {
+      formData.append('leaveRegisterId', leaveRegisterId);
+    }
+    
+    console.log('Upload Document API URL:', apiurl);
+    console.log('Upload Document File:', file.name);
+    
+    const response = await axios.post<any>(apiurl, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+        // 'Authorization': `Bearer ${token}`,
+      },
+      timeout: API_CONFIG.TIMEOUT,
+    });
+    
+    console.log('Upload Document API Response:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('Upload Document API Error:', error);
+    throw error;
+  }
+}
+
 // Download file function
 export async function downloadFile(filePath: string, token: string): Promise<string> {
   try {
