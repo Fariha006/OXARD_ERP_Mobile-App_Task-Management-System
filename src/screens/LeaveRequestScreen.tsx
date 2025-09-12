@@ -41,6 +41,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
   const [editType, setEditType] = useState<any>(null);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  const [modalScrollViewRef, setModalScrollViewRef] = useState<any>(null);
 
   // Check if we're in edit mode and populate form with edit data
   useEffect(() => {
@@ -197,6 +198,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
     setLeaveTypeModalVisible(false);
     setSelectedDocument(null);
     setUploadedFiles([]);
+    setModalScrollViewRef(null);
   };
 
   const handleStartDateChange = (event: any, selectedDate?: Date) => {
@@ -472,6 +474,24 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
     setUploadedFiles(prevFiles => prevFiles.filter(f => f.id !== fileId));
   };
 
+  const scrollToUploadedFiles = () => {
+    if (modalScrollViewRef) {
+      // Scroll to the bottom of the modal to show uploaded files
+      setTimeout(() => {
+        modalScrollViewRef.scrollToEnd({ animated: true });
+      }, 500); // Increased delay to ensure the file is added to the list and UI is updated
+    }
+  };
+
+  // Alternative scroll function that scrolls to a specific position
+  const scrollToSpecificPosition = (y: number) => {
+    if (modalScrollViewRef) {
+      setTimeout(() => {
+        modalScrollViewRef.scrollTo({ x: 0, y: y, animated: true });
+      }, 500);
+    }
+  };
+
   const handleDocumentPicker = async () => {
     try {
       const [file] = await pick({ types: [types.allFiles], allowMultiSelection: false });
@@ -504,6 +524,9 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
               setValidationMessage('Document uploaded successfully!');
               setShowValidationMessage(true);
               setTimeout(() => setShowValidationMessage(false), 3000);
+              
+              // Auto-scroll to show the uploaded file
+              scrollToUploadedFiles();
             } else {
               setValidationMessage('Something went wrong please try after some time');
               setShowValidationMessage(true);
@@ -769,7 +792,10 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalBody}>
+            <ScrollView 
+              ref={setModalScrollViewRef}
+              style={styles.modalBody}
+            >
               <View style={styles.popupContent}>
                 {/* Leave Type Dropdown */}
                 <View style={styles.formGroup}>
@@ -899,7 +925,10 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
 
                 {/* Uploaded Files List */}
                 {uploadedFiles.length > 0 && (
-                  <View style={styles.uploadedFilesContainer}>
+                  <View 
+                    id="uploadedFilesSection"
+                    style={styles.uploadedFilesContainer}
+                  >
                     <Text style={styles.uploadedFilesTitle}>Uploaded Documents</Text>
                     {uploadedFiles.map((file, index) => (
                       <View key={file.id} style={styles.uploadedFileItem}>
@@ -1142,6 +1171,7 @@ const styles = StyleSheet.create({
   modalBody: {
     width: '100%',
     marginBottom: 0,
+    height:'55%'
   },
   popupContent: {
     marginBottom: 0,
