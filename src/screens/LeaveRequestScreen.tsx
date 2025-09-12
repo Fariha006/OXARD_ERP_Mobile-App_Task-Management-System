@@ -40,6 +40,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
   const [editData, setEditData] = useState<any>(null);
   const [editType, setEditType] = useState<any>(null);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
 
   // Check if we're in edit mode and populate form with edit data
   useEffect(() => {
@@ -195,6 +196,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
     setEditingLeaveId(null);
     setLeaveTypeModalVisible(false);
     setSelectedDocument(null);
+    setUploadedFiles([]);
   };
 
   const handleStartDateChange = (event: any, selectedDate?: Date) => {
@@ -466,6 +468,10 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
     setSavedLeaves(savedLeaves.filter(leave => leave.id !== leaveId));
   };
 
+  const handleRemoveUploadedFile = (fileId: string) => {
+    setUploadedFiles(prevFiles => prevFiles.filter(f => f.id !== fileId));
+  };
+
   const handleDocumentPicker = async () => {
     try {
       const [file] = await pick({ types: [types.allFiles], allowMultiSelection: false });
@@ -479,13 +485,33 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
         if (token) {
           try {
             const uploadResult = await uploadDocument(token, file);
-            console.log('Document uploaded successfully:', uploadResult);
-            setValidationMessage('Document uploaded successfully!');
-            setShowValidationMessage(true);
-            setTimeout(() => setShowValidationMessage(false), 3000);
+            console.log('Document upload response:', uploadResult);
+            
+            // Check if upload was successful
+            if (uploadResult && uploadResult.Status === "Success") {
+              // Add the uploaded file to the list
+              const newUploadedFile = {
+                id: Date.now().toString(),
+                fileName: uploadResult.FileName,
+                tmpFileName: uploadResult.TmpFileName,
+                fileSize: uploadResult.FileSize,
+                leaveRegisterId: uploadResult.LeaveRegisterId,
+                originalFile: file
+              };
+            
+              
+              setUploadedFiles(prevFiles => [...prevFiles, newUploadedFile]);
+              setValidationMessage('Document uploaded successfully!');
+              setShowValidationMessage(true);
+              setTimeout(() => setShowValidationMessage(false), 3000);
+            } else {
+              setValidationMessage('Something went wrong please try after some time');
+              setShowValidationMessage(true);
+              setTimeout(() => setShowValidationMessage(false), 3000);
+            }
           } catch (uploadError) {
             console.error('Document upload error:', uploadError);
-            setValidationMessage('Failed to upload document. Please try again.');
+            setValidationMessage('Something went wrong please try after some time');
             setShowValidationMessage(true);
             setTimeout(() => setShowValidationMessage(false), 3000);
           }
@@ -864,11 +890,40 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                 <Text style={styles.formLabel}>Select Document</Text>
                     <TouchableOpacity style={styles.fileUploadButton} onPress={handleDocumentPicker}>
                       <Text style={styles.fileUploadButtonText}>
-                        {selectedDocument ? `📎 ${selectedDocument.name}` : '📎 Select Document'}
+                        {/* {selectedDocument ? `📎 ${selectedDocument.name}` : '📎 Select Document'} */}
+                        { '📎 Select Document'}
                       </Text>
                     </TouchableOpacity>
                  
                 </View>
+
+                {/* Uploaded Files List */}
+                {uploadedFiles.length > 0 && (
+                  <View style={styles.uploadedFilesContainer}>
+                    <Text style={styles.uploadedFilesTitle}>Uploaded Documents</Text>
+                    {uploadedFiles.map((file, index) => (
+                      <View key={file.id} style={styles.uploadedFileItem}>
+                        <Image 
+                          source={require('../../assets/images/innerpage/documentd.png')} 
+                          style={styles.uploadedFileIcon} 
+                          resizeMode="contain" 
+                        />
+                        <View style={styles.uploadedFileInfo}>
+                          <Text style={styles.uploadedFileName}>{file.fileName}</Text>
+                          <Text style={styles.uploadedFileSize}>
+                            Size: {(file.fileSize / 1024).toFixed(2)} KB
+                          </Text>
+                        </View>
+                        <TouchableOpacity 
+                          style={styles.removeFileButton}
+                          onPress={() => handleRemoveUploadedFile(file.id)}
+                        >
+                          <Text style={styles.removeFileButtonText}>✕</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                )}
 
 
                 
@@ -1362,6 +1417,69 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#133F7C',
     fontWeight: '500',
+  },
+  uploadedFilesContainer: {
+    marginTop: 15,
+    padding: 12,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  uploadedFilesTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#133F7C',
+    marginBottom: 10,
+  },
+  uploadedFileItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 6,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  uploadedFileIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
+  uploadedFileInfo: {
+    flex: 1,
+  },
+  uploadedFileName: {
+    fontSize: 13,
+    color: '#333',
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  uploadedFileSize: {
+    fontSize: 11,
+    color: '#666',
+  },
+  removeFileButton: {
+    padding: 4,
+    marginLeft: 8,
+    backgroundColor: '#f8d7da',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  removeFileButtonText: {
+    fontSize: 12,
+    color: '#721c24',
+    fontWeight: 'bold',
   },
 
 

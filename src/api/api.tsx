@@ -1182,8 +1182,10 @@ export async function uploadDocument(token: string, file: any, leaveRegisterId?:
     return response.data;
   } catch (error: any) {
     console.error('Upload Document API Error:', error);
-    throw error;
+    throw error; 
+
   }
+  
 }
 
 // Download file function
