@@ -1152,8 +1152,8 @@ export async function deleteLeaveRequest(token: string, leaveRegisterId: string)
 
 export async function uploadDocument(token: string, file: any, leaveRegisterId?: string) {
   try {
-    //const apiurl = getApiUrl('/api/Document/Upload');
-    const apiurl ='http://localhost:50963/api/Document/Upload';
+    const apiurl = getApiUrl('/api/MobAttachments/Upload');
+   // const apiurl ='http://localhost:50963/api/Document/Upload';
     
     // Create FormData for file upload
     const formData = new FormData();

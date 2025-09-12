@@ -385,7 +385,8 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
               holidays: holidays,
               startHD: startHD,
               endHD: endHD,
-              payHeadId: selectedLeaveType
+              payHeadId: selectedLeaveType,
+              uploadedFiles: [...uploadedFiles] // Include uploaded files data
             };
 
             // Update existing leave or add new one
@@ -411,6 +412,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
             setHolidays('0');
             setLeaveDropdownOpen(false);
             setEditingLeaveId(null);
+            setUploadedFiles([]); // Clear uploaded files after adding to list
 
             setShowValidationMessage(true);
             setTimeout(() => setShowValidationMessage(false), 3000);
@@ -458,6 +460,13 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
     setEndHD(leave.endHD);
     setLeaveDays(leave.leaveDays);
     setHolidays(leave.holidays);
+    
+    // Set uploaded files if they exist
+    if (leave.uploadedFiles && leave.uploadedFiles.length > 0) {
+      setUploadedFiles(leave.uploadedFiles);
+    } else {
+      setUploadedFiles([]);
+    }
 
     // Store the leave ID being edited
     setEditingLeaveId(leave.id);
@@ -515,8 +524,8 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                 fileName: uploadResult.FileName,
                 tmpFileName: uploadResult.TmpFileName,
                 fileSize: uploadResult.FileSize,
-                leaveRegisterId: uploadResult.LeaveRegisterId,
-                originalFile: file
+                leaveRegisterId: uploadResult.LeaveRegisterId
+                //originalFile: file
               };
             
               
