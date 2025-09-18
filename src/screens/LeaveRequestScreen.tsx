@@ -197,7 +197,6 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
     setEditingLeaveId(null);
     setLeaveTypeModalVisible(false);
     setSelectedDocument(null);
-    setUploadedFiles([]);
     setModalScrollViewRef(null);
   };
 
@@ -385,8 +384,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
               holidays: holidays,
               startHD: startHD,
               endHD: endHD,
-              payHeadId: selectedLeaveType,
-              uploadedFiles: [...uploadedFiles] // Include uploaded files data
+              payHeadId: selectedLeaveType
             };
 
             // Update existing leave or add new one
@@ -412,7 +410,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
             setHolidays('0');
             setLeaveDropdownOpen(false);
             setEditingLeaveId(null);
-            setUploadedFiles([]); // Clear uploaded files after adding to list
+            // Uploaded files are now global and persist across leave additions
 
             setShowValidationMessage(true);
             setTimeout(() => setShowValidationMessage(false), 3000);
@@ -461,12 +459,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
     setLeaveDays(leave.leaveDays);
     setHolidays(leave.holidays);
     
-    // Set uploaded files if they exist
-    if (leave.uploadedFiles && leave.uploadedFiles.length > 0) {
-      setUploadedFiles(leave.uploadedFiles);
-    } else {
-      setUploadedFiles([]);
-    }
+    // Uploaded files are now global to the entire leave request, not per leave item
 
     // Store the leave ID being edited
     setEditingLeaveId(leave.id);
@@ -518,14 +511,25 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
             
             // Check if upload was successful
             if (uploadResult && uploadResult.Status === "Success") {
-              // Add the uploaded file to the list
+              // Create attachment object in the required format
+              const attachmentItem = {
+                PageName: "da5010",
+                TableName: "da5010", 
+                FileNameSelected: file.name || "Unknown",
+                FileNameServer: uploadResult.TmpFileName,
+                AutoId: "0",
+                FileId: "0",
+                Folder: uploadResult.UploadFilePath || "temppath"
+              };
+
+              // Add the uploaded file to the list with both formats for display and API
               const newUploadedFile = {
                 id: Date.now().toString(),
                 fileName: uploadResult.FileName,
                 tmpFileName: uploadResult.TmpFileName,
                 fileSize: uploadResult.FileSize,
-                leaveRegisterId: uploadResult.LeaveRegisterId
-                //originalFile: file
+                leaveRegisterId: uploadResult.LeaveRegisterId,
+                attachmentItem: attachmentItem // Store the attachment format for API
               };
             
               
@@ -578,6 +582,9 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
         // Get current date in DD-MMM-YYYY format
         const currentDate = formatDateForAPI(new Date().toISOString().split('T')[0]);
 
+        // Create AttachmentList from uploaded files
+        const attachmentList = uploadedFiles.map(file => file.attachmentItem);
+
         const allLeavesData = {
           Mode: "I",
           LeaveRegisterId: "0",
@@ -589,14 +596,15 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
           Remarks: remarks || "Request From Mobile App",
           Da5011List: savedLeaves.map(leave => ({
             LeaveRegisterDtlsId: "0",
-            FkPayHeadId: leave.payHeadId.toString(),
+            FkPayHeadId: leave.payHeadId.toString(), 
             LeaveStartDate: formatDateForAPI(leave.startDate),
             LeaveEndDate: formatDateForAPI(leave.endDate),
             HalfDayStartDate: leave.startHD ? "1" : "0",
             HalfDayEndDate: leave.endHD ? "1" : "0",
             DayCount: leave.leaveDays,
             offCount: leave.holidays
-          }))
+          })),
+          AttachmentList: attachmentList
         };
 
         console.log('Saving all leaves:', allLeavesData);
@@ -609,9 +617,10 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
             setShowValidationMessage(true);
             setTimeout(() => setShowValidationMessage(false), 3000);
 
-            // Clear saved leaves after successful save
+            // Clear saved leaves and uploaded files after successful save
             setSavedLeaves([]);
             setRemarks('');
+            setUploadedFiles([]);
           } else if (result.ErrorCodes && Array.isArray(result.ErrorCodes)) {
             const errorMessage = result.ErrorCodes.join(', ');
             setValidationMessage(errorMessage);
@@ -713,6 +722,46 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
               <Text style={styles.selectLeavesButtonText}>Select Leaves</Text>
             </TouchableOpacity>
           </View>
+          )}
+
+          {/* Select Document */}
+          {editType != 'view' && (
+          <View style={styles.formGroup}>
+            <Text style={styles.formLabel}>Select Document</Text>
+            <TouchableOpacity style={styles.fileUploadButton} onPress={handleDocumentPicker}>
+              <Text style={styles.fileUploadButtonText}>
+                📎 Select Document
+              </Text>
+            </TouchableOpacity>
+          </View>
+          )}
+
+          {/* Uploaded Files List */}
+          {uploadedFiles.length > 0 && (
+            <View style={styles.uploadedFilesContainer}>
+              <Text style={styles.uploadedFilesTitle}>Uploaded Documents</Text>
+              {uploadedFiles.map((file, index) => (
+                <View key={file.id} style={styles.uploadedFileItem}>
+                  <Image 
+                    source={require('../../assets/images/innerpage/documentd.png')} 
+                    style={styles.uploadedFileIcon} 
+                    resizeMode="contain" 
+                  />
+                  <View style={styles.uploadedFileInfo}>
+                    <Text style={styles.uploadedFileName}>{file.fileName}</Text>
+                    <Text style={styles.uploadedFileSize}>
+                      Size: {(file.fileSize / 1024).toFixed(2)} KB
+                    </Text>
+                  </View>
+                  <TouchableOpacity 
+                    style={styles.removeFileButton}
+                    onPress={() => handleRemoveUploadedFile(file.id)}
+                  >
+                    <Text style={styles.removeFileButtonText}>✕</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
           )}
 
           {/* Saved Leaves List */}
@@ -921,47 +970,6 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
               
                 </View>
 
-                <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Select Document</Text>
-                    <TouchableOpacity style={styles.fileUploadButton} onPress={handleDocumentPicker}>
-                      <Text style={styles.fileUploadButtonText}>
-                        {/* {selectedDocument ? `📎 ${selectedDocument.name}` : '📎 Select Document'} */}
-                        { '📎 Select Document'}
-                      </Text>
-                    </TouchableOpacity>
-                 
-                </View>
-
-                {/* Uploaded Files List */}
-                {uploadedFiles.length > 0 && (
-                  <View 
-                    id="uploadedFilesSection"
-                    style={styles.uploadedFilesContainer}
-                  >
-                    <Text style={styles.uploadedFilesTitle}>Uploaded Documents</Text>
-                    {uploadedFiles.map((file, index) => (
-                      <View key={file.id} style={styles.uploadedFileItem}>
-                        <Image 
-                          source={require('../../assets/images/innerpage/documentd.png')} 
-                          style={styles.uploadedFileIcon} 
-                          resizeMode="contain" 
-                        />
-                        <View style={styles.uploadedFileInfo}>
-                          <Text style={styles.uploadedFileName}>{file.fileName}</Text>
-                          <Text style={styles.uploadedFileSize}>
-                            Size: {(file.fileSize / 1024).toFixed(2)} KB
-                          </Text>
-                        </View>
-                        <TouchableOpacity 
-                          style={styles.removeFileButton}
-                          onPress={() => handleRemoveUploadedFile(file.id)}
-                        >
-                          <Text style={styles.removeFileButtonText}>✕</Text>
-                        </TouchableOpacity>
-                      </View>
-                    ))}
-                  </View>
-                )}
 
 
                 
