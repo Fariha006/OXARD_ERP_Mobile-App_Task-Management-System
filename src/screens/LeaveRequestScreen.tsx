@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, FlatList, Modal, TextInput, Switch, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, FlatList, Modal, TextInput, Switch, Platform, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { pick, types, keepLocalCopy } from '@react-native-documents/picker';
+import RNFS from 'react-native-fs';
+import { getFileUrl } from '../config/apiConfig';
 
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -102,6 +104,29 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
 
           setSavedLeaves(mappedLeaves);
           console.log('Mapped leaves for editing:', mappedLeaves);
+        }
+
+        // Handle existing attachments from AttachmentList
+        if (response && response.AttachmentList && Array.isArray(response.AttachmentList)) {
+          const mappedAttachments = response.AttachmentList.map((attachment: any, index: number) => ({
+            id: `existing-${index}-${Date.now()}`,
+            fileName: attachment.FileNameServer || attachment.FileNameSelected || 'Unknown',
+            tmpFileName: attachment.FileNameServer || '',
+            fileSize: 0, // Size not available from existing attachments
+            leaveRegisterId: '', // Not available for existing attachments
+            attachmentItem: {
+              PageName: attachment.PageName || "da5010",
+              TableName: attachment.TableName || attachment["Table Name"] || "da5010",
+              FileNameSelected: attachment.FileNameSelected || 'Unknown',
+              FileNameServer: attachment.FileNameServer || '',
+              AutoId: attachment.AutoId || "0",
+              FileId: attachment.FileId || "0",
+              Folder: attachment.Folder || "temppath"
+            }
+          }));
+
+          setUploadedFiles(mappedAttachments);
+          console.log('Mapped existing attachments:', mappedAttachments);
         }
       }
     } catch (error) {
@@ -476,6 +501,43 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
     setUploadedFiles(prevFiles => prevFiles.filter(f => f.id !== fileId));
   };
 
+  const handleFileDownload = async (file: any) => {
+    try {
+      // Construct the file path using Folder + '/' + FileNameServer
+      let filePath = `${file.attachmentItem.Folder}/${file.attachmentItem.FileNameServer}`;
+      
+      // Get the full file URL
+      //const downloadUrl = getFileUrl('/' + filePath);
+
+      if(!filePath.startsWith('http')){
+        filePath = getFileUrl('/UploadFiles/DocManager/temp/' + file.attachmentItem.FileNameServer);
+      }
+      //console.log('Downloading file from URL:', downloadUrl);
+      console.log('File path:', filePath);
+      
+      // Get the original filename for saving
+      const fileName = file.attachmentItem.FileNameSelected || file.fileName;
+      
+      // Download path
+      const path = RNFS.DownloadDirectoryPath + "/" + fileName;
+      
+      // Download the file
+      const result = await RNFS.downloadFile({
+        fromUrl: filePath,
+        toFile: path,
+      }).promise;
+
+      if (result.statusCode === 200) {
+        Alert.alert("Success", `File saved to: ${path}`);
+      } else {
+        Alert.alert("Failed", "Download failed");
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      Alert.alert('Error', 'Failed to download file');
+    }
+  };
+
   const scrollToUploadedFiles = () => {
     if (modalScrollViewRef) {
       // Scroll to the bottom of the modal to show uploaded files
@@ -725,7 +787,6 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
           )}
 
           {/* Select Document */}
-          {editType != 'view' && (
           <View style={styles.formGroup}>
             <Text style={styles.formLabel}>Select Document</Text>
             <TouchableOpacity style={styles.fileUploadButton} onPress={handleDocumentPicker}>
@@ -734,7 +795,6 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
               </Text>
             </TouchableOpacity>
           </View>
-          )}
 
           {/* Uploaded Files List */}
           {uploadedFiles.length > 0 && (
@@ -748,9 +808,11 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                     resizeMode="contain" 
                   />
                   <View style={styles.uploadedFileInfo}>
-                    <Text style={styles.uploadedFileName}>{file.fileName}</Text>
+                    <TouchableOpacity onPress={() => handleFileDownload(file)}>
+                      <Text style={[styles.uploadedFileName, styles.downloadableFileName]}>{file.attachmentItem?.FileNameSelected || file.fileName}</Text>
+                    </TouchableOpacity>
                     <Text style={styles.uploadedFileSize}>
-                      Size: {(file.fileSize / 1024).toFixed(2)} KB
+                      {file.fileSize > 0 ? `Size: ${(file.fileSize / 1024).toFixed(2)} KB` : 'Existing Document'}
                     </Text>
                   </View>
                   <TouchableOpacity 
@@ -1508,6 +1570,10 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '600',
     marginBottom: 2,
+  },
+  downloadableFileName: {
+    color: '#133F7C',
+    textDecorationLine: 'underline',
   },
   uploadedFileSize: {
     fontSize: 11,
