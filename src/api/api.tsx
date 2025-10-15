@@ -999,6 +999,7 @@ export async function saveMessage(token: string, messageData: {
   NotificationContent: string;
   EmployeeCategoryId: string;
   EmployeeCategoryListIds: string;
+  AttachmentList?: any[];
 }) {
   try {
     const apiurl = getApiUrl('/api/MobAdm0009/I_U_D_Mode');

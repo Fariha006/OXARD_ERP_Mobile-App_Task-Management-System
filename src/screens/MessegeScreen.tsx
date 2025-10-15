@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, FlatList, Modal, TextInput, Switch, Platform, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { pick, types, keepLocalCopy } from '@react-native-documents/picker';
+import RNFS from 'react-native-fs';
+import { getFileUrl } from '../config/apiConfig';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { getMesseges, fetchMessageCategories, fetchSelectTypes, saveMessage, fetchMessageForEdit } from '../api/api';
+import { getMesseges, fetchMessageCategories, fetchSelectTypes, saveMessage, fetchMessageForEdit, uploadDocument } from '../api/api';
 import UserStorage from '../utils/userStorage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
@@ -31,6 +34,8 @@ export default function MessegeScreen({ navigation }: Props) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editData, setEditData] = useState<any>(null);
   const [selectedNotificationId, setSelectedNotificationId] = useState<string>('');
+  const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   
   // Dropdown modals
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
@@ -114,6 +119,86 @@ export default function MessegeScreen({ navigation }: Props) {
 
   const showDatePickerModal = () => {
     setShowDatePicker(true);
+  };
+
+  const handleDocumentPicker = async () => {
+    try {
+      const [file] = await pick({ types: [types.allFiles], allowMultiSelection: false });
+      if (file.uri) {
+        // if you need a local copy:
+        const [copyResult] = await keepLocalCopy({ files: [{ uri: file.uri, fileName: file.name?file.name:'' }], destination: 'documentDirectory' });
+        setSelectedDocument(file);
+        
+        // Upload document to API
+        const token = await UserStorage.getToken();
+        if (token) {
+          try {
+            const uploadResult = await uploadDocument(token, file);
+            console.log('Document upload response:', uploadResult);
+            
+            // Check if upload was successful
+            if (uploadResult && uploadResult.Status === "Success") {
+              // Create attachment object in the required format
+              const attachmentItem = {
+                PageName: "da5010",
+                TableName: "da5010", 
+                FileNameSelected: file.name || "Unknown",
+                FileNameServer: uploadResult.TmpFileName,
+                FilePath: uploadResult.FilePath || "",
+                FileSize: file.size || 0,
+                FileType: file.type || "application/octet-stream"
+              };
+
+              // Add to uploaded files list
+              const newFile = {
+                id: Date.now().toString(),
+                fileName: file.name || "Unknown",
+                fileSize: file.size || 0,
+                fileType: file.type || "application/octet-stream",
+                attachmentItem: attachmentItem
+              };
+
+              setUploadedFiles(prev => [...prev, newFile]);
+              console.log('File uploaded successfully and added to list');
+            } else {
+              console.error('Upload failed:', uploadResult);
+              Alert.alert('Upload Failed', 'Failed to upload document. Please try again.');
+            }
+          } catch (uploadError) {
+            console.error('Upload error:', uploadError);
+            Alert.alert('Upload Error', 'An error occurred while uploading the document.');
+          }
+        } else {
+          console.error('No authentication token found');
+          Alert.alert('Authentication Error', 'Please login again.');
+        }
+      }
+    } catch (error: any) {
+      console.error('Document picker error:', error);
+      if (error.code !== 'DOCUMENT_PICKER_CANCELED') {
+        Alert.alert('Error', 'Failed to select document. Please try again.');
+      }
+    }
+  };
+
+  const handleFileDownload = async (file: any) => {
+    try {
+      if (file.attachmentItem?.FileNameServer) {
+        const fileUrl = getFileUrl(file.attachmentItem.FileNameServer);
+        console.log('Downloading file from:', fileUrl);
+        
+        // For now, just show an alert with the file URL
+        // In a real app, you might want to open the file or download it
+        Alert.alert('File Download', `File: ${file.fileName}\nURL: ${fileUrl}`);
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      Alert.alert('Download Error', 'Failed to download file.');
+    }
+  };
+
+  const handleRemoveFile = (fileId: string) => {
+    setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
   };        
 
   const handleSave = async () => {
@@ -127,6 +212,9 @@ export default function MessegeScreen({ navigation }: Props) {
       // Convert selectedSelectTypes array to comma-separated string
       const employeeCategoryListIds = selectedSelectTypes.join(',');
 
+      // Create AttachmentList from uploaded files
+      const attachmentList = uploadedFiles.map(file => file.attachmentItem);
+
       const messageData = {
         "Mode": isEditMode ? "U" : "I",
         "NotificationId": isEditMode ? selectedNotificationId : "0",
@@ -135,7 +223,8 @@ export default function MessegeScreen({ navigation }: Props) {
         "NotificationDate": tillDate || "",
         "NotificationContent": message,
         "EmployeeCategoryId": selectedFilterType?.toString() || "",
-        "EmployeeCategoryListIds": employeeCategoryListIds
+        "EmployeeCategoryListIds": employeeCategoryListIds,
+        "AttachmentList": attachmentList
       };
 
       console.log('Posting data:', messageData);
@@ -165,6 +254,8 @@ export default function MessegeScreen({ navigation }: Props) {
         setSelectedFilterType(null);
         setSelectedSelectTypes([]);
         setSelectTypes([]);
+        setUploadedFiles([]);
+        setSelectedDocument(null);
         
         // Reload the messages data
         try {
@@ -197,6 +288,8 @@ export default function MessegeScreen({ navigation }: Props) {
     setSelectedFilterType(null);
     setSelectedSelectTypes([]);
     setSelectTypes([]);
+    setUploadedFiles([]);
+    setSelectedDocument(null);
   };
 
   const handleEditPress = async (notificationId: string) => {
@@ -240,6 +333,8 @@ export default function MessegeScreen({ navigation }: Props) {
     setSelectedFilterType(null);
     setSelectedSelectTypes([]);
     setSelectTypes([]);
+    setUploadedFiles([]);
+    setSelectedDocument(null);
   };
 
   if (loading) {
@@ -305,6 +400,22 @@ export default function MessegeScreen({ navigation }: Props) {
             <Text style={styles.rowLabel}>Document Type: <Text style={styles.rowValue}>{item.DocType}</Text></Text>
             <Text style={styles.rowLabel}>Date: <Text style={styles.rowValue}>{item.NotificationDate}</Text></Text>
             <Text style={styles.rowLabel}>Content: <Text style={styles.rowValue}>{item.NotificationContent}</Text></Text>
+            {item.AttachmentList && item.AttachmentList.length > 0 && (
+              <View style={styles.attachmentContainer}>
+                <Text style={styles.attachmentLabel}>Attachments:</Text>
+                {item.AttachmentList.map((attachment: any, index: number) => (
+                  <TouchableOpacity 
+                    key={index} 
+                    style={styles.attachmentItem}
+                    onPress={() => {
+                      const fileUrl = getFileUrl(attachment.FileNameServer);
+                      Alert.alert('File Download', `File: ${attachment.FileNameSelected}\nURL: ${fileUrl}`);
+                    }}>
+                    <Text style={styles.attachmentText}>📎 {attachment.FileNameSelected}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
           </View>
         )}
       />
@@ -448,6 +559,45 @@ export default function MessegeScreen({ navigation }: Props) {
                        <Text style={styles.checkboxLabel}>Send Via Email</Text>
                      </View>
                    </View>
+
+                   {/* Select Document */}
+                   <View style={styles.formGroup}>
+                     <Text style={styles.formLabel}>Select Document</Text>
+                     <TouchableOpacity style={styles.fileUploadButton} onPress={handleDocumentPicker}>
+                       <Text style={styles.fileUploadButtonText}>
+                         📎 Select Document
+                       </Text>
+                     </TouchableOpacity>
+                   </View>
+
+                   {/* Uploaded Files List */}
+                   {uploadedFiles.length > 0 && (
+                     <View style={styles.uploadedFilesContainer}>
+                       <Text style={styles.uploadedFilesTitle}>Uploaded Documents</Text>
+                       {uploadedFiles.map((file, index) => (
+                         <View key={file.id} style={styles.uploadedFileItem}>
+                           <Image 
+                             source={require('../../assets/images/innerpage/documentd.png')} 
+                             style={styles.uploadedFileIcon} 
+                             resizeMode="contain" 
+                           />
+                           <View style={styles.uploadedFileInfo}>
+                             <TouchableOpacity onPress={() => handleFileDownload(file)}>
+                               <Text style={[styles.uploadedFileName, styles.downloadableFileName]}>{file.attachmentItem?.FileNameSelected || file.fileName}</Text>
+                             </TouchableOpacity>
+                             <Text style={styles.uploadedFileSize}>
+                               {file.fileSize ? `${(file.fileSize / 1024).toFixed(1)} KB` : 'Unknown size'}
+                             </Text>
+                           </View>
+                           <TouchableOpacity 
+                             style={styles.removeFileButton} 
+                             onPress={() => handleRemoveFile(file.id)}>
+                             <Text style={styles.removeFileButtonText}>✕</Text>
+                           </TouchableOpacity>
+                         </View>
+                       ))}
+                     </View>
+                   )}
                  </View>
                )}
                keyExtractor={(item) => item.key}
@@ -558,6 +708,45 @@ export default function MessegeScreen({ navigation }: Props) {
                        <Text style={styles.checkboxLabel}>Send Via Email</Text>
                      </View>
                    </View>
+
+                   {/* Select Document */}
+                   <View style={styles.formGroup}>
+                     <Text style={styles.formLabel}>Select Document</Text>
+                     <TouchableOpacity style={styles.fileUploadButton} onPress={handleDocumentPicker}>
+                       <Text style={styles.fileUploadButtonText}>
+                         📎 Select Document
+                       </Text>
+                     </TouchableOpacity>
+                   </View>
+
+                   {/* Uploaded Files List */}
+                   {uploadedFiles.length > 0 && (
+                     <View style={styles.uploadedFilesContainer}>
+                       <Text style={styles.uploadedFilesTitle}>Uploaded Documents</Text>
+                       {uploadedFiles.map((file, index) => (
+                         <View key={file.id} style={styles.uploadedFileItem}>
+                           <Image 
+                             source={require('../../assets/images/innerpage/documentd.png')} 
+                             style={styles.uploadedFileIcon} 
+                             resizeMode="contain" 
+                           />
+                           <View style={styles.uploadedFileInfo}>
+                             <TouchableOpacity onPress={() => handleFileDownload(file)}>
+                               <Text style={[styles.uploadedFileName, styles.downloadableFileName]}>{file.attachmentItem?.FileNameSelected || file.fileName}</Text>
+                             </TouchableOpacity>
+                             <Text style={styles.uploadedFileSize}>
+                               {file.fileSize ? `${(file.fileSize / 1024).toFixed(1)} KB` : 'Unknown size'}
+                             </Text>
+                           </View>
+                           <TouchableOpacity 
+                             style={styles.removeFileButton} 
+                             onPress={() => handleRemoveFile(file.id)}>
+                             <Text style={styles.removeFileButtonText}>✕</Text>
+                           </TouchableOpacity>
+                         </View>
+                       ))}
+                     </View>
+                   )}
 
                    {/* Employee Tags Section */}
                    {editData && editData.Item2 && editData.Item2.length > 0 && (
@@ -1133,5 +1322,108 @@ const styles = StyleSheet.create({
     color: '#133F7C',
     fontSize: 12,
     fontWeight: '500',
+  },
+  fileUploadButton: {
+    borderWidth: 1,
+    borderColor: '#DEECFF',
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: '#FFFFFF',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fileUploadButtonText: {
+    fontSize: 14,
+    color: '#133F7C',
+    fontWeight: '500',
+  },
+  uploadedFilesContainer: {
+    marginTop: 15,
+    padding: 12,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  uploadedFilesTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#133F7C',
+    marginBottom: 10,
+  },
+  uploadedFileItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 6,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  uploadedFileIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
+  uploadedFileInfo: {
+    flex: 1,
+  },
+  uploadedFileName: {
+    fontSize: 13,
+    color: '#333',
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  downloadableFileName: {
+    color: '#133F7C',
+    textDecorationLine: 'underline',
+  },
+  uploadedFileSize: {
+    fontSize: 11,
+    color: '#666',
+  },
+  removeFileButton: {
+    padding: 4,
+    marginLeft: 8,
+    borderRadius: 4,
+    backgroundColor: '#ffebee',
+    minWidth: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  removeFileButtonText: {
+    color: '#d32f2f',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  attachmentContainer: {
+    marginTop: 8,
+    padding: 8,
+    backgroundColor: '#f0f8ff',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#e3f2fd',
+  },
+  attachmentLabel: {
+    fontSize: 11,
+    color: '#133F7C',
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  attachmentItem: {
+    paddingVertical: 2,
+  },
+  attachmentText: {
+    fontSize: 11,
+    color: '#1976d2',
+    textDecorationLine: 'underline',
   },
 });
