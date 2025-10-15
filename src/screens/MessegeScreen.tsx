@@ -183,17 +183,36 @@ export default function MessegeScreen({ navigation }: Props) {
 
   const handleFileDownload = async (file: any) => {
     try {
-      if (file.attachmentItem?.FileNameServer) {
-        const fileUrl = getFileUrl(file.attachmentItem.FileNameServer);
-        console.log('Downloading file from:', fileUrl);
-        
-        // For now, just show an alert with the file URL
-        // In a real app, you might want to open the file or download it
-        Alert.alert('File Download', `File: ${file.fileName}\nURL: ${fileUrl}`);
+      // Construct the file path using Folder + '/' + FileNameServer
+      let filePath = `${file.attachmentItem.Folder}/${file.attachmentItem.FileNameServer}`;
+      
+      // Get the full file URL
+      if(!filePath.startsWith('http')){
+        filePath = getFileUrl('/UploadFiles/DocManager/temp/' + file.attachmentItem.FileNameServer);
+      }
+      
+      console.log('File path:', filePath);
+      
+      // Get the original filename for saving
+      const fileName = file.attachmentItem.FileNameSelected || file.fileName;
+      
+      // Download path
+      const path = RNFS.DownloadDirectoryPath + "/" + fileName;
+      
+      // Download the file
+      const result = await RNFS.downloadFile({
+        fromUrl: filePath,
+        toFile: path,
+      }).promise;
+
+      if (result.statusCode === 200) {
+        Alert.alert("Success", `File saved to: ${path}`);
+      } else {
+        Alert.alert("Failed", "Download failed");
       }
     } catch (error) {
       console.error('Download error:', error);
-      Alert.alert('Download Error', 'Failed to download file.');
+      Alert.alert('Error', 'Failed to download file');
     }
   };
 
@@ -313,6 +332,31 @@ export default function MessegeScreen({ navigation }: Props) {
         setTitle(messageData.Title);
         setMessage(messageData.NotificationContent);
         setTillDate(messageData.NotificationDate);
+      }
+
+      // Handle existing attachments from Item3 (AttachmentList)
+      if (result.Item3 && Array.isArray(result.Item3)) {
+        const mappedAttachments = result.Item3.map((attachment: any, index: number) => ({
+          id: `existing-${index}-${Date.now()}`,
+          fileName: attachment.FileNameSelected || attachment.FileNameServer || 'Unknown',
+          fileSize: 0, // Size not available from existing attachments
+          fileType: attachment.FileType || "application/octet-stream",
+          attachmentItem: {
+            PageName: attachment.PageName || "da5010",
+            TableName: attachment.TableName || "da5010",
+            FileNameSelected: attachment.FileNameSelected || 'Unknown',
+            FileNameServer: attachment.FileNameServer || '',
+            FilePath: attachment.Folder || "",
+            FileSize: attachment.FileSize || 0,
+            FileType: attachment.FileType || "application/octet-stream",
+            AutoId: attachment.AutoId || "0",
+            FileId: attachment.FileId || "0",
+            Folder: attachment.Folder || ""
+          }
+        }));
+
+        setUploadedFiles(mappedAttachments);
+        console.log('Mapped existing attachments:', mappedAttachments);
       }
     } catch (error) {
       console.error('Error fetching message for edit:', error);
@@ -774,7 +818,10 @@ export default function MessegeScreen({ navigation }: Props) {
               <TouchableOpacity style={styles.cancelButton} onPress={handleEditClose}>
                 <Text style={styles.cancelButtonText}>Close</Text>
               </TouchableOpacity>
-                         </View>
+              <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                <Text style={styles.saveButtonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
            </View>
          </View>
        </Modal>
