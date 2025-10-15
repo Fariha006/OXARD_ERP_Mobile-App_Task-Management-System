@@ -98,6 +98,8 @@ export default function LoginScreen({ navigation }: Props) {
          console.log('LoginScreen: Menu items:', response.menuItems);
          console.log('LoginScreen: Token from API:', response.token ? `Token exists (length: ${response.token.length})` : 'No token');
          console.log('LoginScreen: Token preview:', response.token ? `${response.token.substring(0, 50)}...` : 'No token');
+         console.log('LoginScreen: ApprovalCount:', response.userData.ApprovalCount || 0);
+         console.log('LoginScreen: MessageCount:', response.userData.MessageCount || 0);
          
          // Store user data, menu items, and token
          await storeUserData(response.userData, response.menuItems, response.token);
@@ -176,6 +178,8 @@ export default function LoginScreen({ navigation }: Props) {
           console.log('LoginScreen: Menu items:', response.menuItems);
           console.log('LoginScreen: Token from API:', response.token ? `Token exists (length: ${response.token.length})` : 'No token');
           console.log('LoginScreen: Token preview:', response.token ? `${response.token.substring(0, 50)}...` : 'No token');
+          console.log('LoginScreen: ApprovalCount:', response.userData.ApprovalCount || 0);
+          console.log('LoginScreen: MessageCount:', response.userData.MessageCount || 0);
           
           // Store user data, menu items, and token
           await storeUserData(response.userData, response.menuItems, response.token);

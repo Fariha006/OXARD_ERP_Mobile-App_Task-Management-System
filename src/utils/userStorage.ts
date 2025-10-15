@@ -199,12 +199,12 @@ class UserStorage {
         console.log('Debug - Current AttendanceId:', userData.AttendanceId);
         console.log('Debug - AttendanceId type:', typeof userData.AttendanceId);
         
-        // If AttendanceId is not a number or is 0, set it to 0 (not checked in)
-        if (!userData.AttendanceId || typeof userData.AttendanceId !== 'number' || userData.AttendanceId === 0) {
-          console.log('Debug - Setting AttendanceId to 0 (not checked in)');
-          userData.AttendanceId = 0;
+        // If AttendanceId is not a string or is "0", set it to "0" (not checked in)
+        if (!userData.AttendanceId || userData.AttendanceId === "0") {
+          console.log('Debug - Setting AttendanceId to "0" (not checked in)');
+          userData.AttendanceId = "0";
           await this.storeUserData(userData);
-          console.log('Debug - AttendanceId set to 0');
+          console.log('Debug - AttendanceId set to "0"');
         }
       }
     } catch (error) {
@@ -217,12 +217,64 @@ class UserStorage {
     try {
       const userData = await this.getUserData();
       if (userData) {
-        userData.AttendanceId = newAttendanceId;
+        userData.AttendanceId = newAttendanceId.toString();
         await this.storeUserData(userData);
         console.log('UserStorage: AttendanceId updated to:', newAttendanceId);
       }
     } catch (error) {
       console.error('UserStorage: Error updating AttendanceId:', error);
+      throw error;
+    }
+  }
+
+  // Get ApprovalCount
+  static async getApprovalCount(): Promise<number> {
+    try {
+      const userData = await this.getUserData();
+      return userData?.ApprovalCount || 0;
+    } catch (error) {
+      console.error('Error getting approval count:', error);
+      return 0;
+    }
+  }
+
+  // Get MessageCount
+  static async getMessageCount(): Promise<number> {
+    try {
+      const userData = await this.getUserData();
+      return userData?.MessageCount || 0;
+    } catch (error) {
+      console.error('Error getting message count:', error);
+      return 0;
+    }
+  }
+
+  // Update ApprovalCount
+  static async updateApprovalCount(newCount: number): Promise<void> {
+    try {
+      const userData = await this.getUserData();
+      if (userData) {
+        userData.ApprovalCount = newCount;
+        await this.storeUserData(userData);
+        console.log('UserStorage: ApprovalCount updated to:', newCount);
+      }
+    } catch (error) {
+      console.error('UserStorage: Error updating ApprovalCount:', error);
+      throw error;
+    }
+  }
+
+  // Update MessageCount
+  static async updateMessageCount(newCount: number): Promise<void> {
+    try {
+      const userData = await this.getUserData();
+      if (userData) {
+        userData.MessageCount = newCount;
+        await this.storeUserData(userData);
+        console.log('UserStorage: MessageCount updated to:', newCount);
+      }
+    } catch (error) {
+      console.error('UserStorage: Error updating MessageCount:', error);
       throw error;
     }
   }

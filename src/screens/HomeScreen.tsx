@@ -176,6 +176,8 @@ export default function HomeScreen({ navigation }: Props) {
   const [notificationListCurrentIndex, setNotificationListCurrentIndex] = useState(0);
   const [holidayListData, setHolidayListData] = useState<HolidayListItem[]>([]);
   const [holidayListCurrentIndex, setHolidayListCurrentIndex] = useState(0);
+  const [approvalCount, setApprovalCount] = useState(0);
+  const [messageCount, setMessageCount] = useState(0);
   const flatListRef = useRef<FlatList<any>>(null);
   const circularFlatListRef = useRef<FlatList<CircularItem>>(null);
   const eventFlatListRef = useRef<FlatList<EventItem>>(null);
@@ -554,9 +556,23 @@ export default function HomeScreen({ navigation }: Props) {
     return holidayListItems;
   };
 
+  // Load approval and message counts
+  const loadCounts = async () => {
+    try {
+      const approval = await UserStorage.getApprovalCount();
+      const message = await UserStorage.getMessageCount();
+      setApprovalCount(approval);
+      setMessageCount(message);
+      console.log('HomeScreen: Loaded counts - Approval:', approval, 'Message:', message);
+    } catch (error) {
+      console.error('Error loading counts:', error);
+    }
+  };
+
   useEffect(() => {
     setLoading(true);
     fetchData();
+    loadCounts();
     
     // Save FCM token to backend when HomeScreen loads
     const saveFcmTokenToBackend = async () => {
@@ -1117,9 +1133,14 @@ export default function HomeScreen({ navigation }: Props) {
                      <Image source={tile.image} style={styles.image} />
                      <Text style={styles.title}>{tile.title}</Text>
                    </View>
-                   {(tile.title === 'Approval' || tile.title === 'Messages') && (
+                   {tile.title === 'Approval' && approvalCount > 0 && (
                      <View style={styles.badge}>
-                       <Text style={styles.badgeText}>20</Text>
+                       <Text style={styles.badgeText}>{approvalCount}</Text>
+                     </View>
+                   )}
+                   {tile.title === 'Messages' && messageCount > 0 && (
+                     <View style={styles.badge}>
+                       <Text style={styles.badgeText}>{messageCount}</Text>
                      </View>
                    )}
                  </TouchableOpacity>
