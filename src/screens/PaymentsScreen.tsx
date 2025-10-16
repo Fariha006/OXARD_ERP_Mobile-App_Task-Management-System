@@ -5,7 +5,7 @@ import UserStorage from '../utils/userStorage';
 
 export default function PaymentsScreen({ navigation }: { navigation: any }) {
   const [payments, setPayments] = useState<PaymentInfo[]>([]);
-  const [openIndexes, setOpenIndexes] = useState<number[]>([]);
+  const [openIndexes, setOpenIndexes] = useState<number[]>([0]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
