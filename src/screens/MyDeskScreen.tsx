@@ -149,7 +149,7 @@ export default function HomeScreen({ navigation }: Props) {
             <View style={[styles.tile, styles.lightblue]}>
               <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'ContractRevision' })}>
                 <Image source={require('../../assets/images/mydesk/revisn.png')} style={styles.image} />
-                <Text style={styles.title}>Revisions</Text>
+                <Text style={styles.title}>Contract  History</Text>
               </TouchableOpacity>
             </View>
           </View>

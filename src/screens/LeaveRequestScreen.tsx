@@ -781,7 +781,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
           {editType != 'view' && (
           <View style={styles.selectLeavesContainer} >
             <TouchableOpacity style={styles.selectLeavesButton} onPress={handleRightUndoPress}>
-              <Text style={styles.selectLeavesButtonText}>Select Leaves</Text>
+              <Text style={styles.selectLeavesButtonText}>Add Leaves</Text>
             </TouchableOpacity>
           </View>
           )}

@@ -62,7 +62,7 @@ export default function ContractRevisionScreen({ navigation }: { navigation?: an
           </View>
         </TouchableOpacity>
         <View style={styles.pagewrap}>
-          <Text style={styles.pagetitle}>Contract Revision</Text>
+          <Text style={styles.pagetitle}>Contract History</Text>
         </View>
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
