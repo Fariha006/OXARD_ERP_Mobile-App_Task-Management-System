@@ -19,7 +19,7 @@ export default function MessegeScreen({ navigation }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
-  const [tillDate, setTillDate] = useState('');
+  const [tillDate, setTillDate] = useState(new Date().toISOString().split('T')[0]); // Set current date as default
   const [sendViaEmail, setSendViaEmail] = useState(false);
   const [categories, setCategories] = useState<{ FieldID: number, FieldValue: string }[]>([]);
   const [filterTypes, setFilterTypes] = useState<{ EmployeeCategoryId: number, EmployeeCategory: string }[]>([]);
@@ -220,7 +220,39 @@ export default function MessegeScreen({ navigation }: Props) {
     setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
   };        
 
+  // Validation function for mandatory fields
+  const validateForm = () => {
+    const errors = [];
+    
+    if (selectedCategory === null) {
+      errors.push('Category is required');
+    }
+    if (selectedFilterType === null) {
+      errors.push('Filter Type is required');
+    }
+    if (selectedSelectTypes.length === 0) {
+      errors.push('Select Types is required');
+    }
+    if (!title.trim()) {
+      errors.push('Title is required');
+    }
+    if (!message.trim()) {
+      errors.push('Message is required');
+    }
+    
+    if (errors.length > 0) {
+      Alert.alert('Validation Error', errors.join('\n'));
+      return false;
+    }
+    return true;
+  };
+
   const handleSave = async () => {
+    // Validate form before saving
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       const token = await UserStorage.getToken();
       if (!token) {
@@ -268,7 +300,7 @@ export default function MessegeScreen({ navigation }: Props) {
         setSelectedCategory(null);
         setTitle('');
         setMessage('');
-        setTillDate('');
+        setTillDate(new Date().toISOString().split('T')[0]); // Reset to current date
         setSendViaEmail(false);
         setSelectedFilterType(null);
         setSelectedSelectTypes([]);
@@ -487,12 +519,12 @@ export default function MessegeScreen({ navigation }: Props) {
                  <View>
                                        {/* Category Dropdown */}
                     <View style={styles.formGroup}>
-                      <Text style={styles.formLabel}>Category</Text>
+                      <Text style={styles.formLabel}>Category <Text style={styles.required}>*</Text></Text>
                       <TouchableOpacity
                         style={styles.dropdown}
                         onPress={() => setCategoryModalVisible(true)}>
                         <Text style={styles.dropdownText}>
-                          {selectedCategory !== null ? categories.find(c => c.FieldID === selectedCategory)?.FieldValue : 'Select Category'}
+                          {selectedCategory !== null ? categories.find(c => c.FieldID === selectedCategory)?.FieldValue : 'Select Category *'}
                         </Text>
                         <Text style={styles.dropdownArrow}>▼</Text>
                       </TouchableOpacity>
@@ -500,13 +532,13 @@ export default function MessegeScreen({ navigation }: Props) {
 
                                                                      {/* Filter Types Dropdown */}
                      <View style={styles.formGroup}>
-                       <Text style={styles.formLabel}>Filter Types</Text>
+                       <Text style={styles.formLabel}>Filter Types <Text style={styles.required}>*</Text></Text>
                        <TouchableOpacity
                          style={styles.dropdown}
                          onPress={() => setFilterTypeModalVisible(true)}
                        >
                          <Text style={styles.dropdownText}>
-                           {selectedFilterType !== null ? filterTypes.find(f => f.EmployeeCategoryId === selectedFilterType)?.EmployeeCategory : 'Select Filter Type'}
+                           {selectedFilterType !== null ? filterTypes.find(f => f.EmployeeCategoryId === selectedFilterType)?.EmployeeCategory : 'Select Filter Type *'}
                          </Text>
                          <Text style={styles.dropdownArrow}>▼</Text>
                        </TouchableOpacity>
@@ -514,7 +546,7 @@ export default function MessegeScreen({ navigation }: Props) {
 
                                          {/* Select Types Dropdown */}
                      <View style={styles.formGroup}>
-                       <Text style={styles.formLabel}>Select Types</Text>
+                       <Text style={styles.formLabel}>Select Types <Text style={styles.required}>*</Text></Text>
                        <TouchableOpacity
                          style={styles.dropdown}
                          onPress={async () => {
@@ -541,7 +573,7 @@ export default function MessegeScreen({ navigation }: Props) {
                          <Text style={styles.dropdownText}>
                            {selectedSelectTypes.length > 0 
                              ? `${selectedSelectTypes.length} selected` 
-                             : 'Select Types'}
+                             : 'Select Types *'}
                          </Text>
                          <Text style={styles.dropdownArrow}>▼</Text>
                        </TouchableOpacity>
@@ -549,23 +581,23 @@ export default function MessegeScreen({ navigation }: Props) {
 
                    {/* Title TextBox */}
                    <View style={styles.formGroup}>
-                     <Text style={styles.formLabel}>Title</Text>
+                     <Text style={styles.formLabel}>Title <Text style={styles.required}>*</Text></Text>
                      <TextInput
                        style={styles.textInput}
                        value={title}
                        onChangeText={setTitle}
-                       placeholder="Enter title"
+                       placeholder="Enter title *"
                      />
                    </View>
 
                    {/* Message Rich Text */}
                    <View style={styles.formGroup}>
-                     <Text style={styles.formLabel}>Message</Text>
+                     <Text style={styles.formLabel}>Message <Text style={styles.required}>*</Text></Text>
                      <TextInput
                        style={[styles.textInput, styles.textArea]}
                        value={message}
                        onChangeText={setMessage}
-                       placeholder="Enter message"
+                       placeholder="Enter message *"
                        multiline
                        numberOfLines={4}
                        textAlignVertical="top"
@@ -685,12 +717,12 @@ export default function MessegeScreen({ navigation }: Props) {
                  <View>
                                        {/* Category Dropdown */}
                     <View style={styles.formGroup}>
-                      <Text style={styles.formLabel}>Category</Text>
+                      <Text style={styles.formLabel}>Category <Text style={styles.required}>*</Text></Text>
                       <TouchableOpacity
                         style={styles.dropdown}
                         onPress={() => setCategoryModalVisible(true)}>
                         <Text style={styles.dropdownText}>
-                          {selectedCategory !== null ? categories.find(c => c.FieldID === selectedCategory)?.FieldValue : 'Select Category'}
+                          {selectedCategory !== null ? categories.find(c => c.FieldID === selectedCategory)?.FieldValue : 'Select Category *'}
                         </Text>
                         <Text style={styles.dropdownArrow}>▼</Text>
                       </TouchableOpacity>
@@ -698,23 +730,23 @@ export default function MessegeScreen({ navigation }: Props) {
 
                    {/* Title TextBox */}
                    <View style={styles.formGroup}>
-                     <Text style={styles.formLabel}>Title</Text>
+                     <Text style={styles.formLabel}>Title <Text style={styles.required}>*</Text></Text>
                      <TextInput
                        style={styles.textInput}
                        value={title}
                        onChangeText={setTitle}
-                       placeholder="Enter title"
+                       placeholder="Enter title *"
                      />
                    </View>
 
                    {/* Message Rich Text */}
                    <View style={styles.formGroup}>
-                     <Text style={styles.formLabel}>Message</Text>
+                     <Text style={styles.formLabel}>Message <Text style={styles.required}>*</Text></Text>
                      <TextInput
                        style={[styles.textInput, styles.textArea]}
                        value={message}
                        onChangeText={setMessage}
-                       placeholder="Enter message"
+                       placeholder="Enter message *"
                        multiline
                        numberOfLines={4}
                        textAlignVertical="top"
@@ -1472,5 +1504,18 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#1976d2',
     textDecorationLine: 'underline',
+  },
+  // Mandatory field styles
+  required: {
+    color: '#ff0000',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  mandatoryField: {
+    borderColor: '#ff0000',
+    borderWidth: 2,
+  },
+  mandatoryText: {
+    color: '#ff0000',
   },
 });
