@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList,
-  SafeAreaView, StatusBar, ActivityIndicator, Dimensions
+  SafeAreaView, StatusBar, ActivityIndicator, Dimensions, Modal, Alert
 } from 'react-native';
+import RNFS from 'react-native-fs';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { getNotifications, getFileUrl, managetoken } from '../api/api';
+import { getNotifications, getFileUrl, managetoken, fetchMessageForEdit } from '../api/api';
 import UserStorage from '../utils/userStorage';
 const { width } = Dimensions.get('window');
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
@@ -29,6 +30,7 @@ interface CircularItem {
   listTitle: string;
   content: string;
   photoUrl: string;
+  NotificationId: number;
 }
 
 interface EventItem {
@@ -37,6 +39,7 @@ interface EventItem {
   listTitle: string;
   content: string;
   photoUrl: string;
+  NotificationId: number;
 }
 
 interface AnnouncementItem {
@@ -45,6 +48,7 @@ interface AnnouncementItem {
   listTitle: string;
   content: string;
   photoUrl: string;
+  NotificationId: number;
 }
 
 interface BannerItem {
@@ -53,6 +57,7 @@ interface BannerItem {
   listTitle: string;
   content: string;
   photoUrl: string;
+  NotificationId: number;
 }
 
 interface MemoItem {
@@ -61,6 +66,7 @@ interface MemoItem {
   listTitle: string;
   content: string;
   photoUrl: string;
+  NotificationId: number;
 }
 
 interface MessageItem {
@@ -71,6 +77,7 @@ interface MessageItem {
   photoUrl: string;
   employeeName: string;
   designation: string;
+  NotificationId: number;
 }
 
 interface NotificationListItem {
@@ -79,6 +86,7 @@ interface NotificationListItem {
   role: string;
   image: any;
   tags: string;
+  NotificationId: number;
 }
 
 interface HolidayListItem {
@@ -87,6 +95,7 @@ interface HolidayListItem {
   role: string;
   image: any;
   tags: string;
+  NotificationId: number;
 }
 
 function flattenRest(obj: any, parentKey: string = ''): any {
@@ -178,6 +187,10 @@ export default function HomeScreen({ navigation }: Props) {
   const [holidayListCurrentIndex, setHolidayListCurrentIndex] = useState(0);
   const [approvalCount, setApprovalCount] = useState(0);
   const [messageCount, setMessageCount] = useState(0);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [fetchedData, setFetchedData] = useState<any>(null);
+  const [loadingModal, setLoadingModal] = useState(false);
   const flatListRef = useRef<FlatList<any>>(null);
   const circularFlatListRef = useRef<FlatList<CircularItem>>(null);
   const eventFlatListRef = useRef<FlatList<EventItem>>(null);
@@ -274,6 +287,7 @@ export default function HomeScreen({ navigation }: Props) {
         role: item.Designation || 'Employee',
         image: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/birthday.png'),
         tags: item.NotificationContent || 'Happy Birthday!',
+        NotificationId: item.NotificationId || 0,
       });
       autoIncrementId++;
     });
@@ -309,6 +323,7 @@ export default function HomeScreen({ navigation }: Props) {
         listTitle: item.Title || 'No Title',
         content: item.NotificationContent || 'No content available',
         photoUrl: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/icon!.png'),
+        NotificationId: item.NotificationId || 0,
       });
       autoIncrementId++;
     });
@@ -344,6 +359,7 @@ export default function HomeScreen({ navigation }: Props) {
         listTitle: item.Title || 'No Title',
         content: item.NotificationContent || 'No content available',
         photoUrl: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/icon!.png'),
+        NotificationId: item.NotificationId || 0,
       });
       autoIncrementId++;
     });
@@ -379,6 +395,7 @@ export default function HomeScreen({ navigation }: Props) {
         listTitle: item.Title || 'No Title',
         content: item.NotificationContent || 'No content available',
         photoUrl: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/icon!.png'),
+        NotificationId: item.NotificationId || 0,
       });
       autoIncrementId++;
     });
@@ -414,6 +431,7 @@ export default function HomeScreen({ navigation }: Props) {
         listTitle: item.Title || 'No Title',
         content: item.NotificationContent || 'No content available',
         photoUrl: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/icon!.png'),
+        NotificationId: item.NotificationId || 0,
       });
       autoIncrementId++;
     });
@@ -449,6 +467,7 @@ export default function HomeScreen({ navigation }: Props) {
         listTitle: item.Title || 'No Title',
         content: item.NotificationContent || 'No content available',
         photoUrl: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/icon!.png'),
+        NotificationId: item.NotificationId || 0,
       });
       autoIncrementId++;
     });
@@ -486,6 +505,7 @@ export default function HomeScreen({ navigation }: Props) {
         photoUrl: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/icon!.png'),
         employeeName: item.EmployeeName || 'Unknown',
         designation: item.Designation || 'Employee',
+        NotificationId: item.NotificationId || 0,
       });
       autoIncrementId++;
     });
@@ -518,6 +538,7 @@ export default function HomeScreen({ navigation }: Props) {
         role: item.Title || '',
         image: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/birthday.png'),
         tags: item.NotificationContent || '',
+        NotificationId: item.NotificationId || 0,
       });
       autoIncrementId++;
     });
@@ -549,6 +570,7 @@ export default function HomeScreen({ navigation }: Props) {
         role: item.Title || 'Holiday List',
         image: item.EmployeePhotoUrl ? getFileUrl(`/${item.EmployeePhotoUrl}`) : require('../../assets/images/birthday.png'),
         tags: item.NotificationContent || '',
+        NotificationId: item.NotificationId || 0,
       });
       autoIncrementId++;
     });
@@ -889,6 +911,89 @@ export default function HomeScreen({ navigation }: Props) {
     });
   };
 
+  // Modal functions - similar to MessegeScreen handleEditPress
+  const openModal = async (item: any) => {
+    try {
+      setSelectedItem(item);
+      setLoadingModal(true);
+      setModalVisible(true);
+      
+      // Check if NotificationId exists and is valid
+      const notificationId = item.data.NotificationId || 0;
+      console.log('Item data:', item);
+      console.log('NotificationId:', notificationId);
+      
+      if (!notificationId || notificationId === 0) {
+        console.warn('No valid NotificationId found for item:', item);
+        setLoadingModal(false);
+        // Still show the modal with original item data
+        return;
+      }
+      
+      const token = await UserStorage.getToken();
+      if (!token) {
+        console.error('No authentication token found');
+        setLoadingModal(false);
+        return;
+      }
+      
+      // Fetch detailed data using NotificationId - same as MessegeScreen
+      console.log('Fetching data for NotificationId:', notificationId);
+      const result = await fetchMessageForEdit(token, notificationId.toString());
+      setFetchedData(result);
+      console.log('Fetched detailed data:', result);
+      
+    } catch (error) {
+      console.error('Error fetching detailed data:', error);
+      Alert.alert('Error', 'Failed to fetch detailed information');
+    } finally {
+      setLoadingModal(false);
+    }
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedItem(null);
+    setFetchedData(null);
+    setLoadingModal(false);
+  };
+
+  // File download functionality similar to MessegeScreen
+  const handleFileDownload = async (attachment: any) => {
+    try {
+      // Construct the file path using Folder + '/' + FileNameServer
+      let filePath = `${attachment.Folder}/${attachment.FileNameServer}`;
+      
+      // Get the full file URL
+      if(!filePath.startsWith('http')){
+        filePath = getFileUrl('/UploadFiles/DocManager/temp/' + attachment.FileNameServer);
+      }
+      
+      console.log('File path:', filePath);
+      
+      // Get the original filename for saving
+      const fileName = attachment.FileNameSelected || attachment.FileNameServer || 'Unknown';
+      
+      // Download path
+      const path = RNFS.DownloadDirectoryPath + "/" + fileName;
+      
+      // Download the file
+      const result = await RNFS.downloadFile({
+        fromUrl: filePath,
+        toFile: path,
+      }).promise;
+
+      if (result.statusCode === 200) {
+        Alert.alert("Success", `File saved to: ${path}`);
+      } else {
+        Alert.alert("Failed", "Download failed");
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      Alert.alert('Error', 'Failed to download file');
+    }
+  };
+
   // const ANNOUNCEMENTS = [
   //   {
   //     id: '1',
@@ -935,6 +1040,9 @@ export default function HomeScreen({ navigation }: Props) {
       <View>
         <Text style={styles.itemname}>Happy Birthday {item.name}</Text>
         <Text style={styles.itemtags}>{item.tags}</Text>
+        <TouchableOpacity onPress={() => openModal({ type: 'birthday', data: item })}>
+          <Text style={styles.moreLink}>more</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -961,6 +1069,9 @@ export default function HomeScreen({ navigation }: Props) {
       </View>
       <View>
         <Text style={styles.itemtags}>{item.content}</Text>
+        <TouchableOpacity onPress={() => openModal({ type: 'circular', data: item })}>
+          <Text style={styles.moreLink}>more</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -982,6 +1093,9 @@ export default function HomeScreen({ navigation }: Props) {
       </View>
       <View>
         <Text style={styles.itemtags}>{item.content}</Text>
+        <TouchableOpacity onPress={() => openModal({ type: 'event', data: item })}>
+          <Text style={styles.moreLink}>more</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -1003,6 +1117,9 @@ export default function HomeScreen({ navigation }: Props) {
       </View>
       <View>
         <Text style={styles.itemtags}>{item.content}</Text>
+        <TouchableOpacity onPress={() => openModal({ type: 'announcement', data: item })}>
+          <Text style={styles.moreLink}>more</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -1024,6 +1141,9 @@ export default function HomeScreen({ navigation }: Props) {
       </View>
       <View>
         <Text style={styles.itemtags}>{item.content}</Text>
+        <TouchableOpacity onPress={() => openModal({ type: 'banner', data: item })}>
+          <Text style={styles.moreLink}>more</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -1045,6 +1165,9 @@ export default function HomeScreen({ navigation }: Props) {
       </View>
       <View>
         <Text style={styles.itemtags}>{item.content}</Text>
+        <TouchableOpacity onPress={() => openModal({ type: 'memo', data: item })}>
+          <Text style={styles.moreLink}>more</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -1066,6 +1189,9 @@ export default function HomeScreen({ navigation }: Props) {
       </View>
       <View>
         <Text style={styles.itemtags}>{item.content}</Text>
+        <TouchableOpacity onPress={() => openModal({ type: 'message', data: item })}>
+          <Text style={styles.moreLink}>more</Text>
+        </TouchableOpacity>
       </View>
       <View style={styles.messageAuthorContainer}>
         <Text style={styles.messageAuthorLabel}>Message by:</Text>
@@ -1092,6 +1218,9 @@ export default function HomeScreen({ navigation }: Props) {
       </View>
       <View>
         <Text style={styles.itemtags}>{item.tags}</Text>
+        <TouchableOpacity onPress={() => openModal({ type: 'notificationList', data: item })}>
+          <Text style={styles.moreLink}>more</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -1113,6 +1242,9 @@ export default function HomeScreen({ navigation }: Props) {
       </View>
       <View>
         <Text style={styles.itemtags}>{item.tags}</Text>
+        <TouchableOpacity onPress={() => openModal({ type: 'holidayList', data: item })}>
+          <Text style={styles.moreLink}>more</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -1380,6 +1512,105 @@ export default function HomeScreen({ navigation }: Props) {
         </ScrollView>
 
       </View>
+
+      {/* Modal for displaying more items */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={closeModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                <Text style={styles.modalTitle}>
+                  {selectedItem?.type === 'birthday' && '🎂 Birthday Greetings'}
+                  {selectedItem?.type === 'circular' && '📢 Circulars'}
+                  {selectedItem?.type === 'event' && '🎉 Events'}
+                  {selectedItem?.type === 'announcement' && '📢 Announcements'}
+                  {selectedItem?.type === 'banner' && '🏷️ Banners'}
+                  {selectedItem?.type === 'memo' && '📝 Memos'}
+                  {selectedItem?.type === 'message' && '💬 Messages'}
+                  {selectedItem?.type === 'notificationList' && '🔔 Notification List'}
+                  {selectedItem?.type === 'holidayList' && '🎊 Holiday List'}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.modalScrollView}>
+              {loadingModal ? (
+                <View style={styles.modalLoadingContainer}>
+                  <ActivityIndicator size="large" color="#133F7C" />
+                  <Text style={styles.modalLoadingText}>Loading details...</Text>
+                </View>
+              ) : (
+                <View style={styles.modalItem}>
+                  {/* Display data from fetched result (Item1) - similar to MessegeScreen */}
+                  {fetchedData?.Item1 && fetchedData.Item1.length > 0 ? (
+                    <>
+                      <Text style={styles.modalItemTitle}>
+                        {fetchedData.Item1[0].Title || 'No Title'}
+                      </Text>
+                      <Text style={styles.modalItemContent}>
+                        {fetchedData.Item1[0].NotificationContent || 'No content available'}
+                      </Text>
+                      {/* {fetchedData.Item1[0].NotificationId && (
+                        <Text style={styles.modalItemId}>ID: {fetchedData.Item1[0].NotificationId}</Text>
+                      )} */}
+                      {fetchedData.Item1[0].NotificationDate && (
+                        <Text style={styles.modalItemDate}>Date: {fetchedData.Item1[0].NotificationDate}</Text>
+                      )}
+                      {fetchedData.Item1[0].DocType && (
+                        <Text style={styles.modalItemDocType}>Type: {fetchedData.Item1[0].DocType}</Text>
+                      )}
+                    </>
+                  ) : (
+                    /* Fallback to original item data if fetched data not available */
+                    <>
+                      <Text style={styles.modalItemTitle}>
+                        {selectedItem?.data?.name || selectedItem?.data?.caption || selectedItem?.data?.listTitle || 'Item'}
+                      </Text>
+                      <Text style={styles.modalItemContent}>
+                        {selectedItem?.data?.tags || selectedItem?.data?.content || selectedItem?.data?.role || 'No content available'}
+                      </Text>
+                      {/* {selectedItem?.data?.NotificationId && (
+                        <Text style={styles.modalItemId}>ID: {selectedItem.data.NotificationId}</Text>
+                      )} */}
+                      {selectedItem?.data?.employeeName && (
+                        <Text style={styles.modalItemAuthor}>Author: {selectedItem.data.employeeName}</Text>
+                      )}
+                      {selectedItem?.data?.designation && (
+                        <Text style={styles.modalItemDesignation}>Designation: {selectedItem.data.designation}</Text>
+                      )}
+                    </>
+                  )}
+                  
+                  {/* Attachments Section from Item3 - same as MessegeScreen */}
+                  {fetchedData?.Item3 && Array.isArray(fetchedData.Item3) && fetchedData.Item3.length > 0 && (
+                    <View style={styles.attachmentContainer}>
+                      <Text style={styles.attachmentLabel}>📎 Attachments ({fetchedData.Item3.length})</Text>
+                      {fetchedData.Item3.map((attachment: any, index: number) => (
+                        <TouchableOpacity 
+                          key={index} 
+                          style={styles.attachmentItem}
+                          onPress={() => handleFileDownload(attachment)}>
+                          <Text style={{ fontSize: 16, marginRight: 8 }}>📄</Text>
+                          <Text style={styles.attachmentText}>{attachment.FileNameSelected || attachment.FileNameServer || 'Unknown File'}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                  
+               
+                </View>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
@@ -2130,5 +2361,243 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#888',
     textAlign: 'center',
+  },
+
+  // More link styles
+  moreLink: {
+    color: '#133F7C',
+    fontSize: 12,
+    fontWeight: 'bold',
+    textDecorationLine: 'underline',
+    marginTop: 5,
+    alignSelf: 'flex-end',
+  },
+
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 0,
+    width: '95%',
+    maxHeight: '85%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 15,
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 25,
+    paddingVertical: 20,
+    backgroundColor: '#133F7C',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    flex: 1,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  closeButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  closeButtonText: {
+    fontSize: 18,
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    lineHeight: 18,
+  },
+  modalScrollView: {
+    maxHeight: '75%',
+    paddingHorizontal: 25,
+    paddingVertical: 20,
+  },
+  modalItem: {
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 15,
+    borderLeftWidth: 5,
+    borderLeftColor: '#133F7C',
+    shadowColor: '#133F7C',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#E8F2FF',
+  },
+  modalItemTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 8,
+    lineHeight: 24,
+  },
+  modalItemContent: {
+    fontSize: 15,
+    color: '#4A4A4A',
+    lineHeight: 22,
+    marginBottom: 12,
+  },
+  modalItemId: {
+    fontSize: 12,
+    color: '#133F7C',
+    fontWeight: '600',
+    backgroundColor: '#E8F2FF',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+  },
+  modalItemAuthor: {
+    fontSize: 14,
+    color: '#2C3E50',
+    fontWeight: '600',
+    marginTop: 8,
+    paddingVertical: 4,
+  },
+  modalItemDesignation: {
+    fontSize: 12,
+    color: '#7F8C8D',
+    fontStyle: 'italic',
+    marginTop: 2,
+    paddingLeft: 8,
+  },
+  
+  // Attachment styles (similar to MessegeScreen)
+  attachmentContainer: {
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: '#F8FAFF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E3F2FD',
+    shadowColor: '#133F7C',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  attachmentLabel: {
+    fontSize: 16,
+    color: '#133F7C',
+    fontWeight: '700',
+    marginBottom: 12,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  attachmentItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#E3F2FD',
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  attachmentText: {
+    fontSize: 14,
+    color: '#1976D2',
+    fontWeight: '600',
+    flex: 1,
+    marginLeft: 8,
+  },
+  
+  // Loading styles for modal
+  modalLoadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+    backgroundColor: '#FAFBFC',
+    borderRadius: 12,
+    marginHorizontal: 10,
+  },
+  modalLoadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#133F7C',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  
+  // Additional modal item styles
+  modalItemDate: {
+    fontSize: 13,
+    color: '#7F8C8D',
+    marginTop: 8,
+    backgroundColor: '#F8F9FA',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    fontWeight: '500',
+  },
+  modalItemDocType: {
+    fontSize: 13,
+    color: '#7F8C8D',
+    marginTop: 6,
+    backgroundColor: '#E8F5E8',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    fontWeight: '500',
+  },
+  
+  // Employee section styles (similar to MessegeScreen)
+  employeeContainer: {
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  employeeLabel: {
+    fontSize: 14,
+    color: '#133F7C',
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  tag: {
+    backgroundColor: '#E3F2FD',
+    borderWidth: 1,
+    borderColor: '#bbd2f5ff',
+    borderRadius: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginBottom: 4,
   },
 });
