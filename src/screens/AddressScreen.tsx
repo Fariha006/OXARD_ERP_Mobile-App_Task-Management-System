@@ -10,7 +10,7 @@ import UserStorage from '../utils/userStorage';
 type Props = StackScreenProps<any, 'Address'>;
 
 export default function AddressScreen({ navigation }: Props) {
-  const [openAccordion, setOpenAccordion] = useState<string | null>(null);
+  const [openAccordion, setOpenAccordion] = useState<string | null>('current');
   const [addressInfo, setAddressInfo] = useState<AddressInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
