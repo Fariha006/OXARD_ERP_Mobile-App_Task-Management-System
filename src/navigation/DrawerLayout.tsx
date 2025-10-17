@@ -28,6 +28,7 @@ import MessegeScreen from '../screens/MessegeScreen';
 import LeaveRequestScreen from '../screens/LeaveRequestScreen';
 import RequestDashboardScreen from '../screens/RequestDashboardScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Stack = createStackNavigator();
 
@@ -215,6 +216,7 @@ const Footer = () => {
   const navigation = useNavigation();
 
   return (
+    <SafeAreaView>
     <View style={styles.footer}>
       <TouchableOpacity style={styles.btmmenu} onPress={() => navigation.navigate('Main', { screen: 'Home' })}>
         <View><Image source={require('../../assets/images/btmhome.png')}
@@ -267,6 +269,7 @@ const Footer = () => {
         <Text style={styles.label}>Sign Out</Text>
       </TouchableOpacity>
     </View>
+    </SafeAreaView>
   );
 };
 

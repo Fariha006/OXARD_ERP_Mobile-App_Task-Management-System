@@ -1563,9 +1563,7 @@ export default function HomeScreen({ navigation }: Props) {
                       {fetchedData.Item1[0].NotificationDate && (
                         <Text style={styles.modalItemDate}>Date: {fetchedData.Item1[0].NotificationDate}</Text>
                       )}
-                      {fetchedData.Item1[0].DocType && (
-                        <Text style={styles.modalItemDocType}>Type: {fetchedData.Item1[0].DocType}</Text>
-                      )}
+                   
                     </>
                   ) : (
                     /* Fallback to original item data if fetched data not available */

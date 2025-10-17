@@ -135,7 +135,7 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
         
         // Show success message
         const action = isCurrentlyCheckedIn ? 'Check-out' : 'Check-in';
-        Alert.alert('Success', `${action} successful!`);
+        //Alert.alert('Success', `${action} successful!`);
         
         // Reload user data to reflect changes
         loadUserData();
@@ -239,7 +239,7 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
             disabled={isAttendanceLoading}
           >
             <Text style={styles.attendanceButtonText}>
-              {isAttendanceLoading ? '...' : (isCheckedIn ? 'OUT' : 'IN')}
+              {isAttendanceLoading ? '...' : (isCheckedIn ? 'Check Out' : 'Check In')}
             </Text>
           </TouchableOpacity>
         </View>

@@ -305,7 +305,7 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
               </Text>
             )} */}
          </View>
-                   <TouchableOpacity 
+                   {/* <TouchableOpacity 
             style={[
               styles.attendanceSwitch,
               isCheckedIn ? styles.checkedInSwitch : styles.checkedOutSwitch,
@@ -317,7 +317,7 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
             <Text style={styles.attendanceSwitchText}>
               {isAttendanceLoading ? 'PROCESSING...' : (isCheckedIn ? 'CHECK OUT' : 'CHECK IN')}
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
        </View>
       <View style={styles.drawwraper}>
        
