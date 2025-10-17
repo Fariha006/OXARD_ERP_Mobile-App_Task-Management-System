@@ -83,14 +83,24 @@ export default function ContractRevisionScreen({ navigation }: { navigation?: an
                 <View key={idx} style={idx % 2 === 0 ? styles.odd : styles.even}>
                   <Text style={styles.lbl}>Revision Type:</Text>
                   <Text style={styles.vlue}>{item['Revision Type']}</Text>
-                  <Text style={styles.lbl}>Probation:</Text>
-                  <Text style={styles.vlue}>{item['Probstatus'] ?? '-'}</Text>
+                  <Text style={styles.lbl}> Date of Join:</Text>
+                  <Text style={styles.vlue}>{item['DateJoin']}</Text>
+                  <Text style={styles.lbl}>Old Date of Join:</Text>
+                  <Text style={styles.vlue}>{item['OldDateJoin'] ?? '-'}</Text>
                   <Text style={styles.lbl}>Branch:</Text>
                   <Text style={styles.vlue}>{item['BranchNam']}</Text>
                   <Text style={styles.lbl}>Department:</Text>
                   <Text style={styles.vlue}>{item['DeptDesc']}</Text>
                   <Text style={styles.lbl}>Designation:</Text>
                   <Text style={styles.vlue}>{item['DesgNam']}</Text>
+                  <Text style={styles.lbl}>Effective From:</Text>
+                  <Text style={styles.vlue}>{item['StrEffectiveFrom']}</Text>
+                  <Text style={styles.lbl}>Effective To:</Text>
+                  <Text style={styles.vlue}>{item['StrEffectiveTo']}</Text>
+                  <Text style={styles.lbl}>Probation Status:</Text>
+                  <Text style={styles.vlue}>{item['StrProbstatus']}</Text>
+                  <Text style={styles.lbl}>Remarks:</Text>
+                  <Text style={styles.vlue}>{item['Remarks']}</Text>
                 </View>
               ))}
 {/*               
