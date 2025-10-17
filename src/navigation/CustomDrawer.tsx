@@ -287,7 +287,7 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
       <View style={styles.userimagewraper}>
         <View style={styles.userimagewrapergray}>
           <Image 
-            source={userData?.EmployeePhotoUrl ? { uri: getFileUrl(`/${userData.EmployeePhotoUrl}`) } : require('../../assets/images/userphoto.jpg')} 
+            source={userData?.EmployeePhotoUrl ? { uri: getFileUrl(`/${userData.EmployeePhotoUrl}`) } : require('../../assets/images/profile-picture.png')} 
             style={styles.userimage} 
           />
         

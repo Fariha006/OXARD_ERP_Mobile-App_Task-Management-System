@@ -1297,7 +1297,7 @@ export default function HomeScreen({ navigation }: Props) {
               // contentContainerStyle={{ paddingBottom: 20 }}
               // scrollEnabled={false}
               showsHorizontalScrollIndicator={false} // Optional: hide scroll bar
-              contentContainerStyle={{ paddingHorizontal: 10 }} // Optional: spacing
+              contentContainerStyle={{ paddingHorizontal: 0 }} // Zero margin from left
               onScroll={handleScroll}
               onScrollToIndexFailed={handleScrollToIndexFailed}
               ListEmptyComponent={() => (
@@ -1323,7 +1323,7 @@ export default function HomeScreen({ navigation }: Props) {
                 keyExtractor={item => item.id}
                 horizontal={true}
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 10 }}
+                contentContainerStyle={{ paddingHorizontal: 0 }}
                 onScrollToIndexFailed={handleCircularScrollToIndexFailed}
                 ListEmptyComponent={() => (
                   <View style={styles.emptyCircularContainer}>
@@ -1346,7 +1346,7 @@ export default function HomeScreen({ navigation }: Props) {
                 keyExtractor={item => item.id}
                 horizontal={true}
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 10 }}
+                contentContainerStyle={{ paddingHorizontal: 0 }}
                 onScrollToIndexFailed={handleEventScrollToIndexFailed}
                 ListEmptyComponent={() => (
                   <View style={styles.emptyEventContainer}>
@@ -1369,7 +1369,7 @@ export default function HomeScreen({ navigation }: Props) {
                 keyExtractor={item => item.id}
                 horizontal={true}
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 10 }}
+                contentContainerStyle={{ paddingHorizontal: 0 }}
                 onScrollToIndexFailed={handleAnnouncementScrollToIndexFailed}
                 ListEmptyComponent={() => (
                   <View style={styles.emptyAnnouncementContainer}>
@@ -1392,7 +1392,7 @@ export default function HomeScreen({ navigation }: Props) {
                 keyExtractor={item => item.id}
                 horizontal={true}
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 10 }}
+                contentContainerStyle={{ paddingHorizontal: 0 }}
                 onScrollToIndexFailed={handleBannerScrollToIndexFailed}
                 ListEmptyComponent={() => (
                   <View style={styles.emptyBannerContainer}>
@@ -1415,7 +1415,7 @@ export default function HomeScreen({ navigation }: Props) {
                 keyExtractor={item => item.id}
                 horizontal={true}
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 10 }}
+                contentContainerStyle={{ paddingHorizontal: 0 }}
                 onScrollToIndexFailed={handleMemoScrollToIndexFailed}
                 ListEmptyComponent={() => (
                   <View style={styles.emptyMemoContainer}>
@@ -1438,7 +1438,7 @@ export default function HomeScreen({ navigation }: Props) {
                 keyExtractor={item => item.id}
                 horizontal={true}
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 10 }}
+                contentContainerStyle={{ paddingHorizontal: 0 }}
                 onScrollToIndexFailed={handleMessageScrollToIndexFailed}
                 ListEmptyComponent={() => (
                   <View style={styles.emptyMessageContainer}>
@@ -1461,7 +1461,7 @@ export default function HomeScreen({ navigation }: Props) {
                 keyExtractor={item => item.id}
                 horizontal={true}
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 10 }}
+                contentContainerStyle={{ paddingHorizontal: 0 }}
                 onScrollToIndexFailed={handleNotificationListScrollToIndexFailed}
                 ListEmptyComponent={() => (
                   <View style={styles.emptyNotificationListContainer}>
@@ -1484,7 +1484,7 @@ export default function HomeScreen({ navigation }: Props) {
                 keyExtractor={item => item.id}
                 horizontal={true}
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 10 }}
+                contentContainerStyle={{ paddingHorizontal: 0 }}
                 onScrollToIndexFailed={handleHolidayListScrollToIndexFailed}
                 ListEmptyComponent={() => (
                   <View style={styles.emptyHolidayListContainer}>
@@ -1732,6 +1732,7 @@ const styles = StyleSheet.create({
     width: width -24, // fixed width for horizontal cards
     // marginRight: 8,
     marginRight:1,
+    marginLeft: 0, // Zero left margin
     padding: 10,
     paddingLeft: 10,
     backgroundColor: '#e5eefd',
@@ -1793,6 +1794,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fde8e5',
     width: width -24,
     marginRight: 1,
+    marginLeft: 0, // Zero left margin
     padding: 10,
     paddingLeft: 10,    
     borderRadius: 10,
@@ -1837,6 +1839,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e8e5fd',
     width: width -24,
     marginRight: 1,
+    marginLeft: 0, // Zero left margin
     padding: 10,
     paddingLeft: 10,
     borderRadius: 10,
@@ -1861,6 +1864,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffdcf1ff',
     width: width -24,
     marginRight: 1,
+    marginLeft: 0, // Zero left margin
     padding: 10,
     borderRadius: 10,
     paddingLeft: 10,
@@ -1902,6 +1906,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e9dcf1ff',
     width: width -24,
     marginRight: 1,
+    marginLeft: 0, // Zero left margin
     padding: 10,
     borderRadius: 10,
     paddingLeft: 10,
@@ -1933,6 +1938,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#d2f4f6ff',
     width: width -24,
     marginRight: 1,
+    marginLeft: 0, // Zero left margin
     padding: 10,
     borderRadius: 10,
     paddingLeft: 10,
@@ -1950,6 +1956,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f3d7ff',
     width: width -24,
     marginRight: 1,
+    marginLeft: 0, // Zero left margin
     padding: 10,
     paddingLeft: 10,
     borderRadius: 10,
@@ -2292,6 +2299,7 @@ const styles = StyleSheet.create({
   notificationListItemContainer: {
     width: width -24,
     marginRight: 1,
+    marginLeft: 0, // Zero left margin
     padding: 10,
     paddingLeft: 10,    
     borderRadius: 10,
@@ -2332,6 +2340,7 @@ const styles = StyleSheet.create({
   holidayListItemContainer: {
     width: width -24,
     marginRight: 1,
+    marginLeft: 0, // Zero left margin
     padding: 10,
     paddingLeft: 10,    
     borderRadius: 10,

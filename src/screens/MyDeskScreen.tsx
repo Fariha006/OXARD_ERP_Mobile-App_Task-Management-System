@@ -59,7 +59,7 @@ export default function HomeScreen({ navigation }: Props) {
       <View>
         <View style={styles.logoContainer}>
           <View style={styles.profilepic}>
-            <Image source={userData?.EmployeePhotoUrl ? { uri: getFileUrl(`/${userData.EmployeePhotoUrl}`) } : require('../../assets/images/userphoto.jpg')} 
+            <Image source={userData?.EmployeePhotoUrl ? { uri: getFileUrl(`/${userData.EmployeePhotoUrl}`) } : require('../../assets/images/profile-picture.png')} 
               style={styles.logo} resizeMode="contain" />
           </View>
         </View>

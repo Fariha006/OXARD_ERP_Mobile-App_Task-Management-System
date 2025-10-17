@@ -209,7 +209,7 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
                   source={
                     userData?.EmployeePhotoUrl 
                       ? { uri: getFileUrl(`/${userData.EmployeePhotoUrl}`) } 
-                      : require('../../assets/images/userphoto.jpg')
+                      : require('../../assets/images/profile-picture.png')
                   }
                   style={styles.userimage}
                   onError={(error) => {
