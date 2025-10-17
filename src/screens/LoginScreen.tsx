@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   TextInput,
@@ -8,7 +8,8 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,TouchableOpacity,Text,Alert,StatusBar,
-  ScrollView
+  ScrollView,
+  Keyboard
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -29,8 +30,55 @@ export default function LoginScreen({ navigation }: Props) {
   const [usernameError, setUsernameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [hasAttemptedAutoBiometric, setHasAttemptedAutoBiometric] = useState(false);
   const { refreshDrawer } = useDrawer();
   const isFocused = useIsFocused();
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  // Handle keyboard visibility
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setIsKeyboardVisible(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setIsKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardDidShowListener?.remove();
+      keyboardDidHideListener?.remove();
+    };
+  }, []);
+
+  // Check if biometric is enabled and auto-trigger biometric login
+  useEffect(() => {
+    const checkBiometricAndAutoLogin = async () => {
+      try {
+        // Only attempt auto-biometric login once per screen focus
+        if (hasAttemptedAutoBiometric) return;
+        
+        const isBiometricEnabled = await BiometricSettings.isBiometricEnabled();
+        if (isBiometricEnabled) {
+          setHasAttemptedAutoBiometric(true);
+          // Small delay to ensure screen is fully loaded
+          setTimeout(() => {
+            handleBiometricLogin(false); // Don't show alerts for auto-trigger
+          }, 500);
+        }
+      } catch (error) {
+        console.error('Error checking biometric settings:', error);
+      }
+    };
+
+    if (isFocused && !hasAttemptedAutoBiometric) {
+      checkBiometricAndAutoLogin();
+    } else if (!isFocused) {
+      // Reset the flag when screen loses focus
+      setHasAttemptedAutoBiometric(false);
+    }
+  }, [isFocused, hasAttemptedAutoBiometric]);
+
   const validateFields = () => {
     let isValid = true;
     
@@ -131,19 +179,23 @@ export default function LoginScreen({ navigation }: Props) {
       }
     };
 
-  const handleBiometricLogin = async () => {
+  const handleBiometricLogin = async (showAlerts: boolean = true) => {
     try {
       // Check if biometric authentication is enabled
       const isBiometricEnabled = await BiometricSettings.isBiometricEnabled();
       if (!isBiometricEnabled) {
-        Alert.alert('Biometric Authentication', 'Biometric authentication is not enabled. Please enable it in settings.');
+        if (showAlerts) {
+          Alert.alert('Biometric Authentication', 'Biometric authentication is not enabled. Please enable it in settings.');
+        }
         return;
       }
 
       // Check if biometric is available on device
       const { available, biometryType } = await rnBiometrics.isSensorAvailable();
       if (!available) {
-        Alert.alert('Biometric Authentication', 'Biometric authentication is not available on this device.');
+        if (showAlerts) {
+          Alert.alert('Biometric Authentication', 'Biometric authentication is not available on this device.');
+        }
         return;
       }
 
@@ -152,7 +204,9 @@ export default function LoginScreen({ navigation }: Props) {
       const savedPassword = await AsyncStorage.getItem('savedPassword');
 
       if (!savedUsername || !savedPassword) {
-        Alert.alert('Biometric Authentication', 'No saved credentials found. Please login with username and password first.');
+        if (showAlerts) {
+          Alert.alert('Biometric Authentication', 'No saved credentials found. Please login with username and password first.');
+        }
         return;
       }
 
@@ -217,16 +271,20 @@ export default function LoginScreen({ navigation }: Props) {
       <SafeAreaView style={styles.container}>
         <KeyboardAvoidingView
           style={styles.inner}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
           <ScrollView
-    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
-    keyboardShouldPersistTaps="handled"
-  >
+            ref={scrollViewRef}
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+          >
         {/* Logo */}
         <Image
           source={require('../../assets/images/loginlogo.webp')} // Make sure logo.png is inside assets folder
-          style={styles.logo}
+          style={[styles.logo, isKeyboardVisible && styles.logoSmall]}
           resizeMode="contain"
         />
 
@@ -241,6 +299,11 @@ export default function LoginScreen({ navigation }: Props) {
           }}
           style={[styles.input, styles.inputusr, usernameError ? styles.inputError : null]}
           editable={!isLoading}
+          onFocus={() => {
+            setTimeout(() => {
+              scrollViewRef.current?.scrollToEnd({ animated: true });
+            }, 100);
+          }}
         />
         {usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
 
@@ -256,6 +319,11 @@ export default function LoginScreen({ navigation }: Props) {
           style={[styles.input, passwordError ? styles.inputError : null]}
           secureTextEntry
           editable={!isLoading}
+          onFocus={() => {
+            setTimeout(() => {
+              scrollViewRef.current?.scrollToEnd({ animated: true });
+            }, 100);
+          }}
         />
         {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
 
@@ -277,7 +345,10 @@ export default function LoginScreen({ navigation }: Props) {
           <Text style={styles.orSignInText}>or sign in with</Text>
                      <TouchableOpacity 
              style={styles.biometricButton}
-             onPress={handleBiometricLogin}
+             onPress={() => {
+               setHasAttemptedAutoBiometric(true); // Prevent auto-trigger after manual attempt
+               handleBiometricLogin(true); // Show alerts for manual trigger
+             }}
              disabled={isLoading}
            >
             <Image 
@@ -300,12 +371,21 @@ const styles = StyleSheet.create({
   },
   inner: {
     flex: 1,
-    justifyContent: 'center',
     padding: 24,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingBottom: 50, // Extra padding at bottom for keyboard
   },
   logo: {
     width: '100%',
     marginBottom: 30,
+  },
+  logoSmall: {
+    width: '60%',
+    marginBottom: 15,
+    alignSelf: 'center',
   },
   label: {
     marginBottom: 6,
@@ -320,6 +400,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: '#ffffff',
     color: '#000000',
+    fontSize: 16,
   },
   inputusr: {
     marginBottom: 15,
