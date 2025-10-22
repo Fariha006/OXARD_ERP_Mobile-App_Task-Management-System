@@ -37,6 +37,7 @@ export default function MessegeScreen({ navigation }: Props) {
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [selectedInboxType, setSelectedInboxType] = useState<string>('Inbox');
+  const [showAllData, setShowAllData] = useState(false);
   
   // Dropdown modals
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
@@ -55,14 +56,14 @@ export default function MessegeScreen({ navigation }: Props) {
           setLoading(false);
           return;
         }
-        const result = await getMesseges(token);
+        const result = await getMesseges(token, showAllData ? "1" : "0");
         const allData = Array.isArray(result) ? result : [];
         
         // Filter data based on selected inbox type
         let filteredData = allData;
         if (selectedInboxType === 'Inbox') {
           filteredData = allData.filter(item => item.MessageType === 'IN');
-        } else if (selectedInboxType === 'OutBox') {
+        } else if (selectedInboxType === 'Outbox') {
           filteredData = allData.filter(item => item.MessageType === 'OUT');
         }
         
@@ -74,7 +75,7 @@ export default function MessegeScreen({ navigation }: Props) {
       }
     };
     fetchData();
-  }, [selectedInboxType]);
+  }, [selectedInboxType, showAllData]);
 
   useEffect(() => {
     if (modalVisible || editModalVisible) {
@@ -461,7 +462,7 @@ export default function MessegeScreen({ navigation }: Props) {
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
       
-      {/* Inbox Type Dropdown and New Button */}
+      {/* Inbox Type Dropdown, Show All Data Switch and New Button */}
       <View style={styles.topControlsContainer}>
         <View style={styles.inboxTypeContainer}>
           <TouchableOpacity
@@ -473,6 +474,18 @@ export default function MessegeScreen({ navigation }: Props) {
             <Text style={styles.inboxTypeDropdownArrow}>▼</Text>
           </TouchableOpacity>
         </View>
+        <View style={styles.showAllDataContainer}>
+          <Text style={styles.showAllDataLabel}>Show all data</Text>
+          <View style={styles.switchContainer}>
+          
+            <Switch
+              value={showAllData}
+              onValueChange={setShowAllData}
+              trackColor={{ false: '#767577', true: '#133F7C' }}
+              thumbColor={showAllData ? '#fff' : '#f4f3f4'}
+            />
+          </View>
+        </View>
         <View style={styles.newRequestContainer}>
           <TouchableOpacity style={styles.newRequestButton} onPress={() => setModalVisible(true)}>
             <Text style={styles.newRequestButtonText}>New</Text>
@@ -483,7 +496,7 @@ export default function MessegeScreen({ navigation }: Props) {
 
       <FlatList
         data={data}
-        keyExtractor={(item, idx) => `notification-${item.NotificationId?.toString() || idx.toString()}`}
+        keyExtractor={(item, idx) => `notification-${item.NotificationId?.toString() || `idx-${idx}`}`}
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={<Text style={styles.lbl}>No notifications found.</Text>}
         renderItem={({ item, index }) => (
@@ -703,7 +716,7 @@ export default function MessegeScreen({ navigation }: Props) {
                    )}
                  </View>
                )}
-               keyExtractor={(item) => item.key}
+               keyExtractor={(item, index) => `new-form-${index}`}
                showsVerticalScrollIndicator={true}
              />
 
@@ -868,7 +881,7 @@ export default function MessegeScreen({ navigation }: Props) {
                    )}
                  </View>
                )}
-               keyExtractor={(item) => item.key}
+               keyExtractor={(item, index) => `edit-form-${index}`}
                showsVerticalScrollIndicator={true}
              />
 
@@ -1034,7 +1047,7 @@ export default function MessegeScreen({ navigation }: Props) {
              </View>
              <FlatList
                style={styles.modalBody}
-               data={['Inbox', 'OutBox']}
+               data={['Inbox', 'Outbox']}
                keyExtractor={(item) => item}
                renderItem={({ item }) => (
                  <TouchableOpacity
@@ -1229,6 +1242,27 @@ const styles = StyleSheet.create({
   inboxTypeDropdownArrow: {
     fontSize: 12,
     color: '#666',
+  },
+  showAllDataContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 10,
+  },
+  showAllDataLabel: {
+    fontSize: 12,
+    color: '#333',
+    marginRight: 8,
+    fontWeight: '500',
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  switchText: {
+    fontSize: 12,
+    color: '#333',
+    marginRight: 6,
+    fontWeight: '500',
   },
   newRequestContainer: {
     alignItems: 'flex-end',
