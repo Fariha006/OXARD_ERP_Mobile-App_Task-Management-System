@@ -595,9 +595,9 @@ class ApiService {
   }
 
   // Get leave history data API call
-  async getLeaveHistoryData(token: string): Promise<any> {
+  async getLeaveHistoryData(token: string, showAllFlag: string = "0"): Promise<any> {
     const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
-    const requestBody = { "Mode": "Twelve" };
+    const requestBody = { "Mode": "Twelve", "ShowAllFlag": showAllFlag };
     const response = await axios.post<any>(apiurl, requestBody, {
       headers: {
         ...API_CONFIG.DEFAULT_HEADERS,
@@ -936,7 +936,7 @@ export const getSalaryData = (token: string) => apiService.getSalaryData(token);
 export const getEligibilityData = (token: string) => apiService.getEligibilityData(token);
 export const getContractRevisionData = (token: string) => apiService.getContractRevisionData(token);
 export const getAssetsData = (token: string) => apiService.getAssetsData(token);
-export const getLeaveHistoryData = (token: string) => apiService.getLeaveHistoryData(token);
+export const getLeaveHistoryData = (token: string, showAllFlag: string = "0") => apiService.getLeaveHistoryData(token, showAllFlag);
 export const getNotifications = (token: string) => apiService.getNotifications(token);
 export const getPayslips = (token: string) => apiService.getPayslips(token);
 export const downloadPayslipPdf = (reportCode: string, id: string, token: string) => apiService.downloadPayslipPdf(reportCode, id, token);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, Alert, Switch } from 'react-native';
 import { getLeaveHistoryData, deleteLeaveRequest } from '../api/api';
 import UserStorage from '../utils/userStorage';
 
@@ -8,6 +8,7 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openIndexes, setOpenIndexes] = useState<number[]>([]);
+  const [showAllData, setShowAllData] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -20,7 +21,7 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
           setLoading(false);
           return;
         }
-        const result = await getLeaveHistoryData(token);
+        const result = await getLeaveHistoryData(token, showAllData ? "1" : "0");
         setData(Array.isArray(result) ? result : []);
       } catch (err) {
         setError('Failed to fetch data');
@@ -29,7 +30,7 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
       }
     };
     fetchData();
-  }, []);
+  }, [showAllData]);
 
   const toggleAccordion = (idx: number) => {
     setOpenIndexes(openIndexes.includes(idx)
@@ -115,11 +116,25 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
       
-      {/* New Request Button */}
-      <View style={styles.newRequestContainer}>
-        <TouchableOpacity style={styles.newRequestButton} onPress={() => navigation.navigate('LeaveRequest')}>
-          <Text style={styles.newRequestButtonText}>New Request</Text>
-        </TouchableOpacity>
+      {/* Show All Data Switch */}
+      <View style={styles.topControlsContainer}>
+        <View style={styles.showAllDataContainer}>
+          <Text style={styles.showAllDataLabel}>Show all data</Text>
+          <View style={styles.switchContainer}>
+           
+            <Switch
+              value={showAllData}
+              onValueChange={setShowAllData}
+              trackColor={{ false: '#767577', true: '#133F7C' }}
+              thumbColor={showAllData ? '#fff' : '#f4f3f4'}
+            />
+          </View>
+        </View>
+        <View style={styles.newRequestContainer}>
+          <TouchableOpacity style={styles.newRequestButton} onPress={() => navigation.navigate('LeaveRequest')}>
+            <Text style={styles.newRequestButtonText}>New Request</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -258,6 +273,35 @@ const styles = StyleSheet.create({
   rightclick: {
     width: 110,
   },
+  topControlsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+    paddingHorizontal: 16,
+  },
+  showAllDataContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  showAllDataLabel: {
+    fontSize: 12,
+    color: '#333',
+    marginRight: 8,
+    fontWeight: '500',
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  switchText: {
+    fontSize: 12,
+    color: '#333',
+    marginRight: 6,
+    fontWeight: '500',
+  },
   scrollContainer: {
     padding: 16,
   },
@@ -386,9 +430,6 @@ const styles = StyleSheet.create({
   },
   newRequestContainer: {
     alignItems: 'flex-end',
-    marginTop: 10,
-    marginBottom: 10,
-    paddingRight: 16,
   },
   newRequestButton: {
     paddingVertical: 6,
