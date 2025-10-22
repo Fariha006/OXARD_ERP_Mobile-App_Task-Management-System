@@ -1,14 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList,
-  SafeAreaView, ActivityIndicator, Alert, Modal, TextInput
+  SafeAreaView, ActivityIndicator, Alert, Modal, TextInput, Platform
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import RNFS from 'react-native-fs';
+import Pdf from 'react-native-pdf';
+import { Buffer } from 'buffer';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import UserStorage from '../utils/userStorage';
-import { getApprovals, submitApproval } from '../api/api';
+import { getApprovals, submitApproval, downloadPayslipPdf } from '../api/api';
+
+// Add these declarations at the top for web compatibility
+// @ts-ignore
+// eslint-disable-next-line
+declare var window: any;
+// @ts-ignore
+// eslint-disable-next-line
+declare var document: any;
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -21,6 +32,10 @@ export default function ApprovalsScreen({ navigation }: Props) {
   const [selectedDecisionId, setSelectedDecisionId] = useState<string>('');
   const [remarks, setRemarks] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
+  const [pdfSource, setPdfSource] = useState<{ uri: string } | null>(null);
+  const [base64Data, setBase64Data] = useState<string>('');
+  const [pdfModalVisible, setPdfModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -109,6 +124,90 @@ export default function ApprovalsScreen({ navigation }: Props) {
     }
   };
 
+  const handleDownload = async (transactionId: number, referenceNo: string) => {
+    setDownloadingId(transactionId);
+    try {
+      const token = await UserStorage.getToken();
+      if (!token) {
+        Alert.alert('No authentication token found. Please login again.');
+        setDownloadingId(null);
+        return;
+      }
+      if (Platform.OS === 'web') {
+        // On web, fetch blob directly (not base64)
+        const response = await fetch('http://216.48.184.187:8081/api/Report/Download', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ ReportCode: 'Da5010_APP', Id: transactionId.toString() }),
+        });
+        if (!response.ok) throw new Error('Failed to download PDF');
+        const blob = await response.blob();
+        // Type guard for window and document
+        if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Approval_${referenceNo}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+        }
+        Alert.alert('Success', `Approval document ${referenceNo} downloaded.`);
+      } else {
+        // Mobile: use downloadPayslipPdf from api.tsx with custom ReportCode
+        const base64data = await downloadPayslipPdf('Da5010_APP', transactionId.toString(), token);
+        console.log('PDF base64 preview (mobile):', base64data.substring(0, 40));
+        console.log('PDF base64 length:', base64data.length);
+        if (!base64data.startsWith('JVBERi0')) {
+          Alert.alert('Warning', 'Invalid PDF file data.');
+          return;
+        }
+        
+        // Prepare inline Base64 source for react-native-pdf
+        const source = { uri: `data:application/pdf;base64,${base64data}` };
+        console.log('PDF source URI:', source.uri.substring(0, 50) + '...');
+        setPdfSource(source);
+        setBase64Data(base64data);
+        setPdfModalVisible(true);
+        console.log('PDF modal should be visible now');
+      }
+    } catch (err) {
+      Alert.alert('Error', 'Failed to download approval document.');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  const handleClosePdf = () => {
+    setPdfModalVisible(false);
+    setPdfSource(null);
+    setBase64Data('');
+  };
+
+  const handleSavePdf = async (referenceNo: string) => {
+    if (!base64Data) {
+      Alert.alert('Error', 'No PDF data to save.');
+      return;
+    }
+
+    try {
+      const fileName = `Approval_${referenceNo}.pdf`;
+      const path =
+        Platform.OS === 'android'
+          ? `${RNFS.DownloadDirectoryPath}/${fileName}`
+          : `${RNFS.DocumentDirectoryPath}/${fileName}`;
+
+      await RNFS.writeFile(path, base64Data, 'base64');
+      Alert.alert('Success', `PDF saved to ${path}`);
+    } catch (error) {
+      console.error('Error saving PDF:', error);
+      Alert.alert('Error', 'Failed to save PDF to device.');
+    }
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -182,10 +281,14 @@ export default function ApprovalsScreen({ navigation }: Props) {
                         {/* <MaterialIcons name="more-vert" size={24} color="#133F7C" /> */}
                       </TouchableOpacity>
                       {item2.ReportFlag === 1 && (
-                        <TouchableOpacity style={styles.downloadBtn} onPress={() => {/* TODO: implement download logic */ }}>
+                        <TouchableOpacity 
+                          style={styles.downloadBtn} 
+                          onPress={() => handleDownload(item2.TransactionId, item2.ReferenceNo)}
+                          disabled={downloadingId === item2.TransactionId}
+                        >
                           <View style={styles.dwnloadicon}>
                             <Image source={require('../../assets/images/innerpage/download.png')} style={styles.downloadimage} resizeMode="contain" />
-                            {/* <Text style={styles.downloadBtnText}> {downloadingId === item.PayslipId ? 'Downloading...' : 'Download'}</Text> */}
+                            {/* <Text style={styles.downloadBtnText}> {downloadingId === item2.TransactionId ? 'Downloading...' : 'Download'}</Text> */}
                           </View>
                         </TouchableOpacity>
                       )}
@@ -250,6 +353,54 @@ export default function ApprovalsScreen({ navigation }: Props) {
                 </Text>
               </TouchableOpacity>
            
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* PDF Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={pdfModalVisible}
+        onRequestClose={handleClosePdf}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.pdfModalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Approval Document</Text>
+              <TouchableOpacity onPress={handleClosePdf}>
+                <Text style={styles.modalCloseButton}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.pdfContainer}>
+              {pdfSource ? (
+                <Pdf
+                  source={pdfSource}
+                  style={styles.pdfViewer}
+                  onError={(error) => {
+                    console.log('PDF render error:', error);
+                    Alert.alert('Error', 'Failed to display PDF.');
+                  }}
+                  onLoadComplete={(numberOfPages, filePath) => {
+                    console.log(`PDF loaded: ${numberOfPages} pages`);
+                  }}
+                />
+              ) : (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                  <Text>Loading PDF...</Text>
+                </View>
+              )}
+            </View>
+            
+            {/* PDF Action Buttons */}
+            <View style={styles.pdfActionButtons}>
+              <TouchableOpacity style={styles.pdfCloseButton} onPress={handleClosePdf}>
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveButton} onPress={() => handleSavePdf(data?.Item2?.find((item: any) => item.TransactionId === downloadingId)?.ReferenceNo || '')}>
+                <Text style={styles.saveButtonText}>Save PDF</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -506,5 +657,76 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '600',
+  },
+  // PDF Modal styles
+  pdfModalContent: {
+    backgroundColor: '#E5EEFD',
+    borderRadius: 12,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    width: '95%',
+    height: '70%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  modalCloseButton: {
+    fontSize: 20,
+    color: '#666',
+    fontWeight: 'bold',
+  },
+  pdfContainer: {
+    flex: 1,
+    padding: 10,
+  },
+  pdfViewer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  pdfActionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0'
+  },
+  pdfCloseButton: {
+    backgroundColor: '#fce2e5ff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    flex: 0.48
+  },
+  closeButtonText: {
+    color: '#7c1313ff',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
+  saveButton: {
+    backgroundColor: '#133F7C',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    flex: 0.48
+  },
+  saveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center'
   },
 });
