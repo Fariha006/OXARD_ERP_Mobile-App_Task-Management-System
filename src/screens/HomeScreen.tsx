@@ -1659,6 +1659,7 @@ const styles = StyleSheet.create({
     padding: 0,
     paddingRight: 12,
     paddingLeft: 12,
+  
   },
   grid: {
     flexDirection: 'row',
@@ -1735,6 +1736,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     backgroundColor: '#e5eefd',
     borderRadius: 10,
+    height: 210,
   },
   card: {
     flexDirection: 'row',
@@ -1796,7 +1798,7 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingLeft: 10,    
     borderRadius: 10,
-
+    height: 210,
   },
   circularCard: {
     flexDirection: 'row',
@@ -1841,6 +1843,7 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingLeft: 10,
     borderRadius: 10,
+    height: 210,
   },
   eventCard: {
     flexDirection: 'row',
@@ -1866,6 +1869,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
     paddingLeft: 10,
+    height: 210,
   },
   announcementCard: {
     flexDirection: 'row',
@@ -1908,6 +1912,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
     paddingLeft: 10,
+    height:210
   },
   bannerTextContainer: {
     flex: 1,
@@ -1940,6 +1945,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
     paddingLeft: 10,
+    height: 210,
   },
   memoImage: {
     width: 50,
@@ -1958,6 +1964,7 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingLeft: 10,
     borderRadius: 10,
+    height: 210,
   },
   messageCard: {
     flexDirection: 'row',
@@ -2293,6 +2300,7 @@ const styles = StyleSheet.create({
   // Notification List styles
   notificationListSection: {
     marginVertical: 5,
+    marginBottom: 20
   },
   notificationListItemContainer: {
     width: width -24,
@@ -2302,8 +2310,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,    
     borderRadius: 10,
     backgroundColor: '#fedfeaff',
-
-    
+    height: 210,
   },
   notificationListItemCard: {
     marginBottom: 10,
@@ -2344,6 +2351,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#d1ecffff',
     marginBottom: 18,
+    height: 210,
   },
   holidayListItemCard: {
     marginBottom: 10,

@@ -216,7 +216,7 @@ const Footer = () => {
   const navigation = useNavigation();
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ backgroundColor: '#E5EEFD', }}  edges={[ 'left', 'right','bottom']}>
     <View style={styles.footer}>
       <TouchableOpacity style={styles.btmmenu} onPress={() => navigation.navigate('Main', { screen: 'Home' })}>
         <View><Image source={require('../../assets/images/btmhome.png')}
