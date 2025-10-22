@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList,
-  SafeAreaView, ActivityIndicator, Alert, Modal, TextInput, Platform
+  SafeAreaView, ActivityIndicator, Alert, Modal, TextInput, Platform, Switch
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -31,6 +31,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
   const [selectedCertificateType, setSelectedCertificateType] = useState('');
   const [certificateTypes, setCertificateTypes] = useState<any[]>([]);
   const [loadingCertificateTypes, setLoadingCertificateTypes] = useState(false);
+  const [showAllData, setShowAllData] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,7 +44,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
           setLoading(false);
           return;
         }
-        const result = await getCertificateRequests(token);
+        const result = await getCertificateRequests(token, showAllData ? "1" : "0");
         setData(Array.isArray(result) ? result : []);
       } catch (err) {
         setError('Failed to fetch certificate requests');
@@ -52,7 +53,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
       }
     };
     fetchData();
-  }, []);
+  }, [showAllData]);
 
   const toggleAccordion = (idx: number) => {
     setOpenIndexes(openIndexes.includes(idx)
@@ -124,7 +125,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
               setLoading(false);
               return;
             }
-            const result = await getCertificateRequests(token);
+            const result = await getCertificateRequests(token, showAllData ? "1" : "0");
             setData(Array.isArray(result) ? result : []);
           } catch (err) {
             setError('Failed to fetch certificate requests');
@@ -190,7 +191,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                         setLoading(false);
                         return;
                       }
-                      const result = await getCertificateRequests(token);
+                      const result = await getCertificateRequests(token, showAllData ? "1" : "0");
                       setData(Array.isArray(result) ? result : []);
                     } catch (err) {
                       setError('Failed to fetch certificate requests');
@@ -363,11 +364,24 @@ export default function CertificateRequestScreen({ navigation }: Props) {
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
 
-      {/* New Request Button */}
-      <View style={styles.newRequestContainer}>
-        <TouchableOpacity style={styles.newRequestButton} onPress={handleNewRequest}>
-          <Text style={styles.newRequestButtonText}>New Request</Text>
-        </TouchableOpacity>
+      {/* Show All Data Switch and New Request Button */}
+      <View style={styles.topControlsContainer}>
+        <View style={styles.showAllDataContainer}>
+          <Text style={styles.showAllDataLabel}>Show all data</Text>
+          <View style={styles.switchContainer}>
+            <Switch
+              value={showAllData}
+              onValueChange={setShowAllData}
+              trackColor={{ false: '#767577', true: '#133F7C' }}
+              thumbColor={showAllData ? '#fff' : '#f4f3f4'}
+            />
+          </View>
+        </View>
+        <View style={styles.newRequestContainer}>
+          <TouchableOpacity style={styles.newRequestButton} onPress={handleNewRequest}>
+            <Text style={styles.newRequestButtonText}>New Request</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -973,5 +987,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  topControlsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+    paddingHorizontal: 16,
+  },
+  showAllDataContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 10,
+  },
+  showAllDataLabel: {
+    fontSize: 12,
+    color: '#333',
+    marginRight: 8,
+    fontWeight: '500',
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });

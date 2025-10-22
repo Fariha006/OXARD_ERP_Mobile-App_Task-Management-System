@@ -700,9 +700,12 @@ class ApiService {
   }
 
   // Certificate Request API call
-  async getCertificateRequests(token: string): Promise<any[]> {
+  async getCertificateRequests(token: string, showAllFlag: string = "0"): Promise<any[]> {
     const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
-    const requestBody = { "Mode": "Thirteen" };
+    const requestBody = { 
+      "Mode": "Thirteen",
+      "ShowAllFlag": showAllFlag
+    };
     const response = await axios.post<any[]>(apiurl, requestBody, {
       headers: {
         ...API_CONFIG.DEFAULT_HEADERS,
@@ -941,7 +944,7 @@ export const getNotifications = (token: string) => apiService.getNotifications(t
 export const getPayslips = (token: string) => apiService.getPayslips(token);
 export const downloadPayslipPdf = (reportCode: string, id: string, token: string) => apiService.downloadPayslipPdf(reportCode, id, token);
 export const downloadLeaveOutstandingPdf = (reportCode: string, dateAsOn: string, token: string) => apiService.downloadLeaveOutstandingPdf(reportCode, dateAsOn, token);
-export const getCertificateRequests = (token: string) => apiService.getCertificateRequests(token);
+export const getCertificateRequests = (token: string, showAllFlag: string = "0") => apiService.getCertificateRequests(token, showAllFlag);
 export const getApprovals = (token: string) => apiService.getApprovals(token);
 export const getEmployeeDirectory = (token: string) => apiService.getEmployeeDirectory(token);
 export const getCertificateTypes = (token: string) => apiService.getCertificateTypes(token);
