@@ -36,11 +36,13 @@ export default function MessegeScreen({ navigation }: Props) {
   const [selectedNotificationId, setSelectedNotificationId] = useState<string>('');
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  const [selectedInboxType, setSelectedInboxType] = useState<string>('Inbox');
   
   // Dropdown modals
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [filterTypeModalVisible, setFilterTypeModalVisible] = useState(false);
   const [selectTypeModalVisible, setSelectTypeModalVisible] = useState(false);
+  const [inboxTypeModalVisible, setInboxTypeModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,7 +56,17 @@ export default function MessegeScreen({ navigation }: Props) {
           return;
         }
         const result = await getMesseges(token);
-        setData(Array.isArray(result) ? result : []);
+        const allData = Array.isArray(result) ? result : [];
+        
+        // Filter data based on selected inbox type
+        let filteredData = allData;
+        if (selectedInboxType === 'Inbox') {
+          filteredData = allData.filter(item => item.MessageType === 'IN');
+        } else if (selectedInboxType === 'OutBox') {
+          filteredData = allData.filter(item => item.MessageType === 'OUT');
+        }
+        
+        setData(filteredData);
       } catch (err) {
                   setError('Failed to fetch notifications');
       } finally {
@@ -62,7 +74,7 @@ export default function MessegeScreen({ navigation }: Props) {
       }
     };
     fetchData();
-  }, []);
+  }, [selectedInboxType]);
 
   useEffect(() => {
     if (modalVisible || editModalVisible) {
@@ -449,11 +461,23 @@ export default function MessegeScreen({ navigation }: Props) {
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
       
-      {/* New Button */}
-      <View style={styles.newRequestContainer}>
-        <TouchableOpacity style={styles.newRequestButton} onPress={() => setModalVisible(true)}>
-          <Text style={styles.newRequestButtonText}>New</Text>
-        </TouchableOpacity>
+      {/* Inbox Type Dropdown and New Button */}
+      <View style={styles.topControlsContainer}>
+        <View style={styles.inboxTypeContainer}>
+          <TouchableOpacity
+            style={styles.inboxTypeDropdown}
+            onPress={() => setInboxTypeModalVisible(true)}>
+            <Text style={styles.inboxTypeDropdownText}>
+              {selectedInboxType}
+            </Text>
+            <Text style={styles.inboxTypeDropdownArrow}>▼</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.newRequestContainer}>
+          <TouchableOpacity style={styles.newRequestButton} onPress={() => setModalVisible(true)}>
+            <Text style={styles.newRequestButtonText}>New</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
 
@@ -476,6 +500,9 @@ export default function MessegeScreen({ navigation }: Props) {
             <Text style={styles.rowLabel}>Document Type: <Text style={styles.rowValue}>{item.DocType}</Text></Text>
             <Text style={styles.rowLabel}>Date: <Text style={styles.rowValue}>{item.NotificationDate}</Text></Text>
             <Text style={styles.rowLabel}>Content: <Text style={styles.rowValue}>{item.NotificationContent}</Text></Text>
+            {item.SentBy && item.SentBy.trim() !== '' && (
+              <Text style={styles.rowLabel}>Sent by: <Text style={styles.rowValue}>{item.SentBy}</Text></Text>
+            )}
             {item.AttachmentList && item.AttachmentList.length > 0 && (
               <View style={styles.attachmentContainer}>
                 <Text style={styles.attachmentLabel}>Attachments:</Text>
@@ -990,6 +1017,41 @@ export default function MessegeScreen({ navigation }: Props) {
            </View>
          </View>
        </Modal>
+
+       {/* Inbox Type Selection Modal */}
+       <Modal
+         animationType="slide"
+         transparent={true}
+         visible={inboxTypeModalVisible}
+         onRequestClose={() => setInboxTypeModalVisible(false)}>
+         <View style={styles.modalOverlay}>
+           <View style={styles.modalContent}>
+             <View style={styles.modalHeader}>
+               <Text style={styles.modalTitle}>Select Type</Text>
+               <TouchableOpacity onPress={() => setInboxTypeModalVisible(false)}>
+                 <Text style={styles.closeButton}>✕</Text>
+               </TouchableOpacity>
+             </View>
+             <FlatList
+               style={styles.modalBody}
+               data={['Inbox', 'OutBox']}
+               keyExtractor={(item) => item}
+               renderItem={({ item }) => (
+                 <TouchableOpacity
+                   style={styles.dropdownItem}
+                   activeOpacity={0.7}
+                   onPress={() => {
+                     setSelectedInboxType(item);
+                     setInboxTypeModalVisible(false);
+                   }}>
+                   <Text style={styles.dropdownText}>{item}</Text>
+                 </TouchableOpacity>
+               )}
+               showsVerticalScrollIndicator={true}
+             />
+           </View>
+         </View>
+       </Modal>
      </SafeAreaView>
    );
  }
@@ -1137,11 +1199,39 @@ const styles = StyleSheet.create({
 
 
 
-  newRequestContainer: {
-    alignItems: 'flex-end',
+  topControlsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginTop: 10,
     marginBottom: 10,
-    paddingRight: 16,
+    paddingHorizontal: 16,
+  },
+  inboxTypeContainer: {
+    marginRight: 10,
+  },
+  inboxTypeDropdown: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    width: 100,
+  },
+  inboxTypeDropdownText: {
+    fontSize: 14,
+    color: '#333',
+    fontWeight: '500',
+  },
+  inboxTypeDropdownArrow: {
+    fontSize: 12,
+    color: '#666',
+  },
+  newRequestContainer: {
+    alignItems: 'flex-end',
   },
   newRequestButton: {
     paddingVertical: 6,
