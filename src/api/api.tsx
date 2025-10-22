@@ -609,10 +609,13 @@ class ApiService {
   }
 
   // Get notifications (My Desk) API call
-  async getMesseges(token: string): Promise<any[]> {
+  async getMesseges(token: string, showAllFlag: string = "0"): Promise<any[]> {
     try {
       const apiurl = getApiUrl('/api/MobAdm0009/LG_Mode');
-      const requestBody = { "Mode": "TWO" };
+      const requestBody = { 
+        "Mode": "TWO",
+        "ShowAllFlag": showAllFlag
+      };
       const response = await axios.post<any[]>(apiurl, requestBody, {
         headers: {
           ...API_CONFIG.DEFAULT_HEADERS,
@@ -944,7 +947,7 @@ export const getEmployeeDirectory = (token: string) => apiService.getEmployeeDir
 export const getCertificateTypes = (token: string) => apiService.getCertificateTypes(token);
 export const getCertificateDetails = (certificateId: string, token: string) => apiService.getCertificateDetails(certificateId, token);
 export const saveCertificateRequest = (mode: string, certificateId: string, certificateTypeId: string, requestedDate: string, token: string) => apiService.saveCertificateRequest(mode, certificateId, certificateTypeId, requestedDate, token);
-export const getMesseges = (token: string) => apiService.getMesseges(token);
+export const getMesseges = (token: string, showAllFlag: string = "0") => apiService.getMesseges(token, showAllFlag);
 export const submitApproval = (decisionId: string, decision: string, remarks: string, token: string) => apiService.submitApproval(decisionId, decision, remarks, token);
 export const submitAttendance = (attendanceData: any, token: string) => apiService.submitAttendance(attendanceData, token);
 export { getFileUrl };
