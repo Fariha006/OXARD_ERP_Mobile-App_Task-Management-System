@@ -629,10 +629,14 @@ class ApiService {
       throw error;
     }
   }
-  async getNotifications(token: string): Promise<any> {
+  async getNotifications(token: string, homeScreen: string = "0", notificationScreen: string = "0"): Promise<any> {
     try {
       const apiurl = getApiUrl('/api/MobBa1010/MyDesk');
-      const requestBody = { "Mode": "Fifteen" };
+      const requestBody = { 
+        "Mode": "Fifteen",
+        "HomeScreen": homeScreen,
+        "NotificationScreen": notificationScreen
+      };
       const response = await axios.post<any>(apiurl, requestBody, {
         headers: {
           ...API_CONFIG.DEFAULT_HEADERS,
@@ -940,7 +944,7 @@ export const getEligibilityData = (token: string) => apiService.getEligibilityDa
 export const getContractRevisionData = (token: string) => apiService.getContractRevisionData(token);
 export const getAssetsData = (token: string) => apiService.getAssetsData(token);
 export const getLeaveHistoryData = (token: string, showAllFlag: string = "0") => apiService.getLeaveHistoryData(token, showAllFlag);
-export const getNotifications = (token: string) => apiService.getNotifications(token);
+export const getNotifications = (token: string, homeScreen: string = "0", notificationScreen: string = "0") => apiService.getNotifications(token, homeScreen, notificationScreen);
 export const getPayslips = (token: string) => apiService.getPayslips(token);
 export const downloadPayslipPdf = (reportCode: string, id: string, token: string) => apiService.downloadPayslipPdf(reportCode, id, token);
 export const downloadLeaveOutstandingPdf = (reportCode: string, dateAsOn: string, token: string) => apiService.downloadLeaveOutstandingPdf(reportCode, dateAsOn, token);

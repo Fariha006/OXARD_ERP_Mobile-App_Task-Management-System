@@ -117,7 +117,7 @@ export default function NotificationScreen({ navigation }: Props) {
         return;
       }
 
-      const json = await getNotifications(token);
+      const json = await getNotifications(token, "0", "1");
       const transformedData = reformatApiResult(json);
       setData(parseNotificationData(transformedData));
     } catch (err) {
