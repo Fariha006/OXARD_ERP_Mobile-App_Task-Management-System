@@ -274,17 +274,8 @@ export default function ApprovalsScreen({ navigation }: Props) {
                       <Text style={styles.lbl}>Approval level: <Text style={styles.vlue}>{item2.DecisionLevel ?? '-'}</Text></Text>
                     </View>
                     <View style={styles.actionButtons}>
-                      <TouchableOpacity 
-                        style={styles.moreBtn} 
-                        onPress={() => openViewModal(item2.DecisionId || '0')}
-                      >
-                         <View style={styles.dwnloadicon}>
-                            <Image source={require('../../assets/images/innerpage/clicktoopen.png')} style={styles.downloadimage} resizeMode="contain" />
-                            {/* <Text style={styles.downloadBtnText}> {downloadingId === item.PayslipId ? 'Downloading...' : 'Download'}</Text> */}
-                          </View>
-                        {/* <MaterialIcons name="more-vert" size={24} color="#133F7C" /> */}
-                      </TouchableOpacity>
-                      {item2.ReportFlag === 1 && (
+
+                    {item2.ReportFlag === 1 && (
                         <TouchableOpacity 
                           style={styles.downloadBtn} 
                           onPress={() => handleDownload(item2.TransactionId, item2.ReferenceNo)}
@@ -296,6 +287,17 @@ export default function ApprovalsScreen({ navigation }: Props) {
                           </View>
                         </TouchableOpacity>
                       )}
+                      <TouchableOpacity 
+                        style={styles.moreBtn} 
+                        onPress={() => openViewModal(item2.DecisionId || '0')}
+                      >
+                         <View style={styles.dwnloadicon}>
+                            <Image source={require('../../assets/images/innerpage/clicktoopen.png')} style={styles.downloadimage} resizeMode="contain" />
+                            {/* <Text style={styles.downloadBtnText}> {downloadingId === item.PayslipId ? 'Downloading...' : 'Download'}</Text> */}
+                          </View>
+                        {/* <MaterialIcons name="more-vert" size={24} color="#133F7C" /> */}
+                      </TouchableOpacity>
+                      
                     </View>
                   </View>
                 ))}
@@ -503,11 +505,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#E2EDFC',
   },
   dwnloadicon: {
-    marginLeft: 15,
+    marginLeft: 3,
   },
     downloadimage: {
-    width: 24,
-    height: 26,
+    width: 15,
+    height: 14,
     },
   accordionHeaderClosed: {
     borderColor: '#DEECFF',
@@ -556,10 +558,10 @@ const styles = StyleSheet.create({
   actionButtons: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 2,
   },
   moreBtn: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 2,
     paddingVertical: 4,
     borderRadius: 4,
   },
@@ -597,7 +599,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   downloadBtn: {
-    paddingRight: 6,
+    paddingRight: 2,
   },
   // Modal styles
   modalOverlay: {
