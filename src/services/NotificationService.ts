@@ -1,4 +1,8 @@
 import notifee, { AndroidImportance, AndroidStyle } from '@notifee/react-native';
+import { EventType } from '@notifee/react-native';
+import FileViewer from 'react-native-file-viewer';
+
+
 
 class NotificationService {
   private channelId: string | undefined;
@@ -9,13 +13,22 @@ class NotificationService {
       name: 'Download Notifications',
       importance: AndroidImportance.HIGH,
     });
+
+    // Listen to notification presses
+    notifee.onForegroundEvent(({ type, detail }) => {
+    //   if (type === notifee.EventType.PRESS && detail.notification?.data?.filePath) {
+        if (type === EventType.PRESS && detail.notification?.data?.filePath) {
+        const filePath = detail.notification.data.filePath as string;
+       // this.openFile(filePath);
+      }
+    });
   }
 
   async showProgressNotification(fileName: string, progress: number) {
     if (!this.channelId) await this.init();
 
     await notifee.displayNotification({
-      id: 'download', // fixed ID → update same notification
+      id: 'download',
       title: `Downloading ${fileName}`,
       body: `${Math.floor(progress * 100)}% completed`,
       android: {
@@ -32,7 +45,7 @@ class NotificationService {
     });
   }
 
-  async showDownloadComplete(fileName: string) {
+  async showDownloadComplete(fileName: string, filePath: string) {
     if (!this.channelId) await this.init();
 
     await notifee.displayNotification({
@@ -45,12 +58,16 @@ class NotificationService {
         pressAction: { id: 'default' },
         importance: AndroidImportance.HIGH,
       },
+      data: { filePath }, // store file path in notification
     });
   }
 
-  async cancelAll() {
-    await notifee.cancelAllNotifications();
-  }
+//   private openFile(filePath: string) {
+//     FileViewer.open(filePath, { showOpenWithDialog: true }).catch((err) => {
+
+//       console.error('Failed to open file:'+filePath, err);
+//     });
+//   }
 }
 
 export default new NotificationService();

@@ -196,15 +196,16 @@ export default function ApprovalsScreen({ navigation }: Props) {
 
     try {
       await NotificationService.init();
-      const fileName = `Approval_${referenceNo}.pdf`;
+      const fileName = `ApprovalDocument.pdf`;
       const path =
         Platform.OS === 'android'
           ? `${RNFS.DownloadDirectoryPath}/${fileName}`
           : `${RNFS.DocumentDirectoryPath}/${fileName}`;
 
       await RNFS.writeFile(path, base64Data, 'base64');
-      Alert.alert('Success', `PDF saved to ${path}`);
-      await NotificationService.showDownloadComplete(fileName);
+      //Alert.alert('Success', `PDF saved to ${path}`);
+      const filePathdata = `${RNFS.DownloadDirectoryPath}/${fileName}`
+      await NotificationService.showDownloadComplete(fileName, filePathdata);
     } catch (error) {
       console.error('Error saving PDF:', error);
       Alert.alert('Error', 'Failed to save PDF to device.');
