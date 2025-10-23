@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, Alert, Platform, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, Alert, Platform, Modal, Switch } from 'react-native';
 import { getPayslips, downloadPayslipPdf } from '../api/api';
 import UserStorage from '../utils/userStorage';
 import RNFS from 'react-native-fs';
@@ -23,6 +23,7 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
   const [pdfSource, setPdfSource] = useState<{ uri: string } | null>(null);
   const [base64Data, setBase64Data] = useState<string>('');
   const [pdfModalVisible, setPdfModalVisible] = useState(false);
+  const [showAllData, setShowAllData] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,7 +36,7 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
           setLoading(false);
           return;
         }
-        const result = await getPayslips(token);
+        const result = await getPayslips(token, showAllData ? "1" : "0");
         setData(Array.isArray(result) ? result : []);
       } catch (err) {
         setError('Failed to fetch payslips');
@@ -44,7 +45,7 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
       }
     };
     fetchData();
-  }, []);
+  }, [showAllData]);
 
   const toggleAccordion = (idx: number) => {
     setOpenIndexes(openIndexes.includes(idx)
@@ -169,6 +170,22 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
         </View>
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
+      
+      {/* Show All Data Switch */}
+      <View style={styles.topControlsContainer}>
+        <View style={styles.showAllDataContainer}>
+          <Text style={styles.showAllDataLabel}>Show all data</Text>
+          <View style={styles.switchContainer}>
+            <Switch
+              value={showAllData}
+              onValueChange={setShowAllData}
+              trackColor={{ false: '#767577', true: '#133F7C' }}
+              thumbColor={showAllData ? '#fff' : '#f4f3f4'}
+            />
+          </View>
+        </View>
+      </View>
+      
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {data.length === 0 && <Text style={styles.lbl}>No payslips found.</Text>}
         {data.map((item, idx) => (
@@ -323,6 +340,29 @@ const styles = StyleSheet.create({
   },
   rightclick: {
     width: 110,
+  },
+  topControlsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+    paddingHorizontal: 16,
+  },
+  showAllDataContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  showAllDataLabel: {
+    fontSize: 12,
+    color: '#333',
+    marginRight: 8,
+    fontWeight: '500',
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   scrollContainer: {
     padding: 16,

@@ -652,9 +652,11 @@ class ApiService {
   }
 
   // Get payslips data API call
-  async getPayslips(token: string): Promise<any> {
+  async getPayslips(token: string, showAllFlag: string = "0"): Promise<any> {
     const apiurl = getApiUrl('/api/MobDa6110/Payslips');
-    const response = await axios.post<any>(apiurl, {}, {
+    const response = await axios.post<any>(apiurl, {
+      ShowAllFlag: showAllFlag
+    }, {
       headers: {
         ...API_CONFIG.DEFAULT_HEADERS,
         'Authorization': `Bearer ${token}`,
@@ -945,7 +947,7 @@ export const getContractRevisionData = (token: string) => apiService.getContract
 export const getAssetsData = (token: string) => apiService.getAssetsData(token);
 export const getLeaveHistoryData = (token: string, showAllFlag: string = "0") => apiService.getLeaveHistoryData(token, showAllFlag);
 export const getNotifications = (token: string, homeScreen: string = "0", notificationScreen: string = "0") => apiService.getNotifications(token, homeScreen, notificationScreen);
-export const getPayslips = (token: string) => apiService.getPayslips(token);
+export const getPayslips = (token: string, showAllFlag: string = "0") => apiService.getPayslips(token, showAllFlag);
 export const downloadPayslipPdf = (reportCode: string, id: string, token: string) => apiService.downloadPayslipPdf(reportCode, id, token);
 export const downloadLeaveOutstandingPdf = (reportCode: string, dateAsOn: string, token: string) => apiService.downloadLeaveOutstandingPdf(reportCode, dateAsOn, token);
 export const getCertificateRequests = (token: string, showAllFlag: string = "0") => apiService.getCertificateRequests(token, showAllFlag);
