@@ -12,6 +12,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import UserStorage from '../utils/userStorage';
 import { getApprovals, submitApproval, downloadPayslipPdf } from '../api/api';
+import NotificationService from '../services/NotificationService';
 
 // Add these declarations at the top for web compatibility
 // @ts-ignore
@@ -194,6 +195,7 @@ export default function ApprovalsScreen({ navigation }: Props) {
     }
 
     try {
+      await NotificationService.init();
       const fileName = `Approval_${referenceNo}.pdf`;
       const path =
         Platform.OS === 'android'
@@ -202,6 +204,7 @@ export default function ApprovalsScreen({ navigation }: Props) {
 
       await RNFS.writeFile(path, base64Data, 'base64');
       Alert.alert('Success', `PDF saved to ${path}`);
+      await NotificationService.showDownloadComplete(fileName);
     } catch (error) {
       console.error('Error saving PDF:', error);
       Alert.alert('Error', 'Failed to save PDF to device.');
