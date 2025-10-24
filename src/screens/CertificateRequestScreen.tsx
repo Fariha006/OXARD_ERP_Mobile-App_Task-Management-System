@@ -482,7 +482,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                   style={styles.datePickerButton}
                   onPress={() => setShowDatePicker(true)}>
                   <Text style={styles.datePickerButtonText}>
-                    {newRequest.requestedDate.toLocaleDateString()}
+                    {newRequest.requestedDate.toLocaleDateString().replace(/\//g, '-')}
                   </Text>
                 </TouchableOpacity>
                 {showDatePicker && (
