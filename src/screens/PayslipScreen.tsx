@@ -5,6 +5,7 @@ import UserStorage from '../utils/userStorage';
 import RNFS from 'react-native-fs';
 import Pdf from 'react-native-pdf';
 import { Buffer } from 'buffer';
+import NotificationService from '../services/NotificationService';
 
 // Add these declarations at the top for web compatibility
 // @ts-ignore
@@ -56,6 +57,8 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
   const handleDownload = async (payslipId: number, referenceNo: string) => {
     setDownloadingId(payslipId);
     try {
+      await NotificationService.init();
+
       const token = await UserStorage.getToken();
       if (!token) {
         Alert.alert('No authentication token found. Please login again.');
@@ -85,7 +88,8 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
           a.remove();
           window.URL.revokeObjectURL(url);
         }
-        Alert.alert('Success', `Payslip ${referenceNo} downloaded.`);
+       // Alert.alert('Success', `Payslip ${referenceNo} downloaded.`);
+       await NotificationService.showDownloadComplete(`Payslip_${referenceNo}.pdf`, `${RNFS.DownloadDirectoryPath}/Payslip_${referenceNo}.pdf`);
       } else {
         // Mobile: use downloadPayslipPdf from api.tsx
         const base64data = await downloadPayslipPdf('da6110', payslipId.toString(), token);
@@ -128,7 +132,8 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
           : `${RNFS.DocumentDirectoryPath}/${fileName}`;
 
       await RNFS.writeFile(path, base64Data, 'base64');
-      Alert.alert('Success', `PDF saved to ${path}`);
+      //Alert.alert('Success', `PDF saved to ${path}`);
+      await NotificationService.showDownloadComplete(`Payslip_${referenceNo}.pdf`, `${RNFS.DownloadDirectoryPath}/Payslip_${referenceNo}.pdf`);
     } catch (error) {
       console.error('Error saving PDF:', error);
       Alert.alert('Error', 'Failed to save PDF to device.');

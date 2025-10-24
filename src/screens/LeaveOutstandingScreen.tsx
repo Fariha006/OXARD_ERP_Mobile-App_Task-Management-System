@@ -8,6 +8,7 @@ import { downloadLeaveOutstandingPdf } from '../api/api';
 import UserStorage from '../utils/userStorage';
 import Pdf from 'react-native-pdf';
 import RNFS from 'react-native-fs';
+import NotificationService from '../services/NotificationService';
 
 const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
   const [date, setDate] = useState(new Date());
@@ -81,7 +82,8 @@ const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
            : `${RNFS.DocumentDirectoryPath}/${fileName}`;
 
        await RNFS.writeFile(path, base64Data, 'base64');
-       Alert.alert('Success', `PDF saved to ${path}`);
+       //Alert.alert('Success', `PDF saved to ${path}`);
+       await NotificationService.showDownloadComplete(`LeaveOutstanding_${formattedDate}.pdf`, `${RNFS.DownloadDirectoryPath}/LeaveOutstanding_${formattedDate}.pdf`);
      } catch (error) {
        console.error('Error saving PDF:', error);
        Alert.alert('Error', 'Failed to save PDF to device.');
