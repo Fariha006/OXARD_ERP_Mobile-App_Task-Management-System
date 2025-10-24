@@ -7,7 +7,17 @@ export default function ContractRevisionScreen({ navigation }: { navigation?: an
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [accordionOpen, setAccordionOpen] = useState(true);
+  const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set([0]));
+
+  const toggleAccordion = (index: number) => {
+    if (expandedItems.has(index)) {
+      // If clicking on the currently expanded item, collapse it
+      setExpandedItems(new Set());
+    } else {
+      // If clicking on a different item, expand it and collapse others
+      setExpandedItems(new Set([index]));
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,66 +77,63 @@ export default function ContractRevisionScreen({ navigation }: { navigation?: an
         <TouchableOpacity style={styles.rightclick}></TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.accordion}>
-          <TouchableOpacity style={styles.accordionHeader}
-            onPress={() => setAccordionOpen(!accordionOpen)}>
-            <View style={styles.hdrltficn}>
-              <Image source={require('../../assets/images/innerpage/revisn.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
-              <Text style={styles.accordionTitle}>Revision Effective from</Text>
-            </View>
-            {/* <Text>{accordionOpen ? '▲' : '▼'}</Text> */}
-          </TouchableOpacity>
-          {accordionOpen && (
-            <View style={styles.accordionContent}>
-              {data.length === 0 && <Text style={styles.lbl}>No data found.</Text>}
-              {data.map((item, idx) => (
-                <View key={idx} style={idx % 2 === 0 ? styles.odd : styles.even}>
+        {data.length === 0 && <Text style={styles.lbl}>No data found.</Text>}
+        {data.map((item, idx) => (
+          <View key={idx} style={styles.accordion}>
+            <TouchableOpacity 
+              style={styles.accordionHeader}
+              onPress={() => toggleAccordion(idx)}>
+              <View style={styles.hdrltficn}>
+                <Image source={require('../../assets/images/innerpage/revisn.png')} style={[styles.ltficn, styles.star]} resizeMode="contain" />
+                <Text style={styles.accordionTitle}>Revision Effective from {item['StrEffectiveFrom']}</Text>
+              </View>
+            </TouchableOpacity>
+            {expandedItems.has(idx) && (
+              <View style={styles.accordionContent}>
+                <View style={styles.odd}>
                   <Text style={styles.lbl}>Revision Type:</Text>
                   <Text style={styles.vlue}>{item['Revision Type']}</Text>
-                  <Text style={styles.lbl}> Date of Join:</Text>
+                </View>
+                <View style={styles.even}>
+                  <Text style={styles.lbl}>Date of Join:</Text>
                   <Text style={styles.vlue}>{item['DateJoin']}</Text>
+                </View>
+                <View style={styles.odd}>
                   <Text style={styles.lbl}>Old Date of Join:</Text>
                   <Text style={styles.vlue}>{item['OldDateJoin'] ?? '-'}</Text>
+                </View>
+                <View style={styles.even}>
                   <Text style={styles.lbl}>Branch:</Text>
                   <Text style={styles.vlue}>{item['BranchNam']}</Text>
+                </View>
+                <View style={styles.odd}>
                   <Text style={styles.lbl}>Department:</Text>
                   <Text style={styles.vlue}>{item['DeptDesc']}</Text>
+                </View>
+                <View style={styles.even}>
                   <Text style={styles.lbl}>Designation:</Text>
                   <Text style={styles.vlue}>{item['DesgNam']}</Text>
+                </View>
+                <View style={styles.odd}>
                   <Text style={styles.lbl}>Effective From:</Text>
                   <Text style={styles.vlue}>{item['StrEffectiveFrom']}</Text>
+                </View>
+                <View style={styles.even}>
                   <Text style={styles.lbl}>Effective To:</Text>
                   <Text style={styles.vlue}>{item['StrEffectiveTo']}</Text>
+                </View>
+                <View style={styles.odd}>
                   <Text style={styles.lbl}>Probation Status:</Text>
                   <Text style={styles.vlue}>{item['StrProbstatus']}</Text>
+                </View>
+                <View style={styles.even}>
                   <Text style={styles.lbl}>Remarks:</Text>
                   <Text style={styles.vlue}>{item['Remarks']}</Text>
                 </View>
-              ))}
-{/*               
-                        <View style={styles.mydeskbtnfirstraw}>
-                          <View style={styles.tile}>
-                            <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Salary' })}>
-                              <Image source={require('../../assets/images/innerpage/cntractinfo.png')} style={styles.image} />
-                              <Text style={styles.title}>Contract Info</Text>
-                            </TouchableOpacity>
-                          </View>
-                          <View style={styles.tile}>
-                            <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'Eligibilities' })}>
-                              <Image source={require('../../assets/images/innerpage/salary.png')} style={styles.image} />
-                              <Text style={styles.title}>Salary</Text>
-                            </TouchableOpacity>
-                          </View>
-                          <View style={styles.tile}>
-                            <TouchableOpacity style={styles.algnbtn} onPress={() => navigation.navigate('Main', { screen: 'ContractRevision' })}>
-                              <Image source={require('../../assets/images/innerpage/eligibility.png')} style={[styles.image, styles.imagelast]} />
-                              <Text style={styles.title}>Eligibilities</Text>
-                            </TouchableOpacity>
-                          </View>
-                        </View> */}
-            </View>
-          )}
-        </View>
+              </View>
+            )}
+          </View>
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
@@ -210,6 +217,7 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     fontSize: 12,
     fontWeight: '600',
+    flex: 1,
   },
   accordionContent: {
     marginTop: 1,
