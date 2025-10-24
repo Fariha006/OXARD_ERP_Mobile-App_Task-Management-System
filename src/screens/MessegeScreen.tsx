@@ -31,6 +31,7 @@ export default function MessegeScreen({ navigation }: Props) {
   const [selectTypeDropdownOpen, setSelectTypeDropdownOpen] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [viewModalVisible, setViewModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editData, setEditData] = useState<any>(null);
   const [selectedNotificationId, setSelectedNotificationId] = useState<string>('');
@@ -408,8 +409,78 @@ export default function MessegeScreen({ navigation }: Props) {
     }
   };
 
+  const handleViewPress = async (notificationId: string) => {
+    try {
+      setSelectedNotificationId(notificationId);
+      const token = await UserStorage.getToken();
+      if (!token) {
+        console.error('No authentication token found');
+        return;
+      }
+      
+      const result = await fetchMessageForEdit(token, notificationId);
+      setEditData(result);
+      setIsEditMode(false); // Set to false for view mode
+      setViewModalVisible(true);
+      
+      // Pre-fill the form with view data
+      if (result.Item1 && result.Item1.length > 0) {
+        const messageData = result.Item1[0];
+        setSelectedCategory(messageData.FkCategoryId);
+        setTitle(messageData.Title);
+        setMessage(messageData.NotificationContent);
+        setTillDate(messageData.NotificationDate);
+      }
+
+      // Handle existing attachments from Item3 (AttachmentList)
+      if (result.Item3 && Array.isArray(result.Item3)) {
+        const mappedAttachments = result.Item3.map((attachment: any, index: number) => ({
+          id: `existing-${index}-${Date.now()}`,
+          fileName: attachment.FileNameSelected || attachment.FileNameServer || 'Unknown',
+          fileSize: 0, // Size not available from existing attachments
+          fileType: attachment.FileType || "application/octet-stream",
+          attachmentItem: {
+            PageName: attachment.PageName || "da5010",
+            TableName: attachment.TableName || "da5010",
+            FileNameSelected: attachment.FileNameSelected || 'Unknown',
+            FileNameServer: attachment.FileNameServer || '',
+            FilePath: attachment.Folder || "",
+            FileSize: attachment.FileSize || 0,
+            FileType: attachment.FileType || "application/octet-stream",
+            AutoId: attachment.AutoId || "0",
+            FileId: attachment.FileId || "0",
+            Folder: attachment.Folder || ""
+          }
+        }));
+
+        setUploadedFiles(mappedAttachments);
+        console.log('Mapped existing attachments:', mappedAttachments);
+      }
+    } catch (error) {
+      console.error('Error fetching message for view:', error);
+    }
+  };
+
   const handleEditClose = () => {
     setEditModalVisible(false);
+    setIsEditMode(false);
+    setEditData(null);
+    setSelectedNotificationId('');
+    // Reset form
+    setSelectedCategory(null);
+    setTitle('');
+    setMessage('');
+    setTillDate('');
+    setSendViaEmail(false);
+    setSelectedFilterType(null);
+    setSelectedSelectTypes([]);
+    setSelectTypes([]);
+    setUploadedFiles([]);
+    setSelectedDocument(null);
+  };
+
+  const handleViewClose = () => {
+    setViewModalVisible(false);
     setIsEditMode(false);
     setEditData(null);
     setSelectedNotificationId('');
@@ -504,8 +575,8 @@ export default function MessegeScreen({ navigation }: Props) {
             <View style={styles.rowHeader}>
               <Text style={styles.rowTitle}>{item.Title}</Text>
               <View style={styles.editButtonContainer}>
-                <TouchableOpacity style={styles.editButton} onPress={() => handleEditPress(item.NotificationId)}>
-                    <Text style={styles.editIcon}>✏️</Text>
+                <TouchableOpacity style={styles.viewButton} onPress={() => handleViewPress(item.NotificationId)}>
+                    <Text style={styles.viewIcon}>👁️</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -897,6 +968,119 @@ export default function MessegeScreen({ navigation }: Props) {
            </View>
          </View>
        </Modal>
+
+       {/* View Message Modal */}
+       <Modal
+         animationType="slide"
+         transparent={true}
+         visible={viewModalVisible}
+         onRequestClose={handleViewClose}>
+
+         <View style={styles.modalOverlay}>
+           <View style={styles.modalContent}>
+             <View style={styles.modalHeader}>
+               <Text style={styles.modalTitle}>View Message</Text>
+               <TouchableOpacity onPress={handleViewClose}>
+                 <Text style={styles.closeButton}>✕</Text>
+               </TouchableOpacity>
+             </View>
+             
+             <FlatList
+               style={styles.modalBody}
+               data={[{ key: 'form' }]}
+               renderItem={() => (
+                 <View>
+                   {/* Category Display */}
+                   <View style={styles.formGroup}>
+                     <Text style={styles.formLabel}>Category</Text>
+                     <View style={[styles.textInput, styles.readonlyInput]}>
+                       <Text style={styles.readonlyText}>
+                         {selectedCategory !== null ? categories.find(c => c.FieldID === selectedCategory)?.FieldValue : 'N/A'}
+                       </Text>
+                     </View>
+                   </View>
+
+                   {/* Title Display */}
+                   <View style={styles.formGroup}>
+                     <Text style={styles.formLabel}>Title</Text>
+                     <View style={[styles.textInput, styles.readonlyInput]}>
+                       <Text style={styles.readonlyText}>{title || 'N/A'}</Text>
+                     </View>
+                   </View>
+
+                   {/* Message Display */}
+                   <View style={styles.formGroup}>
+                     <Text style={styles.formLabel}>Message</Text>
+                     <View style={[styles.textInput, styles.textArea, styles.readonlyInput]}>
+                       <Text style={styles.readonlyText}>{message || 'N/A'}</Text>
+                     </View>
+                   </View>
+
+                   {/* Till Date Display */}
+                   <View style={styles.formGroup}>
+                     <Text style={styles.formLabel}>Till Date</Text>
+                     <View style={[styles.textInput, styles.readonlyInput]}>
+                       <Text style={styles.readonlyText}>{tillDate || 'N/A'}</Text>
+                     </View>
+                   </View>
+
+                   {/* Uploaded Files List */}
+                   {uploadedFiles.length > 0 && (
+                     <View style={styles.uploadedFilesContainer}>
+                       <Text style={styles.uploadedFilesTitle}>Attached Documents</Text>
+                       {uploadedFiles.map((file, index) => (
+                         <View key={file.id} style={styles.uploadedFileItem}>
+                           <Image 
+                             source={require('../../assets/images/innerpage/documentd.png')} 
+                             style={styles.uploadedFileIcon} 
+                             resizeMode="contain" 
+                           />
+                           <View style={styles.uploadedFileInfo}>
+                             <TouchableOpacity onPress={() => handleFileDownload(file)}>
+                               <Text style={[styles.uploadedFileName, styles.downloadableFileName]}>{file.attachmentItem?.FileNameSelected || file.fileName}</Text>
+                             </TouchableOpacity>
+                             <Text style={styles.uploadedFileSize}>
+                               {file.fileSize ? `${(file.fileSize / 1024).toFixed(1)} KB` : 'Unknown size'}
+                             </Text>
+                           </View>
+                         </View>
+                       ))}
+                     </View>
+                   )}
+
+                   {/* Employee Tags Section */}
+                   {editData && editData.Item2 && editData.Item2.length > 0 && (
+                     <View style={styles.formGroup}>
+                       <Text style={styles.formLabel}>Employees</Text>
+                       <View style={styles.tagsContainer}>
+                         {editData.Item2.map((employee: any, index: number) => (
+                           <View key={`employee-${employee.EmpNo || index}`} style={styles.tag}>
+                             <Text style={styles.tagText}>
+                               {employee.EmpNo} - {employee.EmployeeName}
+                             </Text>
+                           </View>
+                         ))}
+                       </View>
+                     </View>
+                   )}
+                 </View>
+               )}
+               keyExtractor={(item, index) => `view-form-${index}`}
+               showsVerticalScrollIndicator={true}
+             />
+
+             {/* Modal Buttons */}
+             <View style={styles.modalButtons}>
+               <TouchableOpacity style={styles.cancelButton} onPress={handleViewClose}>
+                 <Text style={styles.cancelButtonText}>Close</Text>
+               </TouchableOpacity>
+               <TouchableOpacity style={[styles.saveButton, styles.disabledButton]} disabled={true}>
+                 <Text style={[styles.saveButtonText, styles.disabledButtonText]}>Save</Text>
+               </TouchableOpacity>
+             </View>
+            </View>
+          </View>
+        </Modal>
 
        {/* Category Selection Modal */}
        <Modal
@@ -1502,6 +1686,24 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 4,
   },
+  viewButton: {
+    padding: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+    backgroundColor: '#e8f5e8',
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  viewIcon: {
+    fontSize: 10,
+  },
   editButtonText: {
     color: '#fff',
     fontSize: 12,
@@ -1641,5 +1843,20 @@ const styles = StyleSheet.create({
   },
   mandatoryText: {
     color: '#ff0000',
+  },
+  disabledButton: {
+    backgroundColor: '#cccccc',
+    opacity: 0.6,
+  },
+  disabledButtonText: {
+    color: '#666666',
+  },
+  readonlyText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  readonlyInput: {
+    backgroundColor: '#F5F5F5',
+    color: '#666',
   },
 });
