@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, FlatList, Modal, TextInput, Switch, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView,
+   ActivityIndicator, FlatList, Modal, TextInput, Switch, Platform, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { pick, types, keepLocalCopy } from '@react-native-documents/picker';
 import RNFS from 'react-native-fs';
@@ -156,18 +157,18 @@ export default function MessegeScreen({ navigation }: Props) {
               const attachmentItem = {
                 PageName: "da5010",
                 TableName: "da5010", 
-                FileNameSelected: file.name || "Unknown",
+                FileNameSelected: uploadResult.FileName || file.name || "Unknown",
                 FileNameServer: uploadResult.TmpFileName,
-                FilePath: uploadResult.FilePath || "",
-                FileSize: file.size || 0,
+                FilePath: uploadResult.UploadFilePath || "",
+                FileSize: uploadResult.FileSize || file.size || 0,
                 FileType: file.type || "application/octet-stream"
               };
 
               // Add to uploaded files list
               const newFile = {
                 id: Date.now().toString(),
-                fileName: file.name || "Unknown",
-                fileSize: file.size || 0,
+                fileName: uploadResult.FileName || file.name || "Unknown",
+                fileSize: uploadResult.FileSize || file.size || 0,
                 fileType: file.type || "application/octet-stream",
                 attachmentItem: attachmentItem
               };
@@ -197,10 +198,10 @@ export default function MessegeScreen({ navigation }: Props) {
 
   const handleFileDownload = async (file: any) => {
     try {
-      // Construct the file path using Folder + '/' + FileNameServer
-      let filePath = `${file.attachmentItem.Folder}/${file.attachmentItem.FileNameServer}`;
+      // Construct the file path using UploadFilePath + '/' + TmpFileName
+      let filePath = `${file.attachmentItem.FilePath}/${file.attachmentItem.FileNameServer}`;
       
-      // Get the full file URL
+      // If FilePath doesn't start with http, use getFileUrl as fallback
       if(!filePath.startsWith('http')){
         filePath = getFileUrl('/UploadFiles/DocManager/temp/' + file.attachmentItem.FileNameServer);
       }
