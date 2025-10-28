@@ -119,21 +119,23 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
   };
 
   const handleSavePdf = async (referenceNo: string) => {
+   // Alert.alert('handleSavePdf', 'handleSavePdf');
     if (!base64Data) {
       Alert.alert('Error', 'No PDF data to save.');
       return;
     }
 
     try {
-      const fileName = `Payslip_${referenceNo}.pdf`;
+      // const fileName = `Payslip_${referenceNo}.pdf`;
+      const fileName = `Payslip.pdf`;
       const path =
         Platform.OS === 'android'
           ? `${RNFS.DownloadDirectoryPath}/${fileName}`
           : `${RNFS.DocumentDirectoryPath}/${fileName}`;
 
       await RNFS.writeFile(path, base64Data, 'base64');
-      //Alert.alert('Success', `PDF saved to ${path}`);
-      await NotificationService.showDownloadComplete(`Payslip_${referenceNo}.pdf`, `${RNFS.DownloadDirectoryPath}/Payslip_${referenceNo}.pdf`);
+     // Alert.alert('Success', `PDF saved to ${path}`);
+      await NotificationService.showDownloadComplete(`Payslip.pdf`, `${RNFS.DownloadDirectoryPath}/Payslip_${referenceNo}.pdf`);
     } catch (error) {
       console.error('Error saving PDF:', error);
       Alert.alert('Error', 'Failed to save PDF to device.');
