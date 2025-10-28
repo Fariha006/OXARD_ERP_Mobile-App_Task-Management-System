@@ -9,6 +9,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { getNotifications, getFileUrl, managetoken, fetchMessageForEdit } from '../api/api';
 import UserStorage from '../utils/userStorage';
+import NotificationService from '../services/NotificationService';
 const { width } = Dimensions.get('window');
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 interface NotificationItem {
@@ -961,6 +962,7 @@ export default function HomeScreen({ navigation }: Props) {
   // File download functionality similar to MessegeScreen
   const handleFileDownload = async (attachment: any) => {
     try {
+      await NotificationService.init();
       // Construct the file path using Folder + '/' + FileNameServer
       let filePath = `${attachment.Folder}/${attachment.FileNameServer}`;
       
@@ -984,7 +986,8 @@ export default function HomeScreen({ navigation }: Props) {
       }).promise;
 
       if (result.statusCode === 200) {
-        Alert.alert("Success", `File saved to: ${path}`);
+        //Alert.alert("Success", `File saved to: ${path}`);
+        await NotificationService.showDownloadComplete(fileName, path);
       } else {
         Alert.alert("Failed", "Download failed");
       }

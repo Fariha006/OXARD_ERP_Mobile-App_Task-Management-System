@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaVi
 import { getDocumentData, downloadFile, getFileUrl } from '../api/api';
 import UserStorage from '../utils/userStorage';
 import RNFS from 'react-native-fs';
+import NotificationService from '../services/NotificationService';
 
 const ACCORDIONS = [
   { key: 'nationalid', label: 'National Id', item: 'Item1' },
@@ -65,7 +66,7 @@ export default function DocumentsScreen({ navigation }: { navigation?: any }) {
       // Combine file names and paths into objects
       const filesWithPaths = fileNames.map((name: string, index: number) => ({
         name: name,
-        path: filePaths[index] || ''
+        path:sectionData.HTTPUploadFilePathAttachment+ filePaths[index] || ''
       }));
       
       
@@ -81,8 +82,10 @@ export default function DocumentsScreen({ navigation }: { navigation?: any }) {
 
   const handleFileDownload = async (filePath: string, fileName: string) => {
     try {
+      await NotificationService.init();
       // Construct the full file URL using the server URL from API configuration
-      const baseUrl =getFileUrl('/'+filePath)
+     // const baseUrl =getFileUrl('/'+filePath)
+      const baseUrl =  filePath;
       // const cleanFilePath = filePath.startsWith('/') ? filePath.substring(1) : filePath;
       // const url = `${baseUrl}${cleanFilePath}`;
       
@@ -95,7 +98,8 @@ export default function DocumentsScreen({ navigation }: { navigation?: any }) {
       }).promise;
 
       if (result.statusCode === 200) {
-        Alert.alert("Success", `File saved to: ${path}`);
+        //Alert.alert("Success", `File saved to: ${path}`);
+        await NotificationService.showDownloadComplete(fileName, path);
       } else {
         Alert.alert("Failed", "Download failed");
       }
