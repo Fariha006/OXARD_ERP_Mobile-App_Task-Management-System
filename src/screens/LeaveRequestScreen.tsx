@@ -10,6 +10,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { getMesseges, fetchMessageCategories, fetchSelectTypes, saveMessage, fetchMessageForEdit, fetchLeaveData, calculateLeaveDays, saveLeaveRequest, saveAllLeaves, fetchLeaveEditData, uploadDocument } from '../api/api';
 import UserStorage from '../utils/userStorage';
+import NotificationService from '../services/NotificationService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LeaveRequest'>;
 
@@ -503,6 +504,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
 
   const handleFileDownload = async (file: any) => {
     try {
+      await NotificationService.init();
       // Construct the file path using Folder + '/' + FileNameServer
       let filePath = `${file.attachmentItem.Folder}/${file.attachmentItem.FileNameServer}`;
       
@@ -528,7 +530,8 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
       }).promise;
 
       if (result.statusCode === 200) {
-        Alert.alert("Success", `File saved to: ${path}`);
+        //Alert.alert("Success", `File saved to: ${path}`);
+        await NotificationService.showDownloadComplete(fileName, path);
       } else {
         Alert.alert("Failed", "Download failed");
       }
