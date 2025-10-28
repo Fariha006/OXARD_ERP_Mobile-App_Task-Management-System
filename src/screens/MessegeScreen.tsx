@@ -9,6 +9,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { getMesseges, fetchMessageCategories, fetchSelectTypes, saveMessage, fetchMessageForEdit, uploadDocument } from '../api/api';
 import UserStorage from '../utils/userStorage';
+import NotificationService from '../services/NotificationService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -198,6 +199,7 @@ export default function MessegeScreen({ navigation }: Props) {
 
   const handleFileDownload = async (file: any) => {
     try {
+      await NotificationService.init();
       // Construct the file path using UploadFilePath + '/' + TmpFileName
       let filePath = `${file.attachmentItem.FilePath}/${file.attachmentItem.FileNameServer}`;
       
@@ -221,13 +223,16 @@ export default function MessegeScreen({ navigation }: Props) {
       }).promise;
 
       if (result.statusCode === 200) {
-        Alert.alert("Success", `File saved to: ${path}`);
+        //Alert.alert("Success", `File saved to: ${path}`);
+        await NotificationService.showDownloadComplete(fileName, path);
       } else {
-        Alert.alert("Failed", "Download failed");
+        //Alert.alert("Failed", "Download failed");
+       // await NotificationService.showDownloadError(fileName, "Download failed");
       }
     } catch (error) {
       console.error('Download error:', error);
-      Alert.alert('Error', 'Failed to download file');
+       Alert.alert('Error', 'Failed to download file');
+      //await NotificationService.showDownloadError(fileName, "Failed to download file");
     }
   };
 
