@@ -268,11 +268,17 @@ export default function LoginScreen({ navigation }: Props) {
         translucent={false}
       />
       )}
-      <SafeAreaView style={styles.container}>
+      {/* <SafeAreaView style={styles.container}>
         <KeyboardAvoidingView
           style={styles.inner}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        > */}
+           <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          style={styles.inner}
+          behavior='padding'
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 5}
         >
           <ScrollView
             ref={scrollViewRef}
@@ -377,7 +383,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingBottom: 50, // Extra padding at bottom for keyboard
+    //paddingBottom: 50, // Extra padding at bottom for keyboard
   },
   logo: {
     width: '100%',
