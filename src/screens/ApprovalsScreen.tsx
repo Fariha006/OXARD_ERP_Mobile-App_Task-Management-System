@@ -274,8 +274,7 @@ export default function ApprovalsScreen({ navigation }: Props) {
                       <Text style={styles.lbl}>Approval level: <Text style={styles.vlue}>{item2.DecisionLevel ?? '-'}</Text></Text>
                     </View>
                     <View style={styles.actionButtons}>
-
-                    {item2.ReportFlag === 1 && (
+                      {item2.ReportFlag === 1 && (
                         <TouchableOpacity 
                           style={styles.downloadBtn} 
                           onPress={() => handleDownload(item2.TransactionId, item2.ReferenceNo)}
@@ -283,7 +282,6 @@ export default function ApprovalsScreen({ navigation }: Props) {
                         >
                           <View style={styles.dwnloadicon}>
                             <Image source={require('../../assets/images/innerpage/download.png')} style={styles.downloadimage} resizeMode="contain" />
-                            {/* <Text style={styles.downloadBtnText}> {downloadingId === item2.TransactionId ? 'Downloading...' : 'Download'}</Text> */}
                           </View>
                         </TouchableOpacity>
                       )}
@@ -291,13 +289,10 @@ export default function ApprovalsScreen({ navigation }: Props) {
                         style={styles.moreBtn} 
                         onPress={() => openViewModal(item2.DecisionId || '0')}
                       >
-                         <View style={styles.dwnloadicon}>
-                            <Image source={require('../../assets/images/innerpage/clicktoopen.png')} style={styles.downloadimage} resizeMode="contain" />
-                            {/* <Text style={styles.downloadBtnText}> {downloadingId === item.PayslipId ? 'Downloading...' : 'Download'}</Text> */}
-                          </View>
-                        {/* <MaterialIcons name="more-vert" size={24} color="#133F7C" /> */}
+                        <View style={styles.dwnloadicon}>
+                          <Image source={require('../../assets/images/innerpage/clicktoopen.png')} style={styles.downloadimage} resizeMode="contain" />
+                        </View>
                       </TouchableOpacity>
-                      
                     </View>
                   </View>
                 ))}
@@ -505,12 +500,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#E2EDFC',
   },
   dwnloadicon: {
-    marginLeft: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-    downloadimage: {
-    width: 15,
+  downloadimage: {
+    width: 14,
     height: 14,
-    },
+  },
   accordionHeaderClosed: {
     borderColor: '#DEECFF',
     borderWidth: 1,
@@ -529,20 +525,18 @@ const styles = StyleSheet.create({
   odd: {
     backgroundColor: '#ffffff',
     marginBottom: 5,
-    paddingBottom: 2,
-    paddingTop: 2,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    paddingBottom: 8,
+    paddingTop: 8,
+    paddingLeft: 8,
+    paddingRight: 8,
   },
   even: {
     backgroundColor: '#F1F6FD',
     marginBottom: 5,
-    paddingBottom: 2,
-    paddingTop: 2,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    paddingBottom: 8,
+    paddingTop: 8,
+    paddingLeft: 8,
+    paddingRight: 8,
   },
   lbl: {
     fontSize: 11,
@@ -558,12 +552,17 @@ const styles = StyleSheet.create({
   actionButtons: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-end',
     gap: 2,
+    marginTop: 2,
+    paddingTop: 2,
   },
   moreBtn: {
-    paddingHorizontal: 2,
+    paddingHorizontal: 6,
     paddingVertical: 4,
     borderRadius: 4,
+    backgroundColor: '#f0f0f0',
+    marginLeft: 4,
   },
   viewBtn: {
     backgroundColor: '#133F7C',
@@ -599,7 +598,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   downloadBtn: {
-    paddingRight: 2,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    borderRadius: 4,
+    backgroundColor: '#e8f4fd',
+    marginRight: 4,
   },
   // Modal styles
   modalOverlay: {

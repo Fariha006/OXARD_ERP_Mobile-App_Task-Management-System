@@ -199,12 +199,12 @@ export default function LeaveHistoryScreen({ navigation }: { navigation?: any })
                 </View>
                 {item.EditFlag == 'True' ? (
                 <View style={styles.savedLeaveActions}>  
-                    <View style={styles.editButtonContainer}>
+                    {/* <View style={styles.editButtonContainer}>
                   <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('LeaveRequest', { editData: item,type: 'view' })}>
                       <Text style={styles.editIcon}>👁️</Text>
                     </TouchableOpacity>
                    
-                  </View>
+                  </View> */}
                   <View style={styles.editButtonContainer}>
                     <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('LeaveRequest', { editData: item,type: 'edit' })}>
                       <Text style={styles.editIcon}>✏️</Text>
