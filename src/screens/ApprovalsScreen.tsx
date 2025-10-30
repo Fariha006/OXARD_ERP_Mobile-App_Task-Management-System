@@ -504,8 +504,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   downloadimage: {
-    width: 14,
-    height: 14,
+    width: 18,
+    height: 18,
   },
   accordionHeaderClosed: {
     borderColor: '#DEECFF',
