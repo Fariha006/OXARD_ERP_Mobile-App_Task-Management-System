@@ -716,7 +716,7 @@ export default function MessegeScreen({ navigation }: Props) {
                        onChangeText={setMessage}
                        placeholder="Enter message *"
                        multiline
-                       numberOfLines={4}
+                       numberOfLines={6}
                        textAlignVertical="top"
                      />
                    </View>
@@ -1547,7 +1547,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   textArea: {
-    height: 100,
+    height: 120,
     textAlignVertical: 'top',
   },
   dropdown: {

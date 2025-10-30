@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   userInfo: {
-    flexDirection: 'column',
+    flexDirection: 'column', 
     marginLeft: 20,
   },
   userName: {

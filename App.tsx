@@ -82,27 +82,7 @@ export default function App() {
       const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
         console.log('📩 Foreground message:', remoteMessage);
         Alert.alert(remoteMessage.notification?.title ?? 'New Message', remoteMessage.notification?.body ?? '');
-      // await notifee.displayNotification({
-      //   title: remoteMessage.notification?.title ?? 'New Message',
-      //   body: remoteMessage.notification?.body ?? '',
-      //   android: {
-      //     channelId: 'default',
-      //     //largeIcon: 'https://onesoftapps.com/assets/images/logo.png',
-      //     importance: AndroidImportance.HIGH,
-      //     pressAction: {
-      //       id: 'default',
-      //     },
-      //   },
-      // });
-
-      //        await notifee.displayNotification({
-      //    title: 'Special Offer!',
-      //    body: 'Check out our latest deals.',
-      //    android: {
-      //      channelId: 'default',
-      //    //  largeIcon: 'https://example.com/your-image.png',
-      //    }
-      //  });
+      
     
     
     });
