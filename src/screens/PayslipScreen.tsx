@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, Alert, Platform, Modal, Switch, 
   PermissionsAndroid
 } from 'react-native';
