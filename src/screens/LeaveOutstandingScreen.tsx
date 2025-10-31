@@ -78,12 +78,12 @@ const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
        const fileName = `LeaveOutstanding_${formattedDate}.pdf`;
        const path =
          Platform.OS === 'android'
-           ? `${RNFS.DownloadDirectoryPath}/${fileName}`
+           ? `${RNFS.ExternalDirectoryPath}/${fileName}`
            : `${RNFS.DocumentDirectoryPath}/${fileName}`;
 
        await RNFS.writeFile(path, base64Data, 'base64');
        //Alert.alert('Success', `PDF saved to ${path}`);
-       await NotificationService.showDownloadComplete(`LeaveOutstanding_${formattedDate}.pdf`, `${RNFS.DownloadDirectoryPath}/LeaveOutstanding_${formattedDate}.pdf`);
+       await NotificationService.showDownloadComplete(`LeaveOutstanding_${formattedDate}.pdf`, `${RNFS.ExternalDirectoryPath}/LeaveOutstanding_${formattedDate}.pdf`);
      } catch (error) {
        console.error('Error saving PDF:', error);
        Alert.alert('Error', 'Failed to save PDF to device.');

@@ -199,13 +199,13 @@ export default function ApprovalsScreen({ navigation }: Props) {
       const fileName = `ApprovalDocument.pdf`;
       const path =
         Platform.OS === 'android'
-          ? `${RNFS.DownloadDirectoryPath}/${fileName}`
+          ? `${RNFS.ExternalDirectoryPath}/${fileName}`
           : `${RNFS.DocumentDirectoryPath}/${fileName}`;
 
       await RNFS.writeFile(path, base64Data, 'base64');
       //Alert.alert('Success', `PDF saved to ${path}`);
-      const filePathdata = `${RNFS.DownloadDirectoryPath}/${fileName}`
-      await NotificationService.showDownloadComplete(fileName, filePathdata);
+      //const filePathdata = `${RNFS.ExternalDirectoryPath}/${fileName}`
+      await NotificationService.showDownloadComplete(fileName, path);
     } catch (error) {
       console.error('Error saving PDF:', error);
       Alert.alert('Error', 'Failed to save PDF to device.');
@@ -399,7 +399,7 @@ export default function ApprovalsScreen({ navigation }: Props) {
               <TouchableOpacity style={styles.pdfCloseButton} onPress={handleClosePdf}>
                 <Text style={styles.closeButtonText}>Close</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.saveButton} onPress={() => handleSavePdf(data?.Item2?.find((item: any) => item.TransactionId === downloadingId)?.ReferenceNo || '')}>
+              <TouchableOpacity style={styles.saveButton} onPress={() => handleSavePdf('')}>
                 <Text style={styles.saveButtonText}>Save PDF</Text>
               </TouchableOpacity>
             </View>

@@ -62,12 +62,12 @@ class NotificationService {
     });
   }
 
-//   private openFile(filePath: string) {
-//     FileViewer.open(filePath, { showOpenWithDialog: true }).catch((err) => {
+  private openFile(filePath: string) {
+    FileViewer.open(filePath, { showOpenWithDialog: true }).catch((err) => {
 
-//       console.error('Failed to open file:'+filePath, err);
-//     });
-//   }
+      console.error('Failed to open file:'+filePath, err);
+    });
+  }
 }
 
 export default new NotificationService();

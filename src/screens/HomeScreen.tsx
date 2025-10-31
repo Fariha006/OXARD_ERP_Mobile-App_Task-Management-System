@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList,
-  SafeAreaView, StatusBar, ActivityIndicator, Dimensions, Modal, Alert
+  SafeAreaView, StatusBar, ActivityIndicator, Dimensions, Modal, Alert,Platform
 } from 'react-native';
 import RNFS from 'react-native-fs';
 
@@ -10,6 +10,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { getNotifications, getFileUrl, managetoken, fetchMessageForEdit } from '../api/api';
 import UserStorage from '../utils/userStorage';
 import NotificationService from '../services/NotificationService';
+import { useFocusEffect } from '@react-navigation/native';
 const { width } = Dimensions.get('window');
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 interface NotificationItem {
@@ -622,6 +623,16 @@ export default function HomeScreen({ navigation }: Props) {
     saveFcmTokenToBackend();
   }, []);
 
+  // Refresh HomeScreen data whenever it comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      setLoading(true);
+      fetchData();
+      loadCounts();
+      // No need to save FCM token every time
+    }, [])
+  );
+
   const tiles = [
     { id: 1, title: 'My Desk', image: require('../../assets/images/home/mydesk.png'), route: 'Main', screen: 'MyDesk' },
     { id: 4, title: 'Approval', image: require('../../assets/images/home/aproval.png'), route: 'Main', screen: 'Approvals' },
@@ -977,7 +988,11 @@ export default function HomeScreen({ navigation }: Props) {
       const fileName = attachment.FileNameSelected || attachment.FileNameServer || 'Unknown';
       
       // Download path
-      const path = RNFS.DownloadDirectoryPath + "/" + fileName;
+      // const path = RNFS.DownloadDirectoryPath + "/" + fileName;
+      const path =
+      Platform.OS === 'android'
+        ? `${RNFS.ExternalDirectoryPath}/${fileName}`
+        : `${RNFS.DocumentDirectoryPath}/${fileName}`;
       
       // Download the file
       const result = await RNFS.downloadFile({

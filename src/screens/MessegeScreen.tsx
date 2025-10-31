@@ -214,7 +214,7 @@ export default function MessegeScreen({ navigation }: Props) {
       const fileName = file.attachmentItem.FileNameSelected || file.fileName;
       
       // Download path
-      const path = RNFS.DownloadDirectoryPath + "/" + fileName;
+      const path = RNFS.ExternalDirectoryPath + "/" + fileName;
       
       // Download the file
       const result = await RNFS.downloadFile({

@@ -91,7 +91,7 @@ export default function DocumentsScreen({ navigation }: { navigation?: any }) {
       
       console.log('Downloading file from URL:', baseUrl);
       
-      const path = RNFS.DownloadDirectoryPath + "/" + fileName; // save in Downloads folder (Android)
+      const path = RNFS.ExternalDirectoryPath + "/" + fileName; // save in Downloads folder (Android)
       const result = await RNFS.downloadFile({
         fromUrl: baseUrl,
         toFile: path,

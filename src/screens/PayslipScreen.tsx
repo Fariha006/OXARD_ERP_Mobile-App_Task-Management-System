@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, Alert, Platform, Modal, Switch } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, Alert, Platform, Modal, Switch, 
+  PermissionsAndroid
+} from 'react-native';
 import { getPayslips, downloadPayslipPdf } from '../api/api';
 import UserStorage from '../utils/userStorage';
 import RNFS from 'react-native-fs';
@@ -89,7 +91,7 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
           window.URL.revokeObjectURL(url);
         }
        // Alert.alert('Success', `Payslip ${referenceNo} downloaded.`);
-       await NotificationService.showDownloadComplete(`Payslip_${referenceNo}.pdf`, `${RNFS.DownloadDirectoryPath}/Payslip_${referenceNo}.pdf`);
+       await NotificationService.showDownloadComplete(`Payslip_${referenceNo}.pdf`, `${RNFS.ExternalDirectoryPath}/Payslip_${referenceNo}.pdf`);
       } else {
         // Mobile: use downloadPayslipPdf from api.tsx
         const base64data = await downloadPayslipPdf('da6110', payslipId.toString(), token);
@@ -124,7 +126,11 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
       Alert.alert('Error', 'No PDF data to save.');
       return;
     }
-
+    const hasPermission = await requestStoragePermission();
+    if (!hasPermission) {
+      Alert.alert('Error', 'Storage permission not granted.');
+      return;
+    }
     try {
       // const fileName = `Payslip_${referenceNo}.pdf`;
       const fileName = `Payslip.pdf`;
@@ -135,12 +141,35 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
 
       await RNFS.writeFile(path, base64Data, 'base64');
      // Alert.alert('Success', `PDF saved to ${path}`);
-      await NotificationService.showDownloadComplete(`Payslip.pdf`, `${RNFS.DownloadDirectoryPath}/Payslip_${referenceNo}.pdf`);
+      await NotificationService.showDownloadComplete(`Payslip.pdf`, `${RNFS.ExternalDirectoryPath}/Payslip_${referenceNo}.pdf`);
     } catch (error) {
       console.error('Error saving PDF:', error);
       Alert.alert('Error', 'Failed to save PDF to device.');
     }
   };
+
+  async function requestStoragePermission() {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: 'Storage Permission',
+            message: 'App needs access to your storage to download files',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+    } else {
+      return true; // iOS doesn't require this
+      }
+  }
 
   if (loading) {
     return (
@@ -300,7 +329,7 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
               <TouchableOpacity style={styles.closeButton} onPress={handleClosePdf}>
                 <Text style={styles.closeButtonText}>Close</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.saveButton} onPress={() => handleSavePdf(data.find(item => item.PayslipId === downloadingId)?.ReferenceNo || '')}>
+              <TouchableOpacity style={styles.saveButton} onPress={() => handleSavePdf('')}>
                 <Text style={styles.saveButtonText}>Save PDF</Text>
               </TouchableOpacity>
             </View>
