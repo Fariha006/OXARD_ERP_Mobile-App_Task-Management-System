@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import RNFetchBlob from 'react-native-blob-util';
 
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, Alert, Platform, Modal, Switch, 
   PermissionsAndroid
@@ -28,6 +29,8 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
   const [base64Data, setBase64Data] = useState<string>('');
   const [pdfModalVisible, setPdfModalVisible] = useState(false);
   const [showAllData, setShowAllData] = useState(false);
+
+;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -121,34 +124,85 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
     setBase64Data('');
   };
 
+  // const handleSavePdf = async (referenceNo: string) => {
+  //  // Alert.alert('handleSavePdf', 'handleSavePdf');
+  //   if (!base64Data) {
+  //     Alert.alert('Error', 'No PDF data to save.');
+  //     return;
+  //   }
+  //   const hasPermission = await requestStoragePermission();
+  //   if (!hasPermission) {
+  //     Alert.alert('Error', 'Storage permission not granted.');
+  //     return;
+  //   }
+  //   try {
+  //     // const fileName = `Payslip_${referenceNo}.pdf`;
+  //     const fileName = `Payslip.pdf`;
+  //     const path =
+  //       Platform.OS === 'android'
+  //         ? `${RNFS.DownloadDirectoryPath}/${fileName}`
+  //         : `${RNFS.DocumentDirectoryPath}/${fileName}`;
+
+  //     await RNFS.writeFile(path, base64Data, 'base64');
+  //    // Alert.alert('Success', `PDF saved to ${path}`);
+  //     await NotificationService.showDownloadComplete(`Payslip.pdf`, `${RNFS.ExternalDirectoryPath}/Payslip_${referenceNo}.pdf`);
+  //   } catch (error) {
+  //     console.error('Error saving PDF:', error);
+  //     Alert.alert('Error', 'Failed to save PDF to device.');
+  //   }
+  // };
+
+
   const handleSavePdf = async (referenceNo: string) => {
-   // Alert.alert('handleSavePdf', 'handleSavePdf');
-    if (!base64Data) {
-      Alert.alert('Error', 'No PDF data to save.');
-      return;
-    }
-    const hasPermission = await requestStoragePermission();
-    if (!hasPermission) {
-      Alert.alert('Error', 'Storage permission not granted.');
-      return;
-    }
-    try {
-      // const fileName = `Payslip_${referenceNo}.pdf`;
-      const fileName = `Payslip.pdf`;
-      const path =
-        Platform.OS === 'android'
-          ? `${RNFS.DownloadDirectoryPath}/${fileName}`
-          : `${RNFS.DocumentDirectoryPath}/${fileName}`;
+    // Alert.alert('handleSavePdf', 'handleSavePdf');
+     if (!base64Data) {
+       Alert.alert('Error', 'No PDF data to save.');
+       return;
+     }
+     const hasPermission = await requestStoragePermission();
+     if (!hasPermission) {
+       Alert.alert('Error', 'Storage permission not granted.');
+       return;
+     }
+     try {
+       // const fileName = `Payslip_${referenceNo}.pdf`;
+       const fileName = `Payslip.pdf`;
 
-      await RNFS.writeFile(path, base64Data, 'base64');
-     // Alert.alert('Success', `PDF saved to ${path}`);
-      await NotificationService.showDownloadComplete(`Payslip.pdf`, `${RNFS.ExternalDirectoryPath}/Payslip_${referenceNo}.pdf`);
-    } catch (error) {
-      console.error('Error saving PDF:', error);
-      Alert.alert('Error', 'Failed to save PDF to device.');
-    }
-  };
+        const { fs, android } = RNFetchBlob;
+    const downloadDir = fs.dirs.DownloadDir;
+    const filePath = `${downloadDir}/${fileName}`;
 
+    // Write Base64 data
+    await fs.writeFile(filePath, base64Data, 'base64');
+
+      //  const {fs, android} = RNFetchBlob;
+      //  const downloadDir = fs.dirs.DownloadDir;
+      // const filePath = `${downloadDir}/${fileName}`;
+      //  await fs.writeFile(filePath, base64Data, 'base64');
+       if (Platform.OS === 'android') {
+        android.addCompleteDownload({
+          title: fileName,
+          description: 'Payslip File downloaded successfully',
+          mime: 'application/pdf',
+          path: filePath,
+          showNotification: true,
+          
+        });
+
+        await NotificationService.showDownloadComplete(fileName, filePath);
+
+
+
+  
+      }
+       
+      
+       
+     } catch (error) {
+       console.error('Error saving PDF:', error);
+       Alert.alert('Error', 'Failed to save PDF to device.');
+     }
+   };
   async function requestStoragePermission() {
     if (Platform.OS === 'android') {
       try {
