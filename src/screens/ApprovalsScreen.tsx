@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList,
-  SafeAreaView, ActivityIndicator, Alert, Modal, TextInput, Platform
+  SafeAreaView, ActivityIndicator, Alert, Modal, TextInput, Platform, PermissionsAndroid
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import RNFS from 'react-native-fs';
+import RNFetchBlob from 'react-native-blob-util';
 import Pdf from 'react-native-pdf';
 import { Buffer } from 'buffer';
 
@@ -193,24 +194,60 @@ export default function ApprovalsScreen({ navigation }: Props) {
       Alert.alert('Error', 'No PDF data to save.');
       return;
     }
-
+    const hasPermission = await requestStoragePermission();
+    if (!hasPermission) {
+      Alert.alert('Error', 'Storage permission not granted.');
+      return;
+    }
     try {
-      await NotificationService.init();
       const fileName = `ApprovalDocument.pdf`;
-      const path =
-        Platform.OS === 'android'
-          ? `${RNFS.ExternalDirectoryPath}/${fileName}`
-          : `${RNFS.DocumentDirectoryPath}/${fileName}`;
 
-      await RNFS.writeFile(path, base64Data, 'base64');
-      //Alert.alert('Success', `PDF saved to ${path}`);
-      //const filePathdata = `${RNFS.ExternalDirectoryPath}/${fileName}`
-      await NotificationService.showDownloadComplete(fileName, path);
+      const { fs, android } = RNFetchBlob;
+      const downloadDir = fs.dirs.DownloadDir;
+      const filePath = `${downloadDir}/${fileName}`;
+
+      // Write Base64 data
+      await fs.writeFile(filePath, base64Data, 'base64');
+
+      if (Platform.OS === 'android') {
+        android.addCompleteDownload({
+          title: fileName,
+          description: 'Approval Document File downloaded successfully',
+          mime: 'application/pdf',
+          path: filePath,
+          showNotification: true,
+        });
+
+        await android.actionViewIntent(filePath, 'application/pdf');
+      }
     } catch (error) {
       console.error('Error saving PDF:', error);
       Alert.alert('Error', 'Failed to save PDF to device.');
     }
   };
+
+  async function requestStoragePermission() {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: 'Storage Permission',
+            message: 'App needs access to your storage to download files',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+    } else {
+      return true; // iOS doesn't require this
+    }
+  }
 
   if (loading) {
     return (

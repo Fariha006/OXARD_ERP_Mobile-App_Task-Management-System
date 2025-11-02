@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList,
-  SafeAreaView, StatusBar, ActivityIndicator, Dimensions, Modal, Alert,Platform
+  SafeAreaView, StatusBar, ActivityIndicator, Dimensions, Modal, Alert,Platform, PermissionsAndroid
 } from 'react-native';
 import RNFS from 'react-native-fs';
+import RNFetchBlob from 'react-native-blob-util';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -11,6 +12,15 @@ import { getNotifications, getFileUrl, managetoken, fetchMessageForEdit } from '
 import UserStorage from '../utils/userStorage';
 import NotificationService from '../services/NotificationService';
 import { useFocusEffect } from '@react-navigation/native';
+
+// Add these declarations at the top for web compatibility
+// @ts-ignore
+// eslint-disable-next-line
+declare var window: any;
+// @ts-ignore
+// eslint-disable-next-line
+declare var document: any;
+
 const { width } = Dimensions.get('window');
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 interface NotificationItem {
@@ -970,14 +980,68 @@ export default function HomeScreen({ navigation }: Props) {
     setLoadingModal(false);
   };
 
+  // Helper function to get MIME type from file extension
+  const getMimeTypeFromFileName = (fileName: string): string => {
+    const extension = fileName.split('.').pop()?.toLowerCase() || '';
+    const mimeTypes: { [key: string]: string } = {
+      'pdf': 'application/pdf',
+      'doc': 'application/msword',
+      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'xls': 'application/vnd.ms-excel',
+      'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'ppt': 'application/vnd.ms-powerpoint',
+      'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'txt': 'text/plain',
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'gif': 'image/gif',
+      'zip': 'application/zip',
+      'rar': 'application/x-rar-compressed',
+      'mp4': 'video/mp4',
+      'mp3': 'audio/mpeg',
+    };
+    return mimeTypes[extension] || 'application/octet-stream';
+  };
+
+  async function requestStoragePermission() {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: 'Storage Permission',
+            message: 'App needs access to your storage to download files',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+    } else {
+      return true; // iOS doesn't require this
+    }
+  }
+
   // File download functionality similar to MessegeScreen
   const handleFileDownload = async (attachment: any) => {
     try {
       await NotificationService.init();
+
+      const token = await UserStorage.getToken();
+      if (!token) {
+        Alert.alert('No authentication token found. Please login again.');
+        return;
+      }
+
       // Construct the file path using Folder + '/' + FileNameServer
       let filePath = `${attachment.Folder}/${attachment.FileNameServer}`;
       
-      // Get the full file URL
+      // If FilePath doesn't start with http, use getFileUrl as fallback
       if(!filePath.startsWith('http')){
         filePath = getFileUrl('/UploadFiles/DocManager/temp/' + attachment.FileNameServer);
       }
@@ -987,24 +1051,120 @@ export default function HomeScreen({ navigation }: Props) {
       // Get the original filename for saving
       const fileName = attachment.FileNameSelected || attachment.FileNameServer || 'Unknown';
       
-      // Download path
-      // const path = RNFS.DownloadDirectoryPath + "/" + fileName;
-      const path =
-      Platform.OS === 'android'
-        ? `${RNFS.ExternalDirectoryPath}/${fileName}`
-        : `${RNFS.DocumentDirectoryPath}/${fileName}`;
-      
-      // Download the file
-      const result = await RNFS.downloadFile({
-        fromUrl: filePath,
-        toFile: path,
-      }).promise;
+      // Get MIME type from file extension
+      const mimeType = getMimeTypeFromFileName(fileName);
 
-      if (result.statusCode === 200) {
-        //Alert.alert("Success", `File saved to: ${path}`);
-        await NotificationService.showDownloadComplete(fileName, path);
+      if (Platform.OS === 'web') {
+        // On web, fetch blob directly
+        const response = await fetch(filePath, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) throw new Error('Failed to download file');
+        const blob = await response.blob();
+        // Type guard for window and document
+        if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+        }
       } else {
-        Alert.alert("Failed", "Download failed");
+        // Mobile: download file using RNFetchBlob
+        const hasPermission = await requestStoragePermission();
+        if (!hasPermission) {
+          Alert.alert('Error', 'Storage permission not granted.');
+          return;
+        }
+
+        try {
+          const { fs, android } = RNFetchBlob;
+          const downloadDir = fs.dirs.DownloadDir;
+          const finalPath = `${downloadDir}/${fileName}`;
+
+          // Check if file already exists and remove it
+          if (await fs.exists(finalPath)) {
+            await fs.unlink(finalPath);
+          }
+
+          // Download the file directly from URL using RNFetchBlob
+          const response = await RNFetchBlob.config({
+            fileCache: true,
+          }).fetch('GET', filePath, {
+            'Authorization': `Bearer ${token}`,
+          });
+
+          // Get the temporary file path where file was cached
+          const tempFilePath = response.path();
+          console.log('Temporary file path:', tempFilePath);
+          
+          // Wait a bit to ensure file is fully written
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          // Check if temp file exists
+          if (!(await fs.exists(tempFilePath))) {
+            throw new Error('Downloaded file not found at temporary path');
+          }
+
+          // Read the file as base64
+          const base64Data = await fs.readFile(tempFilePath, 'base64');
+          
+          if (!base64Data || base64Data.length === 0) {
+            throw new Error('Downloaded file is empty');
+          }
+
+          // Write file to Download directory
+          await fs.writeFile(finalPath, base64Data, 'base64');
+          console.log('File saved to:', finalPath);
+
+          // Verify file was written
+          if (!(await fs.exists(finalPath))) {
+            throw new Error('Failed to save file to download directory');
+          }
+
+          // Remove temporary file
+          if (await fs.exists(tempFilePath)) {
+            await fs.unlink(tempFilePath);
+          }
+
+          // For Android, add complete download and open with appropriate MIME type
+          if (Platform.OS === 'android') {
+            await android.addCompleteDownload({
+              title: fileName,
+              description: 'File downloaded successfully',
+              mime: mimeType,
+              path: finalPath,
+              showNotification: true,
+            });
+
+            await android.actionViewIntent(finalPath, mimeType);
+          }
+
+          // Show notification
+          await NotificationService.showDownloadComplete(fileName, finalPath);
+        } catch (downloadError: any) {
+          console.error('Error downloading file:', downloadError);
+          let errorMessage = 'Unknown error';
+          if (downloadError instanceof Error) {
+            errorMessage = downloadError.message;
+          } else if (typeof downloadError === 'string') {
+            errorMessage = downloadError;
+          } else if (downloadError && downloadError.message) {
+            errorMessage = downloadError.message;
+          }
+          console.error('Error type:', typeof downloadError);
+          console.error('Error message:', errorMessage);
+          if (downloadError && downloadError.stack) {
+            console.error('Error stack:', downloadError.stack);
+          }
+          Alert.alert('Error', `Failed to download file to device: ${errorMessage}`);
+        }
       }
     } catch (error) {
       console.error('Download error:', error);

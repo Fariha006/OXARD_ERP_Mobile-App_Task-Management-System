@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, SafeAreaView,
-  Platform, Alert, ActivityIndicator, Image, Modal
+  Platform, Alert, ActivityIndicator, Image, Modal, PermissionsAndroid
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { downloadLeaveOutstandingPdf } from '../api/api';
 import UserStorage from '../utils/userStorage';
 import Pdf from 'react-native-pdf';
 import RNFS from 'react-native-fs';
+import RNFetchBlob from 'react-native-blob-util';
 import NotificationService from '../services/NotificationService';
 
 const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
@@ -72,23 +73,61 @@ const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
        Alert.alert('Error', 'No PDF data to save.');
        return;
      }
-
+     const hasPermission = await requestStoragePermission();
+     if (!hasPermission) {
+       Alert.alert('Error', 'Storage permission not granted.');
+       return;
+     }
      try {
        const formattedDate = formatDate(date);
        const fileName = `LeaveOutstanding_${formattedDate}.pdf`;
-       const path =
-         Platform.OS === 'android'
-           ? `${RNFS.ExternalDirectoryPath}/${fileName}`
-           : `${RNFS.DocumentDirectoryPath}/${fileName}`;
 
-       await RNFS.writeFile(path, base64Data, 'base64');
-       //Alert.alert('Success', `PDF saved to ${path}`);
-       await NotificationService.showDownloadComplete(`LeaveOutstanding_${formattedDate}.pdf`, `${RNFS.ExternalDirectoryPath}/LeaveOutstanding_${formattedDate}.pdf`);
+       const { fs, android } = RNFetchBlob;
+       const downloadDir = fs.dirs.DownloadDir;
+       const filePath = `${downloadDir}/${fileName}`;
+
+       // Write Base64 data
+       await fs.writeFile(filePath, base64Data, 'base64');
+
+       if (Platform.OS === 'android') {
+         android.addCompleteDownload({
+           title: fileName,
+           description: 'Leave Outstanding File downloaded successfully',
+           mime: 'application/pdf',
+           path: filePath,
+           showNotification: true,
+         });
+
+         await android.actionViewIntent(filePath, 'application/pdf');
+       }
      } catch (error) {
        console.error('Error saving PDF:', error);
        Alert.alert('Error', 'Failed to save PDF to device.');
      }
    };
+
+   async function requestStoragePermission() {
+     if (Platform.OS === 'android') {
+       try {
+         const granted = await PermissionsAndroid.request(
+           PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+           {
+             title: 'Storage Permission',
+             message: 'App needs access to your storage to download files',
+             buttonNeutral: 'Ask Me Later',
+             buttonNegative: 'Cancel',
+             buttonPositive: 'OK',
+           },
+         );
+         return granted === PermissionsAndroid.RESULTS.GRANTED;
+       } catch (err) {
+         console.warn(err);
+         return false;
+       }
+     } else {
+       return true; // iOS doesn't require this
+     }
+   }
 
    return (
     <SafeAreaView style={styles.container}>
