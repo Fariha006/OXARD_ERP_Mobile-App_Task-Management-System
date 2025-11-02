@@ -189,7 +189,9 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
           
         });
 
-        await NotificationService.showDownloadComplete(fileName, filePath);
+        await android.actionViewIntent(filePath, 'application/pdf');
+
+        //await NotificationService.showDownloadComplete(fileName, filePath);
 
 
 
