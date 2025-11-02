@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView,
-   ActivityIndicator, FlatList, Modal, TextInput, Switch, Platform, Alert, PermissionsAndroid } from 'react-native';
+   ActivityIndicator, FlatList, Modal, TextInput, Switch, Platform, Alert,
+    PermissionsAndroid,NativeModules } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { pick, types, keepLocalCopy } from '@react-native-documents/picker';
 import RNFS from 'react-native-fs';
@@ -11,6 +12,8 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { getMesseges, fetchMessageCategories, fetchSelectTypes, saveMessage, fetchMessageForEdit, uploadDocument } from '../api/api';
 import UserStorage from '../utils/userStorage';
 import NotificationService from '../services/NotificationService';
+const { MediaStoreModule } = NativeModules;
+
 
 // Add these declarations at the top for web compatibility
 // @ts-ignore
@@ -346,6 +349,7 @@ export default function MessegeScreen({ navigation }: Props) {
 
           // Write file to Download directory
           await fs.writeFile(finalPath, base64Data, 'base64');
+          const uri = await MediaStoreModule.saveFileToDownloads(finalPath, fileName, mimeType);
           console.log('File saved to:', finalPath);
 
           // Verify file was written

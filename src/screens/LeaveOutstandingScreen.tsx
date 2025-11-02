@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, SafeAreaView,
-  Platform, Alert, ActivityIndicator, Image, Modal, PermissionsAndroid
+  Platform, Alert, ActivityIndicator, Image, Modal, PermissionsAndroid, NativeModules
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { downloadLeaveOutstandingPdf } from '../api/api';
@@ -10,6 +10,7 @@ import Pdf from 'react-native-pdf';
 import RNFS from 'react-native-fs';
 import RNFetchBlob from 'react-native-blob-util';
 import NotificationService from '../services/NotificationService';
+const { MediaStoreModule } = NativeModules;
 
 const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
   const [date, setDate] = useState(new Date());
@@ -88,6 +89,9 @@ const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
 
        // Write Base64 data
        await fs.writeFile(filePath, base64Data, 'base64');
+       
+       // Save to downloads using MediaStoreModule
+       const uri = await MediaStoreModule.saveFileToDownloads(filePath, fileName, 'application/pdf');
 
        if (Platform.OS === 'android') {
          android.addCompleteDownload({

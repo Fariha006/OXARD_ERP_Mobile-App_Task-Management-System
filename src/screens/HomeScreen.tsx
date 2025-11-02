@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList,
-  SafeAreaView, StatusBar, ActivityIndicator, Dimensions, Modal, Alert,Platform, PermissionsAndroid
+  SafeAreaView, StatusBar, ActivityIndicator, Dimensions, Modal, Alert,Platform, PermissionsAndroid, NativeModules
 } from 'react-native';
 import RNFS from 'react-native-fs';
 import RNFetchBlob from 'react-native-blob-util';
+const { MediaStoreModule } = NativeModules;
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -1121,6 +1122,7 @@ export default function HomeScreen({ navigation }: Props) {
 
           // Write file to Download directory
           await fs.writeFile(finalPath, base64Data, 'base64');
+          const uri = await MediaStoreModule.saveFileToDownloads(finalPath, fileName, mimeType);
           console.log('File saved to:', finalPath);
 
           // Verify file was written

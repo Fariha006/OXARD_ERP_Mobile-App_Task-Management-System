@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Image, FlatList,
-  SafeAreaView, ActivityIndicator, Alert, Modal, TextInput, Platform, PermissionsAndroid
+  SafeAreaView, ActivityIndicator, Alert, Modal, TextInput, Platform, PermissionsAndroid, NativeModules
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import RNFS from 'react-native-fs';
@@ -14,6 +14,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import UserStorage from '../utils/userStorage';
 import { getApprovals, submitApproval, downloadPayslipPdf } from '../api/api';
 import NotificationService from '../services/NotificationService';
+const { MediaStoreModule } = NativeModules;
 
 // Add these declarations at the top for web compatibility
 // @ts-ignore
@@ -208,6 +209,9 @@ export default function ApprovalsScreen({ navigation }: Props) {
 
       // Write Base64 data
       await fs.writeFile(filePath, base64Data, 'base64');
+      
+      // Save to downloads using MediaStoreModule
+      const uri = await MediaStoreModule.saveFileToDownloads(filePath, fileName, 'application/pdf');
 
       if (Platform.OS === 'android') {
         android.addCompleteDownload({

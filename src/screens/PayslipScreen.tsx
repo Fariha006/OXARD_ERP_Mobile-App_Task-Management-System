@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import RNFetchBlob from 'react-native-blob-util';
 
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, Alert, Platform, Modal, Switch, 
-  PermissionsAndroid
+  PermissionsAndroid,NativeModules
 } from 'react-native';
 import { getPayslips, downloadPayslipPdf } from '../api/api';
 import UserStorage from '../utils/userStorage';
@@ -10,6 +10,7 @@ import RNFS from 'react-native-fs';
 import Pdf from 'react-native-pdf';
 import { Buffer } from 'buffer';
 import NotificationService from '../services/NotificationService';
+const { MediaStoreModule } = NativeModules;
 
 // Add these declarations at the top for web compatibility
 // @ts-ignore
@@ -124,6 +125,40 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
     setBase64Data('');
   };
 
+  //   const handleSavePdf = async (referenceNo: string) => {
+  //  // Alert.alert('handleSavePdf', 'handleSavePdf');
+  //   if (!base64Data) {
+  //     Alert.alert('Error', 'No PDF data to save.');
+  //     return;
+  //   }
+  //   const hasPermission = await requestStoragePermission();
+  //   if (!hasPermission) {
+  //     Alert.alert('Error', 'Storage permission not granted.');
+  //     return;
+  //   }
+  //   try {
+  //     // const fileName = `Payslip_${referenceNo}.pdf`;
+  //     const fileName = `Payslip.pdf`;
+  //     const path = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+  //       // Platform.OS === 'android'
+  //       //   ? `${RNFS.DownloadDirectoryPath}/${fileName}`
+  //       //   : `${RNFS.DocumentDirectoryPath}/${fileName}`;
+
+  //       // Platform.OS === 'android'
+  //       // ? `${RNFS.DocumentDirectoryPath}/${fileName}`
+  //       // : `${RNFS.DownloadDirectoryPath}/${fileName}`;
+
+  //     await RNFS.writeFile(path, base64Data, 'base64');
+  //     const uri = await MediaStoreModule.saveFileToDownloads(path, fileName, 'application/pdf');
+  //    // Alert.alert('Success', `PDF saved to ${path}`);
+  //     await NotificationService.showDownloadComplete(`Payslip.pdf`, `${RNFS.ExternalDirectoryPath}/Payslip_${referenceNo}.pdf`);
+  //   } catch (error) {
+  //     console.error('Error saving PDF:', error);
+  //     Alert.alert('Error', 'Failed to save PDF to device.');
+  //   }
+  // };
+
+
   // const handleSavePdf = async (referenceNo: string) => {
   //  // Alert.alert('handleSavePdf', 'handleSavePdf');
   //   if (!base64Data) {
@@ -175,6 +210,9 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
     // Write Base64 data
     await fs.writeFile(filePath, base64Data, 'base64');
 
+
+
+    const uri = await MediaStoreModule.saveFileToDownloads(filePath, fileName, 'application/pdf');
       //  const {fs, android} = RNFetchBlob;
       //  const downloadDir = fs.dirs.DownloadDir;
       // const filePath = `${downloadDir}/${fileName}`;
@@ -206,29 +244,44 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
      }
    };
   async function requestStoragePermission() {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: 'Storage Permission',
-            message: 'App needs access to your storage to download files',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
-        );
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
-        console.warn(err);
-        return false;
-      }
-    } else {
-      return true; // iOS doesn't require this
-      }
-  }
+    // if (Platform.OS === 'android') {
+    //   try {
+    //     const granted = await PermissionsAndroid.request(
+    //       PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+    //       {
+    //         title: 'Storage Permission',
+    //         message: 'App needs access to your storage to download files',
+    //         buttonNeutral: 'Ask Me Later',
+    //         buttonNegative: 'Cancel',
+    //         buttonPositive: 'OK',
+    //       },
+    //     );
+    //     return granted === PermissionsAndroid.RESULTS.GRANTED;
+    //   } catch (err) {
+    //     console.warn(err);
+    //     return false;
+    //   }
+    // } else {
+    //   return true; // iOS doesn't require this
+    //   }
 
-  if (loading) {
+    if (Platform.OS === 'android') {
+      if (Platform.Version >= 33) {
+        const result = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+          PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
+          PermissionsAndroid.PERMISSIONS.READ_MEDIA_AUDIO,
+        ]);
+        console.log('Media permission result:', result);
+      } else {
+        const result = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+        );
+        console.log('Storage permission result:', result);
+        return result === PermissionsAndroid.RESULTS.GRANTED;
+      }
+      return false; // Return false if not handled above
+    }
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>

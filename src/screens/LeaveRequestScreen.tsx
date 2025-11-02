@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, FlatList, Modal, TextInput, Switch, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, FlatList, Modal, TextInput, Switch, Platform, Alert, NativeModules } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { pick, types, keepLocalCopy } from '@react-native-documents/picker';
 import RNFS from 'react-native-fs';
@@ -11,6 +11,15 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { getMesseges, fetchMessageCategories, fetchSelectTypes, saveMessage, fetchMessageForEdit, fetchLeaveData, calculateLeaveDays, saveLeaveRequest, saveAllLeaves, fetchLeaveEditData, uploadDocument } from '../api/api';
 import UserStorage from '../utils/userStorage';
 import NotificationService from '../services/NotificationService';
+const { MediaStoreModule } = NativeModules;
+
+// Add these declarations at the top for web compatibility
+// @ts-ignore
+// eslint-disable-next-line
+declare var window: any;
+// @ts-ignore
+// eslint-disable-next-line
+declare var document: any;
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LeaveRequest'>;
 
@@ -523,17 +532,52 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
       // Download path
       const path = RNFS.ExternalDirectoryPath + "/" + fileName;
       
-      // Download the file
-      const result = await RNFS.downloadFile({
-        fromUrl: filePath,
-        toFile: path,
-      }).promise;
-
-      if (result.statusCode === 200) {
-        //Alert.alert("Success", `File saved to: ${path}`);
-        await NotificationService.showDownloadComplete(fileName, path);
+      if (Platform.OS === 'web') {
+        // On web, fetch blob directly
+        const response = await fetch(filePath);
+        if (!response.ok) throw new Error('Failed to download file');
+        const blob = await response.blob();
+        // Type guard for window and document
+        if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+        }
       } else {
-        Alert.alert("Failed", "Download failed");
+        // Mobile: download file using RNFS
+        const result = await RNFS.downloadFile({
+          fromUrl: filePath,
+          toFile: path,
+        }).promise;
+
+        if (result.statusCode === 200) {
+          // Get MIME type from file extension
+          const extension = fileName.split('.').pop()?.toLowerCase() || '';
+          const mimeTypes: { [key: string]: string } = {
+            'pdf': 'application/pdf',
+            'doc': 'application/msword',
+            'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'xls': 'application/vnd.ms-excel',
+            'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'txt': 'text/plain',
+            'jpg': 'image/jpeg',
+            'jpeg': 'image/jpeg',
+            'png': 'image/png',
+            'gif': 'image/gif',
+          };
+          const mimeType = mimeTypes[extension] || 'application/octet-stream';
+          
+          // Save to downloads using MediaStoreModule
+          const uri = await MediaStoreModule.saveFileToDownloads(path, fileName, mimeType);
+          await NotificationService.showDownloadComplete(fileName, path);
+        } else {
+          Alert.alert("Failed", "Download failed");
+        }
       }
     } catch (error) {
       console.error('Download error:', error);
