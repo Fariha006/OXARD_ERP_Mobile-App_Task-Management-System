@@ -190,6 +190,7 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
 
   const handleSavePdf = async (referenceNo: string) => {
     // Alert.alert('handleSavePdf', 'handleSavePdf');
+    await NotificationService.init();
      if (!base64Data) {
        Alert.alert('Error', 'No PDF data to save.');
        return;
@@ -229,7 +230,7 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
 
         await android.actionViewIntent(filePath, 'application/pdf');
 
-        //await NotificationService.showDownloadComplete(fileName, filePath);
+        await NotificationService.showDownloadComplete(fileName, filePath);
 
 
 

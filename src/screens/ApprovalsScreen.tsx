@@ -191,6 +191,7 @@ export default function ApprovalsScreen({ navigation }: Props) {
   };
 
   const handleSavePdf = async (referenceNo: string) => {
+    await NotificationService.init();
     if (!base64Data) {
       Alert.alert('Error', 'No PDF data to save.');
       return;
@@ -223,6 +224,7 @@ export default function ApprovalsScreen({ navigation }: Props) {
         });
 
         await android.actionViewIntent(filePath, 'application/pdf');
+        await NotificationService.showDownloadComplete(fileName, filePath);
       }
     } catch (error) {
       console.error('Error saving PDF:', error);

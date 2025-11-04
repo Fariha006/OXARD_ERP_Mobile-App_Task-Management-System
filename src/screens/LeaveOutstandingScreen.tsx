@@ -70,6 +70,7 @@ const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
    };
 
    const handleSavePdf = async () => {
+    await NotificationService.init();
      if (!base64Data) {
        Alert.alert('Error', 'No PDF data to save.');
        return;
@@ -103,6 +104,7 @@ const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
          });
 
          await android.actionViewIntent(filePath, 'application/pdf');
+         await NotificationService.showDownloadComplete(fileName, filePath);
        }
      } catch (error) {
        console.error('Error saving PDF:', error);

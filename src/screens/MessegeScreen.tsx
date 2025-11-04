@@ -943,9 +943,9 @@ export default function MessegeScreen({ navigation }: Props) {
                              <TouchableOpacity onPress={() => handleFileDownload(file)}>
                                <Text style={[styles.uploadedFileName, styles.downloadableFileName]}>{file.attachmentItem?.FileNameSelected || file.fileName}</Text>
                              </TouchableOpacity>
-                             <Text style={styles.uploadedFileSize}>
+                             {/* <Text style={styles.uploadedFileSize}>
                                {file.fileSize ? `${(file.fileSize / 1024).toFixed(1)} KB` : 'Unknown size'}
-                             </Text>
+                             </Text>  */}
                            </View>
                            <TouchableOpacity 
                              style={styles.removeFileButton} 
@@ -1092,9 +1092,9 @@ export default function MessegeScreen({ navigation }: Props) {
                              <TouchableOpacity onPress={() => handleFileDownload(file)}>
                                <Text style={[styles.uploadedFileName, styles.downloadableFileName]}>{file.attachmentItem?.FileNameSelected || file.fileName}</Text>
                              </TouchableOpacity>
-                             <Text style={styles.uploadedFileSize}>
+                             {/* <Text style={styles.uploadedFileSize}>
                                {file.fileSize ? `${(file.fileSize / 1024).toFixed(1)} KB` : 'Unknown size'}
-                             </Text>
+                             </Text> */}
                            </View>
                            <TouchableOpacity 
                              style={styles.removeFileButton} 
@@ -1210,9 +1210,9 @@ export default function MessegeScreen({ navigation }: Props) {
                              <TouchableOpacity onPress={() => handleFileDownload(file)}>
                                <Text style={[styles.uploadedFileName, styles.downloadableFileName]}>{file.attachmentItem?.FileNameSelected || file.fileName}</Text>
                              </TouchableOpacity>
-                             <Text style={styles.uploadedFileSize}>
+                             {/* <Text style={styles.uploadedFileSize}>
                                {file.fileSize ? `${(file.fileSize / 1024).toFixed(1)} KB` : 'Unknown size'}
-                             </Text>
+                             </Text> */}
                            </View>
                          </View>
                        ))}
