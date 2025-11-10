@@ -1008,6 +1008,10 @@ export default function HomeScreen({ navigation }: Props) {
   async function requestStoragePermission() {
     if (Platform.OS === 'android') {
       try {
+        if (Platform.Version >= 33) {
+          console.log('Scoped storage active, permission auto-granted.');
+          return true;
+        }
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
           {

@@ -245,52 +245,30 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
      }
    };
   async function requestStoragePermission() {
-    // if (Platform.OS === 'android') {
-    //   try {
-    //     const granted = await PermissionsAndroid.request(
-    //       PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-    //       {
-    //         title: 'Storage Permission',
-    //         message: 'App needs access to your storage to download files',
-    //         buttonNeutral: 'Ask Me Later',
-    //         buttonNegative: 'Cancel',
-    //         buttonPositive: 'OK',
-    //       },
-    //     );
-    //     return granted === PermissionsAndroid.RESULTS.GRANTED;
-    //   } catch (err) {
-    //     console.warn(err);
-    //     return false;
-    //   }
-    // } else {
-    //   return true; // iOS doesn't require this
-    //   }
-
     if (Platform.OS === 'android') {
-      if (Platform.Version >= 33) {
-        const result = await PermissionsAndroid.requestMultiple([
-          PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
-          PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
-          PermissionsAndroid.PERMISSIONS.READ_MEDIA_AUDIO,
-        ]);
-        console.log('Media permission result:', result);
-      } else {
-        const result = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+      try {
+        if (Platform.Version >= 33) {
+          console.log('Scoped storage active, permission auto-granted.');
+          return true;
+        }
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: 'Storage Permission',
+            message: 'App needs access to your storage to download files',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
         );
-        console.log('Storage permission result:', result);
-        return result === PermissionsAndroid.RESULTS.GRANTED;
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        return false;
       }
-      return false; // Return false if not handled above
+    } else {
+      return true; // iOS doesn't require this
     }
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#133F7C" />
-          <Text style={styles.loadingText}>Loading payslips...</Text>
-        </View>
-      </SafeAreaView>
-    );
   }
 
   if (error) {
