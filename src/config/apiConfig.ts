@@ -1,7 +1,8 @@
 // API Configuration
 export const API_CONFIG = {
   // Base URL for API endpoints
-  BASE_URL: 'http://216.48.184.187:8081',
+  //BASE_URL: 'http://216.48.184.187:8081',
+  BASE_URL: 'http://15.185.68.50:8053',
   
   // API endpoints
   ENDPOINTS: {
