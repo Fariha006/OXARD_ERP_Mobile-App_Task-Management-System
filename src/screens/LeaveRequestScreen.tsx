@@ -391,9 +391,9 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
       const token = await UserStorage.getToken();
       if (token && selectedLeaveType !== null) {
         const leaveRequestData = {
-          Da5011List: [
-            {
-              LeaveRegisterDtlsId: "0",
+      
+              //LeaveRegisterDtlsId: "0",
+              LeaveRegisterId:"0",
               FkPayHeadId: selectedLeaveType.toString(),
               LeaveStartDate: formatDateForAPI(startDate),
               LeaveEndDate: formatDateForAPI(endDate),
@@ -401,16 +401,67 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
               HalfDayEndDate: endHD ? "1" : "0",
               DayCount: leaveDays,
               offCount: holidays
-            }
-          ]
+          
         };
 
         console.log('Saving leave request:', leaveRequestData);
         const result = await saveLeaveRequest(token, leaveRequestData);
 
-        if (result?.Table && result.Table.length > 0) {
-          const response = result.Table[0];
-          if (response.RequestStatus === 'Success') {
+        // if (result?.Table && result.Table.length > 0) {
+        //   const response = result.Table[0];
+        //   if (response.RequestStatus === 'Success') {
+        //     const updatedLeave = {
+        //       id: editingLeaveId || Date.now().toString(),
+        //       leaveType: leaveData?.Item2?.find((item: any) => item.PayheadId === selectedLeaveType)?.PayHeadName,
+        //       startDate: startDate,
+        //       endDate: endDate,
+        //       leaveDays: leaveDays,
+        //       holidays: holidays,
+        //       startHD: startHD,
+        //       endHD: endHD,
+        //       payHeadId: selectedLeaveType
+        //     };
+
+        //     // Update existing leave or add new one
+        //     if (editingLeaveId) {
+        //       // Update existing leave
+        //       setSavedLeaves(savedLeaves.map(leave =>
+        //         leave.id === editingLeaveId ? updatedLeave : leave
+        //       ));
+        //       setValidationMessage('Leave updated successfully!');
+        //     } else {
+        //       // Add new leave
+        //       setSavedLeaves([...savedLeaves, updatedLeave]);
+        //       //setValidationMessage('Leave request saved successfully!');
+        //     }
+
+        //     // Reset form
+        //     setSelectedLeaveType(null);
+        //     setStartDate('');
+        //     setEndDate('');
+        //     setStartHD(false);
+        //     setEndHD(false);
+        //     setLeaveDays('0');
+        //     setHolidays('0');
+        //     setLeaveDropdownOpen(false);
+        //     setEditingLeaveId(null);
+        //     // Uploaded files are now global and persist across leave additions
+
+        //     setShowValidationMessage(true);
+        //     setTimeout(() => setShowValidationMessage(false), 3000);
+
+        //     // Close the popup after successful save
+        //     setPopupVisible(false);
+        //   } else {
+        //     setValidationMessage(response.ResponseMessage || 'Failed to save leave request');
+        //     setShowValidationMessage(true);
+        //     setTimeout(() => setShowValidationMessage(false), 3000);
+        //   }
+        // }
+
+        if (result?.Flag =="True") {
+        //  const response = result.Table[0];
+        //  if (response.RequestStatus === 'Success') {
             const updatedLeave = {
               id: editingLeaveId || Date.now().toString(),
               leaveType: leaveData?.Item2?.find((item: any) => item.PayheadId === selectedLeaveType)?.PayHeadName,
@@ -453,11 +504,12 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
 
             // Close the popup after successful save
             setPopupVisible(false);
-          } else {
-            setValidationMessage(response.ResponseMessage || 'Failed to save leave request');
-            setShowValidationMessage(true);
-            setTimeout(() => setShowValidationMessage(false), 3000);
-          }
+          // } 
+        }
+        else {
+          setValidationMessage(result.WarningMessage || 'Failed to save leave request');
+          setShowValidationMessage(true);
+          setTimeout(() => setShowValidationMessage(false), 3000);
         }
       }
     } catch (error) {

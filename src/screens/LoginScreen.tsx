@@ -9,7 +9,8 @@ import {
   KeyboardAvoidingView,
   Platform,TouchableOpacity,Text,Alert,StatusBar,
   ScrollView,
-  Keyboard
+  Keyboard,
+  BackHandler
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -49,6 +50,34 @@ export default function LoginScreen({ navigation }: Props) {
       keyboardDidShowListener?.remove();
       keyboardDidHideListener?.remove();
     };
+  }, []);
+
+  // Handle back button press
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      // Show exit confirmation dialog
+      Alert.alert(
+        'Exit App',
+        'Do you want to exit this app?',
+        [
+          {
+            text: 'No',
+            style: 'cancel',
+            onPress: () => null,
+          },
+          {
+            text: 'Yes',
+            style: 'destructive',
+            onPress: () => BackHandler.exitApp(),
+          },
+        ],
+        { cancelable: false }
+      );
+      // Return true to prevent default back behavior
+      return true;
+    });
+
+    return () => backHandler.remove();
   }, []);
 
   // Check if biometric is enabled and auto-trigger biometric login
