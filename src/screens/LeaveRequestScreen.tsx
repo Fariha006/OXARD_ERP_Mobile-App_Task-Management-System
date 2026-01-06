@@ -390,6 +390,21 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
     try {
       const token = await UserStorage.getToken();
       if (token && selectedLeaveType !== null) {
+        // Check if same leave type already exists in saved leaves
+        // If editing, exclude the leave being edited from the calculation
+        const existingLeavesWithSameType = savedLeaves.filter(leave => 
+          leave.payHeadId === selectedLeaveType && 
+          (!editingLeaveId || leave.id !== editingLeaveId)
+        );
+        
+        // Sum up existing day counts for the same leave type
+        const existingDayCount = existingLeavesWithSameType.reduce((sum, leave) => {
+          return sum + (parseInt(leave.leaveDays) || 0);
+        }, 0);
+        
+        // Add existing day count to current day count
+        const totalDayCount = (parseInt(leaveDays) || 0) + existingDayCount;
+        
         const leaveRequestData = {
       
               //LeaveRegisterDtlsId: "0",
@@ -399,7 +414,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
               LeaveEndDate: formatDateForAPI(endDate),
               HalfDayStartDate: startHD ? "1" : "0",
               HalfDayEndDate: endHD ? "1" : "0",
-              DayCount: leaveDays,
+              DayCount: totalDayCount.toString(),
               offCount: holidays
           
         };
