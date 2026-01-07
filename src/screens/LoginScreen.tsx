@@ -17,7 +17,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { loginUser, LoginRequest, UserData, MenuItem } from '../api/api';
 import UserStorage from '../utils/userStorage';
 import { useDrawer } from '../context/DrawerContext';
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeBiometrics from "react-native-biometrics";
 import BiometricSettings from '../utils/biometricSettings';
@@ -52,33 +52,69 @@ export default function LoginScreen({ navigation }: Props) {
     };
   }, []);
 
-  // Handle back button press
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      // Show exit confirmation dialog
-      Alert.alert(
-        'Exit App',
-        'Do you want to exit this app?',
-        [
-          {
-            text: 'No',
-            style: 'cancel',
-            onPress: () => null,
-          },
-          {
-            text: 'Yes',
-            style: 'destructive',
-            onPress: () => BackHandler.exitApp(),
-          },
-        ],
-        { cancelable: false }
-      );
-      // Return true to prevent default back behavior
-      return true;
-    });
+  // Handle back button press - only when Login screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      // Prevent navigation from going back
+      const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+        // Prevent default behavior of leaving the screen
+        e.preventDefault();
 
-    return () => backHandler.remove();
-  }, []);
+        // Show exit confirmation dialog
+        Alert.alert(
+          'Exit App',
+          'Do you want to exit this app?',
+          [
+            {
+              text: 'No',
+              style: 'cancel',
+              onPress: () => {
+                // Do nothing, stay on Login screen
+              },
+            },
+            {
+              text: 'Yes',
+              style: 'destructive',
+              onPress: () => {
+                // Exit the app
+                BackHandler.exitApp();
+              },
+            },
+          ],
+          { cancelable: false }
+        );
+      });
+
+      // Also handle hardware back button
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        // Show exit confirmation dialog
+        Alert.alert(
+          'Exit App',
+          'Do you want to exit this app?',
+          [
+            {
+              text: 'No',
+              style: 'cancel',
+              onPress: () => null,
+            },
+            {
+              text: 'Yes',
+              style: 'destructive',
+              onPress: () => BackHandler.exitApp(),
+            },
+          ],
+          { cancelable: false }
+        );
+        // Return true to prevent default back behavior (navigation)
+        return true;
+      });
+
+      return () => {
+        unsubscribe();
+        backHandler.remove();
+      };
+    }, [navigation])
+  );
 
   // Check if biometric is enabled and auto-trigger biometric login
   useEffect(() => {
@@ -455,7 +491,7 @@ const styles = StyleSheet.create({
 button: {
   marginTop: 30,
   borderColor: '#D60808',
-  backgroundColor: '#D60808',
+  backgroundColor: '#811458',
   width: 163,
   height: 44,
   justifyContent: 'center',
