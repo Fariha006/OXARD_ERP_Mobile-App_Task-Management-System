@@ -1,8 +1,12 @@
 // API Configuration
 export const API_CONFIG = {
   // Base URL for API endpoints
-    BASE_URL: 'http://216.48.184.187:8081',
+   // BASE_URL: 'http://216.48.184.187:8081',
   //  BASE_URL: 'http://157.175.202.101:8050/apimobile',
+  //unisys
+    BASE_URL:'https://unisisgroup.oxarderp.com/apimobile', 
+ //VISAT
+ // BASE_URL:'http://216.48.184.187:8050/apimobile', 
   
   // API endpoints
   ENDPOINTS: {

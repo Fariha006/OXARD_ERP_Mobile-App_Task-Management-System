@@ -127,7 +127,7 @@ export default function ApprovalsScreen({ navigation }: Props) {
     }
   };
 
-  const handleDownload = async (transactionId: number, referenceNo: string) => {
+  const handleDownload = async (transactionId: number, referenceNo: string, decisionId: string) => {
     setDownloadingId(transactionId);
     try {
       const token = await UserStorage.getToken();
@@ -161,7 +161,7 @@ export default function ApprovalsScreen({ navigation }: Props) {
         Alert.alert('Success', `Approval document ${referenceNo} downloaded.`);
       } else {
         // Mobile: use downloadPayslipPdf from api.tsx with custom ReportCode
-        const base64data = await downloadPayslipPdf('Da5010_APP', transactionId.toString(), token);
+        const base64data = await downloadPayslipPdf('Da5010_APP', transactionId.toString(), token,decisionId);
         console.log('PDF base64 preview (mobile):', base64data.substring(0, 40));
         console.log('PDF base64 length:', base64data.length);
         if (!base64data.startsWith('JVBERi0')) {
@@ -324,7 +324,7 @@ export default function ApprovalsScreen({ navigation }: Props) {
                       {item2.ReportFlag === 1 && (
                         <TouchableOpacity 
                           style={styles.downloadBtn} 
-                          onPress={() => handleDownload(item2.TransactionId, item2.ReferenceNo)}
+                          onPress={() => handleDownload(item2.TransactionId, item2.ReferenceNo,item2.DecisionId)}
                           disabled={downloadingId === item2.TransactionId}
                         >
                           <View style={styles.dwnloadicon}>

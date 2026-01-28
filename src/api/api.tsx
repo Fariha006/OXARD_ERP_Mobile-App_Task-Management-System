@@ -667,11 +667,12 @@ class ApiService {
   }
 
   // Download payslip PDF API call
-  async downloadPayslipPdf(reportCode: string, id: string, token: string): Promise<string> {
+  async downloadPayslipPdf(reportCode: string, id: string, token: string, decisionId: string): Promise<string> {
     const apiurl = getApiUrl('/api/Report/Download');
     const response = await axios.post(apiurl, {
       ReportCode: reportCode,
       Id: id,
+      DecisionId: decisionId,
     }, {
       headers: {
         ...API_CONFIG.DEFAULT_HEADERS,
@@ -948,7 +949,7 @@ export const getAssetsData = (token: string) => apiService.getAssetsData(token);
 export const getLeaveHistoryData = (token: string, showAllFlag: string = "0") => apiService.getLeaveHistoryData(token, showAllFlag);
 export const getNotifications = (token: string, homeScreen: string = "0", notificationScreen: string = "0") => apiService.getNotifications(token, homeScreen, notificationScreen);
 export const getPayslips = (token: string, showAllFlag: string = "0") => apiService.getPayslips(token, showAllFlag);
-export const downloadPayslipPdf = (reportCode: string, id: string, token: string) => apiService.downloadPayslipPdf(reportCode, id, token);
+export const downloadPayslipPdf = (reportCode: string, id: string, token: string, decisionId: string) => apiService.downloadPayslipPdf(reportCode, id, token, decisionId);
 export const downloadLeaveOutstandingPdf = (reportCode: string, dateAsOn: string, token: string) => apiService.downloadLeaveOutstandingPdf(reportCode, dateAsOn, token);
 export const getCertificateRequests = (token: string, showAllFlag: string = "0") => apiService.getCertificateRequests(token, showAllFlag);
 export const getApprovals = (token: string) => apiService.getApprovals(token);
@@ -1067,14 +1068,15 @@ export async function fetchLeaveData(token: string) {
   }
 }
 
-export async function calculateLeaveDays(token: string, startDate: string, endDate: string, halfDayStart: boolean, halfDayEnd: boolean) {
+export async function calculateLeaveDays(token: string, startDate: string, endDate: string, halfDayStart: boolean, halfDayEnd: boolean,payHeadId: string) {
   try {
     const apiurl = getApiUrl('/api/MobDa5010/V1_Mode');
     const requestBody = {
       "startdate": startDate,
       "enddate": endDate,
       "halfdaystartdate": halfDayStart.toString(),
-      "halfdayenddate": halfDayEnd.toString()
+      "halfdayenddate": halfDayEnd.toString(),
+      "PayheadId": payHeadId
     };
     const response = await axios.post<any>(apiurl, requestBody, {
       headers: {

@@ -283,7 +283,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
           const endDateFormatted = formatDateForAPI(end);
 
           console.log('Calling API with:', { startDateFormatted, endDateFormatted, startHD, endHD });
-          const result = await calculateLeaveDays(token, startDateFormatted, endDateFormatted, startHD, endHD);
+          const result = await calculateLeaveDays(token, startDateFormatted, endDateFormatted, startHD, endHD,selectedLeaveType?.toString() || '');
 
           if (Array.isArray(result) && result.length >= 2) {
             setLeaveDays(result[0].toString());
@@ -984,7 +984,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                 mode="date"
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                 onChange={handleDateChange}
-                minimumDate={new Date()}
+               
               />
             )}
           </View>
@@ -1183,7 +1183,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                       mode="date"
                       display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                       onChange={handleStartDateChange}
-                      minimumDate={new Date()}
+                     
                     />
                   )}
                 </View>
@@ -1202,7 +1202,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                       mode="date"
                       display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                       onChange={handleEndDateChange}
-                      minimumDate={new Date()}
+                      
                     />
                   )}
                 </View>
