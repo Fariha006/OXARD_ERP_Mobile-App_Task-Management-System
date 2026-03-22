@@ -195,6 +195,7 @@ class ApiService {
   async login(credentials: LoginRequest): Promise<AppLoginResponse> {
     try {
       const apiurl = getApiUrl('/api/Login/CheckAuthentication');
+      
       const response = await axios.post<LoginResponse>(apiurl, credentials, {
         headers: API_CONFIG.DEFAULT_HEADERS,
         timeout: API_CONFIG.TIMEOUT,
@@ -235,7 +236,7 @@ class ApiService {
         // Network error
         return {
           success: false,
-          message: 'Network error. Please check your internet connection.',
+          message: 'Network error. Please check your internet connection1.',
         };
       } else {
         // Other error
