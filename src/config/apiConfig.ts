@@ -4,9 +4,10 @@ export const API_CONFIG = {
    // BASE_URL: 'http://216.48.184.187:8081',
   //  BASE_URL: 'http://157.175.202.101:8050/apimobile',
   //unisys
-    BASE_URL:'https://unisisgroup.oxarderp.com/apimobile', 
+    // BASE_URL:'https://unisisgroup.oxarderp.com/apimobile', 
  //VISAT
  // BASE_URL:'http://216.48.184.187:8050/apimobile', 
+ BASE_URL:'http://216.48.184.187:8083', 
   
   // API endpoints
   ENDPOINTS: {
