@@ -1,44 +1,26 @@
-
-
-// import React from 'react';
-// import { NavigationContainer } from '@react-navigation/native';
-
-// import AppNavigator from './src/navigation/DrawerNavigator';
-
-// export default function App() {
-//   return (
-
-//        <AppNavigator /> 
-//   );
-// }
-
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { StatusBar,PermissionsAndroid, Platform, Alert, View, Text } from 'react-native';
+import { StatusBar, PermissionsAndroid, Platform, Alert, View, Text } from 'react-native';
 import DrawerLayout from './src/navigation/DrawerLayout';
 import LoginScreen from './src/screens/LoginScreen';
-import DetailsScreen from './src/screens/DetailsScreen';
-import Header from './src/components/Header';
 import CustomDrawer from './src/navigation/CustomDrawer';
 import SplashScreen from './src/components/SplashScreen';
 import { DrawerProvider } from './src/context/DrawerContext'; 
 import messaging from '@react-native-firebase/messaging';
-import { API_CONFIG } from './src/config/apiConfig';
-import { managetoken } from './src/api/api';
+import firebase from '@react-native-firebase/app';
 import notifee, { AndroidImportance } from '@notifee/react-native';
 import UserStorage from './src/utils/userStorage';
+
 const Drawer = createDrawerNavigator();
 
 async function createChannel() {
-  // Creates a channel called "Default Channel"
   await notifee.createChannel({
-    id: 'default',           // Channel ID
-    name: 'Default Channel', // Channel name (visible to users)
-    importance: AndroidImportance.HIGH, // High importance = makes sound & heads-up notification
+    id: 'default',
+    name: 'Default Channel',
+    importance: AndroidImportance.HIGH,
   });
 }
-
 
 async function requestUserPermission(): Promise<boolean> {
   if (Platform.OS === 'android' && Platform.Version >= 33) {
@@ -47,21 +29,18 @@ async function requestUserPermission(): Promise<boolean> {
     );
     return granted === PermissionsAndroid.RESULTS.GRANTED;
   }
-  return true; // iOS permission handled by Firebase
+  return true;
 }
+
 async function getFcmToken(): Promise<void> {
   try {
     const token = await messaging().getToken();
-    //Alert.alert('FCM Token:', token);
     console.log('🔑 FCM Token:', token);
-    
-    // Save FCM token to AsyncStorage
+
     await UserStorage.storeFcmToken(token);
-    console.log('✅ FCM token saved to storage');
-    
+    console.log('✅ FCM token saved');
   } catch (error) {
-    console.error('❌ Error getting FCM token:', error);
-  //  Alert.alert('Error', 'Failed to get FCM token');
+    console.error('❌ FCM error:', error);
   }
 }
 
@@ -69,43 +48,40 @@ export default function App() {
   const [isSplashVisible, setIsSplashVisible] = useState(true);
 
   useEffect(() => {
+    console.log('🔥 Firebase apps:', firebase.apps);
+
+    // 🚨 If Firebase not initialized → stop here
+    if (!firebase.apps.length) {
+      console.error('❌ Firebase NOT initialized (iOS issue)');
+      return;
+    }
+
     const initFCM = async () => {
       const hasPermission = await requestUserPermission();
+
       if (hasPermission) {
         await getFcmToken();
       }
-      else{
-        //Alert.alert('Permission not granted');
-      }
 
-      // Foreground messages
-      const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
+      const unsubscribe = messaging().onMessage(async remoteMessage => {
         console.log('📩 Foreground message:', remoteMessage);
-        Alert.alert(remoteMessage.notification?.title ?? 'New Message', remoteMessage.notification?.body ?? '');
-      
-    
-    
-    });
 
-      
-
-      // When app is opened from a notification (background state)
-      messaging().onNotificationOpenedApp(remoteMessage => {
-        console.log('📂 App opened from background state:', remoteMessage);
+        Alert.alert(
+          remoteMessage.notification?.title ?? 'New Message',
+          remoteMessage.notification?.body ?? ''
+        );
       });
 
-      // When app is opened from a notification (quit state)
-      messaging()
-        .getInitialNotification()
-        .then(remoteMessage => {
-          if (remoteMessage) {
-            console.log('📂 App opened from quit state:', remoteMessage);
-          }
-        });
+      messaging().onNotificationOpenedApp(remoteMessage => {
+        console.log('📂 Opened from background:', remoteMessage);
+      });
 
-      return () => {
-        unsubscribeOnMessage();
-      };
+      const initialMessage = await messaging().getInitialNotification();
+      if (initialMessage) {
+        console.log('📂 Opened from quit:', initialMessage);
+      }
+
+      return unsubscribe;
     };
 
     initFCM();
@@ -124,23 +100,28 @@ export default function App() {
   }
 
   return (
-    <>
-   
-      <DrawerProvider>
-        <NavigationContainer>
-          <Drawer.Navigator initialRouteName="Login" drawerContent={(props) => <CustomDrawer {...props} />}>
-            <Drawer.Screen name="Main" component={DrawerLayout} options={{ headerShown: false}}/>
+    <DrawerProvider>
+      <NavigationContainer>
+        <Drawer.Navigator
+          initialRouteName="Login"
+          drawerContent={(props) => <CustomDrawer {...props} />}
+        >
+          <Drawer.Screen
+            name="Main"
+            component={DrawerLayout}
+            options={{ headerShown: false }}
+          />
 
-            <Drawer.Screen name="Login" component={LoginScreen}  options={{ headerShown: false ,drawerItemStyle: { display: 'none' },}}  />
-
-              
-          </Drawer.Navigator>
-        </NavigationContainer>
-      </DrawerProvider>
-    </>
+          <Drawer.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{
+              headerShown: false,
+              drawerItemStyle: { display: 'none' },
+            }}
+          />
+        </Drawer.Navigator>
+      </NavigationContainer>
+    </DrawerProvider>
   );
 }
-
-
-
-

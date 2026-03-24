@@ -195,7 +195,7 @@ class ApiService {
   async login(credentials: LoginRequest): Promise<AppLoginResponse> {
     try {
       const apiurl = getApiUrl('/api/Login/CheckAuthentication');
-      
+      Alert.alert('Login API URL:', apiurl);
       const response = await axios.post<LoginResponse>(apiurl, credentials, {
         headers: API_CONFIG.DEFAULT_HEADERS,
         timeout: API_CONFIG.TIMEOUT,

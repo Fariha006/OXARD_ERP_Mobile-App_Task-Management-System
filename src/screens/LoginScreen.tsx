@@ -205,7 +205,7 @@ export default function LoginScreen({ navigation }: Props) {
       };
 
       const response = await loginUser(loginData);
-
+Alert.alert('LoginScreen: Login response:', response.message || 'No message');
              if (response.success && response.userData && response.menuItems && response.token) {
          console.log('LoginScreen: Login successful:', response.userData);
          console.log('LoginScreen: Menu items:', response.menuItems);
