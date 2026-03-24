@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { StatusBar, PermissionsAndroid, Platform, Alert, View, Text } from 'react-native';
+import {
+  StatusBar,
+  PermissionsAndroid,
+  Platform,
+  Alert,
+  View,
+  Text,
+  ActivityIndicator,
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DrawerLayout from './src/navigation/DrawerLayout';
 import LoginScreen from './src/screens/LoginScreen';
 import CustomDrawer from './src/navigation/CustomDrawer';
@@ -46,6 +56,25 @@ async function getFcmToken(): Promise<void> {
 
 export default function App() {
   const [isSplashVisible, setIsSplashVisible] = useState(true);
+  const [iosVectorFontsReady, setIosVectorFontsReady] = useState(Platform.OS !== 'ios');
+
+  useEffect(() => {
+    if (Platform.OS !== 'ios') return;
+    let cancelled = false;
+    const failOpenTimer = setTimeout(() => {
+      if (!cancelled) setIosVectorFontsReady(true);
+    }, 5000);
+    Promise.all([Ionicons.loadFont(), MaterialIcons.loadFont()])
+      .catch((e) => console.warn('Vector icon fonts failed to load:', e))
+      .finally(() => {
+        clearTimeout(failOpenTimer);
+        if (!cancelled) setIosVectorFontsReady(true);
+      });
+    return () => {
+      cancelled = true;
+      clearTimeout(failOpenTimer);
+    };
+  }, []);
 
   useEffect(() => {
     console.log('🔥 Firebase apps:', firebase.apps);
@@ -97,6 +126,14 @@ export default function App() {
 
   if (isSplashVisible) {
     return <SplashScreen onFinish={handleSplashFinish} />;
+  }
+
+  if (!iosVectorFontsReady) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#133F7C' }}>
+        <ActivityIndicator size="large" color="#ffffff" />
+      </View>
+    );
   }
 
   return (
