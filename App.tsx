@@ -33,6 +33,14 @@ async function createChannel() {
 }
 
 async function requestUserPermission(): Promise<boolean> {
+  if (Platform.OS === 'ios') {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+    return enabled;
+  }
+
   if (Platform.OS === 'android' && Platform.Version >= 33) {
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
@@ -44,6 +52,10 @@ async function requestUserPermission(): Promise<boolean> {
 
 async function getFcmToken(): Promise<void> {
   try {
+    if (Platform.OS === 'ios') {
+      await messaging().registerDeviceForRemoteMessages();
+    }
+
     const token = await messaging().getToken();
     console.log('🔑 FCM Token:', token);
 
