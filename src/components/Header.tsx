@@ -3,7 +3,9 @@
 import React, { useState,useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet,StatusBar, Alert, Platform, PermissionsAndroid } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { DrawerActions } from '@react-navigation/native';
 import { DrawerHeaderProps } from '@react-navigation/drawer';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import UserStorage from '../utils/userStorage';
 import { getFileUrl } from '../config/apiConfig';
 import { useDrawer } from '../context/DrawerContext';
@@ -155,6 +157,14 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
   console.log('Header: isLoading:', isLoading);
   console.log('Header: error:', error);
 
+  const openDrawerForIOS = () => {
+    let currentNav: any = navigation;
+    while (currentNav) {
+      currentNav.dispatch(DrawerActions.openDrawer());
+      currentNav = currentNav.getParent?.();
+    }
+  };
+
   return (
     <>
     <StatusBar 
@@ -162,9 +172,18 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
     barStyle="light-content" 
     translucent={false}
   />
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.hdrcontainer}>
-        <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
+        <TouchableOpacity
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          onPress={() => {
+            if (Platform.OS === 'android') {
+              navigation.toggleDrawer();
+            } else {
+              openDrawerForIOS();
+            }
+          }}
+        >
           <Ionicons name="menu" size={25} color="white" />
         </TouchableOpacity>
         {/* <Text style={styles.title}>
@@ -244,7 +263,7 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
           </TouchableOpacity>
         </View>
       )}
-    </View>
+    </SafeAreaView>
     </>
   );
 };
@@ -265,7 +284,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 20,
+    marginTop: Platform.OS === 'ios' ? 0 : 20,
   },
   Iconnotfction: {
     backgroundColor: '#ffffff',
