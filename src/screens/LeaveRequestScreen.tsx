@@ -195,9 +195,8 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
-      // Store in YYYY-MM-DD format for internal consistency
+    setShowDatePicker(false);
+    if (event?.type === 'set' && selectedDate) {
       setRequestDate(selectedDate.toISOString().split('T')[0]);
     }
   };
@@ -237,21 +236,19 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
   };
 
   const handleStartDateChange = (event: any, selectedDate?: Date) => {
-    setShowStartDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
+    setShowStartDatePicker(false);
+    if (event?.type === 'set' && selectedDate) {
       const formattedDate = selectedDate.toISOString().split('T')[0];
       setStartDate(formattedDate);
-      // Use the new formattedDate instead of startDate state
       calculateLeaveDaysAndHolidays(formattedDate, endDate, startHD, endHD);
     }
   };
 
   const handleEndDateChange = (event: any, selectedDate?: Date) => {
-    setShowEndDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
+    setShowEndDatePicker(false);
+    if (event?.type === 'set' && selectedDate) {
       const formattedDate = selectedDate.toISOString().split('T')[0];
       setEndDate(formattedDate);
-      // Use the new formattedDate instead of endDate state
       calculateLeaveDaysAndHolidays(startDate, formattedDate, startHD, endHD);
     }
   };

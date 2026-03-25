@@ -20,9 +20,15 @@ const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
   const [base64Data, setBase64Data] = useState<string>('');
   const [pdfModalVisible, setPdfModalVisible] = useState(false);
 
-  const onChange = (_event: any, selectedDate?: Date) => {
-    setShowPicker(Platform.OS === 'ios');
-    if (selectedDate) setDate(selectedDate);
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowPicker(false);
+    if (event?.type === 'set' && selectedDate) {
+      setDate(selectedDate);
+    }
+  };
+
+  const showDatePickerModal = () => {
+    setShowPicker(true);
   };
 
   const formatDate = (d: Date) => {
@@ -159,15 +165,15 @@ const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
 
       <View style={styles.formGroup}>
         <Text style={styles.label}>As on Date</Text>
-        <TouchableOpacity style={styles.dateInput} onPress={() => setShowPicker(true)}>
+        <TouchableOpacity style={styles.dateInput} onPress={showDatePickerModal}>
           <Text style={styles.dateText}>{formatDate(date)}</Text>
         </TouchableOpacity>
         {showPicker && (
           <DateTimePicker
             value={date}
             mode="date"
-            display="default"
-            onChange={onChange}
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={handleDateChange}
           />
         )}
       </View>

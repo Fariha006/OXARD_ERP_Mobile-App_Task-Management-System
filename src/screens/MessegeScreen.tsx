@@ -30,7 +30,7 @@ export default function MessegeScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<number | string | null>(null);
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [tillDate, setTillDate] = useState(new Date().toISOString().split('T')[0]); // Set current date as default
@@ -60,6 +60,29 @@ export default function MessegeScreen({ navigation }: Props) {
   const [selectTypeModalVisible, setSelectTypeModalVisible] = useState(false);
   const [inboxTypeModalVisible, setInboxTypeModalVisible] = useState(false);
 
+  const normalizeMessageType = (value: any) =>
+    String(value ?? '').trim().toUpperCase();
+
+  const loadMessageMasterData = async () => {
+    try {
+      const token = await UserStorage.getToken();
+      if (!token) {
+        return;
+      }
+
+      const result = await fetchMessageCategories(token);
+      const categoriesData = result?.Item1 || result?.item1 || [];
+      const filterTypesData = result?.Item2 || result?.item2 || [];
+
+      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+      setFilterTypes(Array.isArray(filterTypesData) ? filterTypesData : []);
+    } catch (e) {
+      console.error('Failed to fetch message master data:', e);
+      setCategories([]);
+      setFilterTypes([]);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -77,9 +100,9 @@ export default function MessegeScreen({ navigation }: Props) {
         // Filter data based on selected inbox type
         let filteredData = allData;
         if (selectedInboxType === 'Inbox') {
-          filteredData = allData.filter(item => item.MessageType === 'IN');
+          filteredData = allData.filter(item => normalizeMessageType(item?.MessageType) === 'IN');
         } else if (selectedInboxType === 'Outbox') {
-          filteredData = allData.filter(item => item.MessageType === 'OUT');
+          filteredData = allData.filter(item => normalizeMessageType(item?.MessageType) === 'OUT');
         }
         
         setData(filteredData);
@@ -94,18 +117,7 @@ export default function MessegeScreen({ navigation }: Props) {
 
   useEffect(() => {
     if (modalVisible || editModalVisible) {
-      (async () => {
-        try {
-          const token = await UserStorage.getToken();
-          if (token) {
-            const result = await fetchMessageCategories(token);
-            setCategories(result.Item1 || []);
-            setFilterTypes(result.Item2 || []);
-          }
-        } catch (e) {
-          // handle error
-        }
-      })();
+      loadMessageMasterData();
     }
   }, [modalVisible, editModalVisible]);
 
@@ -138,9 +150,178 @@ export default function MessegeScreen({ navigation }: Props) {
     }
   };
 
+  const selectedCategoryLabel =
+    selectedCategory !== null
+      ? categories.find(c => String(c.FieldID) === String(selectedCategory))?.FieldValue
+      : null;
+
+  const selectedCategoryDisplayText =
+    selectedCategory === null
+      ? 'Select Category *'
+      : selectedCategoryLabel || String(selectedCategory);
+
+  const handleOpenCategoryModal = async () => {
+    setFilterTypeModalVisible(false);
+    setSelectTypeModalVisible(false);
+    if (categories.length === 0) {
+      await loadMessageMasterData();
+    }
+    setCategoryModalVisible(true);
+  };
+
+  const handleOpenFilterTypePicker = () => {
+    setCategoryModalVisible(false);
+    setSelectTypeModalVisible(false);
+    setFilterTypeModalVisible(true);
+  };
+
+  const closeFormPickers = () => {
+    setCategoryModalVisible(false);
+    setFilterTypeModalVisible(false);
+    setSelectTypeModalVisible(false);
+  };
+
+  const formPickersOpen =
+    categoryModalVisible || filterTypeModalVisible || selectTypeModalVisible;
+
+  /** iOS does not reliably support a second Modal on top of the message form Modal (hangs / blank). Render pickers as an overlay inside the same modal. */
+  const renderMessageFormPickersOverlay = () => {
+    if (!formPickersOpen) {
+      return null;
+    }
+    return (
+      <View style={styles.nestedPickerOverlay}>
+        <TouchableOpacity
+          style={styles.nestedPickerBackdrop}
+          activeOpacity={1}
+          onPress={closeFormPickers}
+          accessibilityRole="button"
+          accessibilityLabel="Dismiss picker"
+        />
+        <View style={styles.nestedPickerCard}>
+          {categoryModalVisible ? (
+            <>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Select Category</Text>
+                <TouchableOpacity onPress={closeFormPickers}>
+                  <Text style={styles.closeButton}>✕</Text>
+                </TouchableOpacity>
+              </View>
+              <FlatList
+                style={styles.modalBody}
+                data={categories}
+                keyExtractor={(item: any, index) =>
+                  String(item?.FieldID ?? item?.fieldId ?? `cat-${index}`)
+                }
+                ListEmptyComponent={
+                  <Text style={styles.lbl}>No categories found.</Text>
+                }
+                renderItem={({ item: cat }: { item: any }) => (
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      setSelectedCategory(cat.FieldID ?? cat.fieldId);
+                      closeFormPickers();
+                    }}>
+                    <Text style={styles.dropdownText}>
+                      {cat.FieldValue || cat.fieldValue || String(cat.FieldID ?? cat.fieldId)}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                showsVerticalScrollIndicator={true}
+              />
+            </>
+          ) : filterTypeModalVisible ? (
+            <>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Select Filter Type</Text>
+                <TouchableOpacity onPress={closeFormPickers}>
+                  <Text style={styles.closeButton}>✕</Text>
+                </TouchableOpacity>
+              </View>
+              <FlatList
+                style={styles.modalBody}
+                data={filterTypes}
+                keyExtractor={(item, index) =>
+                  String(item?.EmployeeCategoryId ?? `ft-${index}`)
+                }
+                renderItem={({ item: ft }) => (
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      setSelectedFilterType(ft.EmployeeCategoryId);
+                      closeFormPickers();
+                    }}>
+                    <Text style={styles.dropdownText}>{ft.EmployeeCategory}</Text>
+                  </TouchableOpacity>
+                )}
+                showsVerticalScrollIndicator={true}
+              />
+            </>
+          ) : (
+            <>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Select Types</Text>
+                <TouchableOpacity onPress={closeFormPickers}>
+                  <Text style={styles.closeButton}>✕</Text>
+                </TouchableOpacity>
+              </View>
+              <FlatList
+                style={styles.modalBody}
+                data={selectTypes}
+                keyExtractor={(item, index) =>
+                  String(item?.Id ?? `st-${index}`)
+                }
+                renderItem={({ item: st }) => (
+                  <TouchableOpacity
+                    style={[
+                      styles.dropdownItem,
+                      selectedSelectTypes.includes(st.Id) && styles.dropdownItemSelected,
+                    ]}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      setSelectedSelectTypes(prev => {
+                        if (prev.includes(st.Id)) {
+                          return prev.filter(id => id !== st.Id);
+                        }
+                        return [...prev, st.Id];
+                      });
+                    }}>
+                    <Text
+                      style={[
+                        styles.dropdownText,
+                        selectedSelectTypes.includes(st.Id) && styles.dropdownTextSelected,
+                      ]}>
+                      {st.Descr}
+                    </Text>
+                    {selectedSelectTypes.includes(st.Id) && (
+                      <Text style={styles.checkmark}>✓</Text>
+                    )}
+                  </TouchableOpacity>
+                )}
+                showsVerticalScrollIndicator={true}
+              />
+              <View style={styles.modalButtons}>
+                <TouchableOpacity style={styles.cancelButton} onPress={closeFormPickers}>
+                  <Text style={styles.cancelButtonText}>Close</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.saveButton} onPress={closeFormPickers}>
+                  <Text style={styles.saveButtonText}>OK</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+        </View>
+      </View>
+    );
+  };
+
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
+    // Hide picker after user interaction on both iOS and Android.
+    setShowDatePicker(false);
+    if (event?.type === 'set' && selectedDate) {
       setTillDate(selectedDate.toISOString().split('T')[0]); // Format as YYYY-MM-DD
     }
   };
@@ -518,6 +699,7 @@ export default function MessegeScreen({ navigation }: Props) {
   };
 
   const handleClose = () => {
+    closeFormPickers();
     setModalVisible(false);
     // Reset form
     setSelectedCategory(null);
@@ -637,6 +819,7 @@ export default function MessegeScreen({ navigation }: Props) {
   };
 
   const handleEditClose = () => {
+    closeFormPickers();
     setEditModalVisible(false);
     setIsEditMode(false);
     setEditData(null);
@@ -808,9 +991,9 @@ export default function MessegeScreen({ navigation }: Props) {
                       <Text style={styles.formLabel}>Category <Text style={styles.required}>*</Text></Text>
                       <TouchableOpacity
                         style={styles.dropdown}
-                        onPress={() => setCategoryModalVisible(true)}>
+                        onPress={handleOpenCategoryModal}>
                         <Text style={styles.dropdownText}>
-                          {selectedCategory !== null ? categories.find(c => c.FieldID === selectedCategory)?.FieldValue : 'Select Category *'}
+                          {selectedCategoryDisplayText}
                         </Text>
                         <Text style={styles.dropdownArrow}>▼</Text>
                       </TouchableOpacity>
@@ -821,7 +1004,7 @@ export default function MessegeScreen({ navigation }: Props) {
                        <Text style={styles.formLabel}>Filter Types <Text style={styles.required}>*</Text></Text>
                        <TouchableOpacity
                          style={styles.dropdown}
-                         onPress={() => setFilterTypeModalVisible(true)}
+                         onPress={handleOpenFilterTypePicker}
                        >
                          <Text style={styles.dropdownText}>
                            {selectedFilterType !== null ? filterTypes.find(f => f.EmployeeCategoryId === selectedFilterType)?.EmployeeCategory : 'Select Filter Type *'}
@@ -842,6 +1025,8 @@ export default function MessegeScreen({ navigation }: Props) {
                                if (token) {
                                  const result = await fetchSelectTypes(token, selectedFilterType);
                                  setSelectTypes(result || []);
+                                 setCategoryModalVisible(false);
+                                 setFilterTypeModalVisible(false);
                                  setSelectTypeModalVisible(true);
                                } else {
                                  console.error('No authentication token found');
@@ -977,6 +1162,7 @@ export default function MessegeScreen({ navigation }: Props) {
               
             </View>
           </View>
+          {renderMessageFormPickersOverlay()}
         </View>
       </Modal>
 
@@ -1006,9 +1192,9 @@ export default function MessegeScreen({ navigation }: Props) {
                       <Text style={styles.formLabel}>Category <Text style={styles.required}>*</Text></Text>
                       <TouchableOpacity
                         style={styles.dropdown}
-                        onPress={() => setCategoryModalVisible(true)}>
+                        onPress={handleOpenCategoryModal}>
                         <Text style={styles.dropdownText}>
-                          {selectedCategory !== null ? categories.find(c => c.FieldID === selectedCategory)?.FieldValue : 'Select Category *'}
+                          {selectedCategoryDisplayText}
                         </Text>
                         <Text style={styles.dropdownArrow}>▼</Text>
                       </TouchableOpacity>
@@ -1141,6 +1327,7 @@ export default function MessegeScreen({ navigation }: Props) {
               </TouchableOpacity>
             </View>
            </View>
+          {renderMessageFormPickersOverlay()}
          </View>
        </Modal>
 
@@ -1170,7 +1357,7 @@ export default function MessegeScreen({ navigation }: Props) {
                      <Text style={styles.formLabel}>Category</Text>
                      <View style={[styles.textInput, styles.readonlyInput]}>
                        <Text style={styles.readonlyText}>
-                         {selectedCategory !== null ? categories.find(c => c.FieldID === selectedCategory)?.FieldValue : 'N/A'}
+                         {selectedCategoryLabel || 'N/A'}
                        </Text>
                      </View>
                    </View>
@@ -1256,139 +1443,6 @@ export default function MessegeScreen({ navigation }: Props) {
             </View>
           </View>
         </Modal>
-
-       {/* Category Selection Modal */}
-       <Modal
-         animationType="slide"
-         transparent={true}
-         visible={categoryModalVisible}
-         onRequestClose={() => setCategoryModalVisible(false)}>
-         <View style={styles.modalOverlay}>
-           <View style={styles.modalContent}>
-             <View style={styles.modalHeader}>
-               <Text style={styles.modalTitle}>Select Category</Text>
-               <TouchableOpacity onPress={() => setCategoryModalVisible(false)}>
-                 <Text style={styles.closeButton}>✕</Text>
-               </TouchableOpacity>
-             </View>
-             <FlatList
-               style={styles.modalBody}
-               data={categories}
-               keyExtractor={(item) => item.FieldID.toString()}
-               renderItem={({ item: cat }) => (
-                 <TouchableOpacity
-                   style={styles.dropdownItem}
-                   activeOpacity={0.7}
-                   onPress={() => {
-                     setSelectedCategory(cat.FieldID);
-                     setCategoryModalVisible(false);
-                   }}>
-                   <Text style={styles.dropdownText}>{cat.FieldValue}</Text>
-                 </TouchableOpacity>
-               )}
-               showsVerticalScrollIndicator={true}
-             />
-           </View>
-         </View>
-       </Modal>
-
-       {/* Filter Type Selection Modal */}
-       <Modal
-         animationType="slide"
-         transparent={true}
-         visible={filterTypeModalVisible}
-         onRequestClose={() => setFilterTypeModalVisible(false)}>
-         <View style={styles.modalOverlay}>
-           <View style={styles.modalContent}>
-             <View style={styles.modalHeader}>
-               <Text style={styles.modalTitle}>Select Filter Type</Text>
-               <TouchableOpacity onPress={() => setFilterTypeModalVisible(false)}>
-                 <Text style={styles.closeButton}>✕</Text>
-               </TouchableOpacity>
-             </View>
-             <FlatList
-               style={styles.modalBody}
-               data={filterTypes}
-               keyExtractor={(item) => item.EmployeeCategoryId.toString()}
-               renderItem={({ item: ft }) => (
-                 <TouchableOpacity
-                   style={styles.dropdownItem}
-                   activeOpacity={0.7}
-                   onPress={() => {
-                     setSelectedFilterType(ft.EmployeeCategoryId);
-                     setFilterTypeModalVisible(false);
-                   }}>
-                   <Text style={styles.dropdownText}>{ft.EmployeeCategory}</Text>
-                 </TouchableOpacity>
-               )}
-               showsVerticalScrollIndicator={true}
-             />
-           </View>
-         </View>
-       </Modal>
-
-       {/* Select Types Selection Modal */}
-       <Modal
-         animationType="slide"
-         transparent={true}
-         visible={selectTypeModalVisible}
-         onRequestClose={() => setSelectTypeModalVisible(false)}>
-         <View style={styles.modalOverlay}>
-           <View style={styles.modalContent}>
-             <View style={styles.modalHeader}>
-               <Text style={styles.modalTitle}>Select Types</Text>
-               <TouchableOpacity onPress={() => setSelectTypeModalVisible(false)}>
-                 <Text style={styles.closeButton}>✕</Text>
-               </TouchableOpacity>
-             </View>
-             <FlatList
-               style={styles.modalBody}
-               data={selectTypes}
-               keyExtractor={(item) => item.Id.toString()}
-               renderItem={({ item: st }) => (
-                 <TouchableOpacity
-                   style={[
-                     styles.dropdownItem,
-                     selectedSelectTypes.includes(st.Id) && styles.dropdownItemSelected
-                   ]}
-                   activeOpacity={0.7}
-                   onPress={() => {
-                     setSelectedSelectTypes(prev => {
-                       if (prev.includes(st.Id)) {
-                         return prev.filter(id => id !== st.Id);
-                       } else {
-                         return [...prev, st.Id];
-                       }
-                     });
-                   }}>
-                   <Text style={[
-                     styles.dropdownText,
-                     selectedSelectTypes.includes(st.Id) && styles.dropdownTextSelected
-                   ]}>
-                     {st.Descr}
-                   </Text>
-                   {selectedSelectTypes.includes(st.Id) && (
-                     <Text style={styles.checkmark}>✓</Text>
-                   )}
-                 </TouchableOpacity>
-               )}
-               showsVerticalScrollIndicator={true}
-             />
-             <View style={styles.modalButtons}>
-               <TouchableOpacity 
-                 style={styles.cancelButton} 
-                 onPress={() => setSelectTypeModalVisible(false)}>
-                 <Text style={styles.cancelButtonText}>Close</Text>
-               </TouchableOpacity>
-               <TouchableOpacity 
-                 style={styles.saveButton} 
-                 onPress={() => setSelectTypeModalVisible(false)}>
-                 <Text style={styles.saveButtonText}>OK</Text>
-               </TouchableOpacity>
-             </View>
-           </View>
-         </View>
-       </Modal>
 
        {/* Inbox Type Selection Modal */}
        <Modal
@@ -1666,6 +1720,35 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
+  },
+  /** Full-screen layer inside the message form modal (avoids nested Modal on iOS). */
+  nestedPickerOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  nestedPickerBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+  },
+  nestedPickerCard: {
+    backgroundColor: '#E5EEFD',
+    borderRadius: 12,
+    width: '90%',
+    maxHeight: '75%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 8,
+    zIndex: 1001,
+    overflow: 'hidden',
   },
   modalContent: {
     // backgroundColor: '#fff',
@@ -1730,6 +1813,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffffff',
   },
   dropdownText: {
+    flex: 1,
+    marginRight: 8,
     fontSize: 12,
     color: '#333',
     fontWeight: '500',

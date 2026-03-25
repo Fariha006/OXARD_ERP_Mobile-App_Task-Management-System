@@ -235,9 +235,13 @@ export default function CertificateRequestScreen({ navigation }: Props) {
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setShowDatePicker(false);
-    if (selectedDate) {
-      setNewRequest({ ...newRequest, requestedDate: selectedDate });
+    if (event?.type === 'set' && selectedDate) {
+      setNewRequest((prev) => ({ ...prev, requestedDate: selectedDate }));
     }
+  };
+
+  const showDatePickerModal = () => {
+    setShowDatePicker(true);
   };
 
   const handleCertificateTypeSelect = (type: any) => {
@@ -480,7 +484,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                 <Text style={styles.inputLabel}>Requested Date:</Text>
                 <TouchableOpacity
                   style={styles.datePickerButton}
-                  onPress={() => setShowDatePicker(true)}>
+                  onPress={showDatePickerModal}>
                   <Text style={styles.datePickerButtonText}>
                     {newRequest.requestedDate.toLocaleDateString().replace(/\//g, '-')}
                   </Text>
@@ -489,7 +493,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                   <DateTimePicker
                     value={newRequest.requestedDate}
                     mode="date"
-                    display="default"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                     onChange={handleDateChange}
                   />
                 )}
