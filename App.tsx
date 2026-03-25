@@ -153,6 +153,9 @@ export default function App() {
       <NavigationContainer>
         <Drawer.Navigator
           initialRouteName="Login"
+          screenOptions={{
+            drawerStyle: { width: '50%' },
+          }}
           drawerContent={(props) => <CustomDrawer {...props} />}
         >
           <Drawer.Screen
