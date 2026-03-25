@@ -1380,7 +1380,7 @@ const styles = StyleSheet.create({
   },
   pagetitle: {
     fontSize: 22,
-    color: '#133F7C',
+    color: '#811458',
   },
   backicon: {
     marginLeft: 20,
@@ -1402,7 +1402,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   formContainer: {
-    backgroundColor: '#E2EDFC',
+    backgroundColor: '#ededed',
     borderRadius: 10,
     padding: 16,
     marginBottom: 12,
@@ -1588,7 +1588,7 @@ const styles = StyleSheet.create({
     borderColor: '#90a4c3ff',
   },
   selectLeavesButtonText: {
-    color: '#133F7C',
+    color: '#811458',
     fontSize: 12,
   },
   dropdown: {
@@ -1803,7 +1803,7 @@ const styles = StyleSheet.create({
   },
   fileUploadButtonText: {
     fontSize: 14,
-    color: '#133F7C',
+    color: '#811458',
     fontWeight: '500',
   },
   uploadedFilesContainer: {
