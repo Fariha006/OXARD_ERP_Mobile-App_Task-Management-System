@@ -333,6 +333,57 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
     setShowEndDatePicker(true);
   };
 
+  const closeLeaveTypePicker = () => {
+    setLeaveTypeModalVisible(false);
+  };
+
+  const handleOpenLeaveTypeModal = () => {
+    setLeaveTypeModalVisible(true);
+  };
+
+  /** iOS does not reliably support a second Modal on top of the leave form Modal (hangs / blank). Render picker as an overlay inside the same modal. */
+  const renderLeaveTypePickerOverlay = () => {
+    if (!leaveTypeModalVisible) {
+      return null;
+    }
+    return (
+      <View style={styles.nestedPickerOverlay}>
+        <TouchableOpacity
+          style={styles.nestedPickerBackdrop}
+          activeOpacity={1}
+          onPress={closeLeaveTypePicker}
+          accessibilityRole="button"
+          accessibilityLabel="Dismiss picker"
+        />
+        <View style={styles.nestedPickerCard}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Select Leave Type</Text>
+            <TouchableOpacity onPress={closeLeaveTypePicker}>
+              <Text style={styles.closeButton}>✕</Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            style={styles.modalBody}
+            data={leaveData?.Item2 || []}
+            keyExtractor={(item) => item.PayheadId.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.dropdownItem}
+                activeOpacity={0.7}
+                onPress={() => {
+                  setSelectedLeaveType(item.PayheadId);
+                  closeLeaveTypePicker();
+                }}>
+                <Text style={styles.dropdownText}>{item.PayHeadName}</Text>
+              </TouchableOpacity>
+            )}
+            showsVerticalScrollIndicator={true}
+          />
+        </View>
+      </View>
+    );
+  };
+
   const validateLeaveData = () => {
     if (!selectedLeaveType) {
       return 'Please select a leave type';
@@ -1156,7 +1207,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                   <Text style={styles.formLabel}>Leave Type</Text>
                   <TouchableOpacity
                     style={styles.dropdown}
-                    onPress={() => setLeaveTypeModalVisible(true)}>
+                    onPress={handleOpenLeaveTypeModal}>
                     <Text style={styles.dropdownText}>
                       {selectedLeaveType !== null && leaveData?.Item2
                         ? leaveData.Item2.find((item: any) => item.PayheadId === selectedLeaveType)?.PayHeadName
@@ -1297,41 +1348,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
               </View>
             )}
           </View>
-        </View>
-      </Modal>
-
-      {/* Leave Type Selection Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={leaveTypeModalVisible}
-        onRequestClose={() => setLeaveTypeModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Leave Type</Text>
-              <TouchableOpacity onPress={() => setLeaveTypeModalVisible(false)}>
-                <Text style={styles.closeButton}>✕</Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              style={styles.modalBody}
-              data={leaveData?.Item2 || []}
-              keyExtractor={(item) => item.PayheadId.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.dropdownItem}
-                  activeOpacity={0.7}
-                  onPress={() => {
-                    setSelectedLeaveType(item.PayheadId);
-                    setLeaveTypeModalVisible(false);
-                  }}>
-                  <Text style={styles.dropdownText}>{item.PayHeadName}</Text>
-                </TouchableOpacity>
-              )}
-              showsVerticalScrollIndicator={true}
-            />
-          </View>
+          {renderLeaveTypePickerOverlay()}
         </View>
       </Modal>
     </SafeAreaView>
@@ -1458,6 +1475,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.5)',
+    position: 'relative',
+  },
+  nestedPickerOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  nestedPickerBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+  },
+  nestedPickerCard: {
+    backgroundColor: '#E5EEFD',
+    borderRadius: 12,
+    width: '90%',
+    maxHeight: '75%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 8,
+    zIndex: 1001,
+    overflow: 'hidden',
   },
   modalContent: {
     backgroundColor: '#E5EEFD',

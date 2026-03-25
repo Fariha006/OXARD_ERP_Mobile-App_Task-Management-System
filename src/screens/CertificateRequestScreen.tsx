@@ -244,10 +244,65 @@ export default function CertificateRequestScreen({ navigation }: Props) {
     setShowDatePicker(true);
   };
 
+  const closeCertificateTypePicker = () => {
+    setCertificateTypeModalVisible(false);
+  };
+
+  const handleOpenCertificateTypeModal = () => {
+    setCertificateTypeModalVisible(true);
+  };
+
+  /** iOS does not reliably support a second Modal on top of the certificate form Modal (hangs / blank). Render picker as an overlay inside the same modal. */
+  const renderCertificateTypePickerOverlay = () => {
+    if (!certificateTypeModalVisible || !modalVisible) {
+      return null;
+    }
+    return (
+      <View style={styles.nestedPickerOverlay}>
+        <TouchableOpacity
+          style={styles.nestedPickerBackdrop}
+          activeOpacity={1}
+          onPress={closeCertificateTypePicker}
+          accessibilityRole="button"
+          accessibilityLabel="Dismiss picker"
+        />
+        <View style={styles.nestedPickerCard}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Select Certificate Type</Text>
+            <TouchableOpacity onPress={closeCertificateTypePicker}>
+              <Text style={styles.closeButton}>✕</Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            style={styles.modalBody}
+            data={certificateTypes}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.dropdownItem}
+                activeOpacity={0.7}
+                onPress={() => handleCertificateTypeSelect(item)}>
+                <Text style={styles.dropdownItemText}>{item.CertificateName}</Text>
+              </TouchableOpacity>
+            )}
+            showsVerticalScrollIndicator={true}
+            ListEmptyComponent={
+              <View style={styles.dropdownItem}>
+                <Text style={styles.dropdownItemText}>
+                  {loadingCertificateTypes ? 'Loading...' : 'No certificate types available'}
+                </Text>
+              </View>
+            }
+          />
+        </View>
+      </View>
+    );
+  };
+
   const handleCertificateTypeSelect = (type: any) => {
     setSelectedCertificateType(type.CertificateName);
-    setNewRequest({ ...newRequest, certificateType: type.ReportId.toString() });
-    setCertificateTypeModalVisible(false);
+    setNewRequest((prev) => ({ ...prev, certificateType: type.ReportId.toString() }));
+    closeCertificateTypePicker();
   };
 
   const handleEditRequest = async (item: any) => {
@@ -455,7 +510,10 @@ export default function CertificateRequestScreen({ navigation }: Props) {
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => {
+          setCertificateTypeModalVisible(false);
+          setModalVisible(false);
+        }}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -503,7 +561,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                 <Text style={styles.inputLabel}>Certificate Type:</Text>
                 <TouchableOpacity
                   style={styles.dropdownButton}
-                  onPress={() => setCertificateTypeModalVisible(true)}
+                  onPress={handleOpenCertificateTypeModal}
                   disabled={loadingCertificateTypes}>
                   <Text style={styles.dropdownButtonText}>
                     {loadingCertificateTypes ? 'Loading...' : (selectedCertificateType || 'Select certificate type')}
@@ -529,45 +587,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
-      </Modal>
-
-      {/* Certificate Type Selection Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={certificateTypeModalVisible}
-        onRequestClose={() => setCertificateTypeModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Certificate Type</Text>
-              <TouchableOpacity onPress={() => setCertificateTypeModalVisible(false)}>
-                <Text style={styles.closeButton}>✕</Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              style={styles.modalBody}
-              data={certificateTypes}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.dropdownItem}
-                  activeOpacity={0.7}
-                  onPress={() => handleCertificateTypeSelect(item)}>
-                  <Text style={styles.dropdownItemText}>{item.CertificateName}</Text>
-                </TouchableOpacity>
-              )}
-              showsVerticalScrollIndicator={true}
-              ListEmptyComponent={
-                <View style={styles.dropdownItem}>
-                  <Text style={styles.dropdownItemText}>
-                    {loadingCertificateTypes ? 'Loading...' : 'No certificate types available'}
-                  </Text>
-                </View>
-              }
-            />
-          </View>
+          {renderCertificateTypePickerOverlay()}
         </View>
       </Modal>
     </SafeAreaView>
@@ -776,6 +796,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.5)',
+    position: 'relative',
+  },
+  nestedPickerOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  nestedPickerBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+  },
+  nestedPickerCard: {
+    backgroundColor: '#E5EEFD',
+    borderRadius: 12,
+    width: '90%',
+    maxHeight: '75%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 8,
+    zIndex: 1001,
+    overflow: 'hidden',
   },
   modalContent: {
     backgroundColor: '#E5EEFD',
