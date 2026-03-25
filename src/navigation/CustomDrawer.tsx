@@ -426,6 +426,7 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderWidth: 1,
     marginBottom: 17,
+    marginEnd:15
   },
   downarows: {},
   Useremail: { color: '#e6e6e6', fontSize: 13, fontWeight: '300' },
@@ -459,6 +460,7 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderWidth: 1,
     marginTop: 17,
+    marginEnd:10
     
 
   },

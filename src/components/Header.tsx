@@ -375,7 +375,8 @@ const styles = StyleSheet.create({
     marginRight: 1,
   },
   checkedInButton: {
-    backgroundColor: '#ff6b6b',
+    backgroundColor: '#fedfeaff',
+   
   },
   checkedOutButton: {
     backgroundColor: '#4ecdc4',
@@ -384,7 +385,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#cccccc',
   },
   attendanceButtonText: {
-    color: '#ffffff',
+    color: '#000000',
     fontSize: 12,
     fontWeight: '600',
   },
