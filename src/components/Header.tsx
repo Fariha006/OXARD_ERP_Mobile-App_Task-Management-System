@@ -270,7 +270,7 @@ const Header = ({ navigation, route }: DrawerHeaderProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#133F7C',
+    backgroundColor: '#811458',
     padding: 5,
     flexDirection: 'column',
     alignItems: 'flex-start',
@@ -278,7 +278,8 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   hdrcontainer: {
-    backgroundColor: '#133F7C',
+   // backgroundColor: '#133F7C',
+   backgroundColor: '#811458',
     // backgroundColor: 'pink',
     padding: 2,
     flexDirection: 'row',

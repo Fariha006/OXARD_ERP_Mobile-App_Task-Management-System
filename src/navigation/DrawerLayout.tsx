@@ -216,7 +216,7 @@ const Footer = () => {
   const navigation = useNavigation();
 
   return (
-    <SafeAreaView style={{ backgroundColor: '#E5EEFD', }}  edges={[ 'left', 'right','bottom']}>
+    <SafeAreaView style={{ backgroundColor: '#811458', }}  edges={[ 'left', 'right','bottom']}>
     <View style={styles.footer}>
       <TouchableOpacity style={styles.btmmenu} onPress={() => navigation.navigate('Main', { screen: 'Home' })}>
         <View><Image source={require('../../assets/images/btmhome.png')}
@@ -294,8 +294,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: '#002F65',
-    backgroundColor: '#002F65',
+    borderTopColor: '#811458',
+    backgroundColor: '#811458',
   },
   label: {
     fontSize: 11,
