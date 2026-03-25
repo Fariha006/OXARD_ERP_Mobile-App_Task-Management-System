@@ -1857,7 +1857,8 @@ const styles = StyleSheet.create({
   tile: {
     width: '13%',
     aspectRatio: 1,
-    backgroundColor: '#E5EEFD',
+    // backgroundColor: '#f2f2eb',
+    backgroundColor: '#ebebeb',
     borderRadius: 10,
     marginBottom: 5,
     marginLeft: 0,
@@ -1867,18 +1868,22 @@ const styles = StyleSheet.create({
     padding: 10,
     color: '#101010',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
+    // borderColor: '#811458',
+    // borderWidth: 1,
   },
   title: {
     fontSize: 11,
     textAlign: 'center',
+    color: '#811458',
   },
   tileContent: {
     alignItems: 'center',
     justifyContent: 'center',
+    
   },
   badge: {
     position: 'absolute',
@@ -1918,7 +1923,7 @@ const styles = StyleSheet.create({
     marginLeft: 0, // Zero left margin
     padding: 10,
     paddingLeft: 10,
-    backgroundColor: '#e5eefd',
+    backgroundColor: '#fce3f3',
     borderRadius: 10,
     height: 210,
   },

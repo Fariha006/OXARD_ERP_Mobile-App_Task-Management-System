@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     marginRight: 1,
   },
   checkedInButton: {
-    backgroundColor: '#fedfeaff',
+    backgroundColor: '#f3bf12',
    
   },
   checkedOutButton: {
