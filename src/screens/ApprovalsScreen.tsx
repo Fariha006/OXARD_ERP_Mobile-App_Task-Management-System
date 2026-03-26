@@ -415,9 +415,9 @@ export default function ApprovalsScreen({ navigation }: Props) {
         <View style={styles.modalOverlay}>
           <View style={styles.pdfModalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Approval Document</Text>
+              <Text style={[styles.modalTitle, styles.pdfModalTitle]}>Approval Document</Text>
               <TouchableOpacity onPress={handleClosePdf}>
-                <Text style={styles.modalCloseButton}>✕</Text>
+                <Text style={[styles.modalCloseButton, styles.pdfModalCloseButton]}>✕</Text>
               </TouchableOpacity>
             </View>
             
@@ -717,7 +717,7 @@ const styles = StyleSheet.create({
   },
   // PDF Modal styles
   pdfModalContent: {
-    backgroundColor: '#E5EEFD',
+    backgroundColor: '#fafafa',
     borderRadius: 12,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
@@ -742,6 +742,12 @@ const styles = StyleSheet.create({
     color: '#666',
     fontWeight: 'bold',
   },
+  pdfModalTitle: {
+    color: '#811458',
+  },
+  pdfModalCloseButton: {
+    color: '#930606ff',
+  },
   pdfContainer: {
     flex: 1,
     padding: 10,
@@ -761,20 +767,20 @@ const styles = StyleSheet.create({
     borderTopColor: '#e0e0e0'
   },
   pdfCloseButton: {
-    backgroundColor: '#fce2e5ff',
+    backgroundColor: '#f3bf12',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
     flex: 0.48
   },
   closeButtonText: {
-    color: '#7c1313ff',
+    color: '#000000',
     fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center'
   },
   saveButton: {
-    backgroundColor: '#133F7C',
+    backgroundColor: '#811458',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
