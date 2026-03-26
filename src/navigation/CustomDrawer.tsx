@@ -383,8 +383,8 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
 export default CustomDrawer;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 0, paddingLeft: 15, backgroundColor: "#811458" },
-  headsep: { height: 20, backgroundColor: '#811458', marginBottom: 17, },
+  container: { flex: 1, paddingTop: 0, paddingLeft: 15, backgroundColor: "#fafafa" },
+  headsep: { height: 20, backgroundColor: '#fafafa', marginBottom: 17, },
   drawwraper: { paddingLeft: 1, paddingRight: 5, },
   title: { fontSize: 18, marginBottom: 20 },
   userimagewraper:
@@ -429,8 +429,8 @@ const styles = StyleSheet.create({
     marginEnd:15
   },
   downarows: {},
-  Useremail: { color: '#e6e6e6', fontSize: 13, fontWeight: '300' },
-  Username: { color: '#ffffff', fontWeight: 'bold', fontSize: 15, },
+  Useremail: { color: '#636363', fontSize: 13, fontWeight: '300' },
+  Username: { color: '#811458', fontWeight: 'bold', fontSize: 15, },
   menuItem:{ 
     display: 'flex',
     flexDirection: 'row',
@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
   },
   divmenuIcon:{ width:22,marginRight:12,},
   menuIcon:{ width:'100%',},
-  menuText: { color: '#ffffff', fontSize: 12, fontWeight: '500'},
+  menuText: { color: '#000000', fontSize: 12, fontWeight: '500'},
   attendanceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
