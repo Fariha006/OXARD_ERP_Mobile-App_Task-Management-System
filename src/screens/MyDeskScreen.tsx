@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   logoContainercodetext: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#CB525A',
+    color: '#000000',
     margin: 0,
     padding: 0,
   },
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   usernametext: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#07478D',
+    color: '#811458',
     margin: 0,
     padding: 0,
   },
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 3.84,
     elevation: 5,
   },
   algnbtn: {
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   lightblue: {
-    backgroundColor: '#F1F6FD',
+    backgroundColor: '#fafafa',
     borderColor: '#D6DFEC',
   },
   lightpink: {
@@ -332,6 +332,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 11,
     textAlign: 'center',
+    color: '#000000',
   },
 
   toptitle: {
@@ -348,7 +349,7 @@ const styles = StyleSheet.create({
   },
   pagetitle: {
     fontSize: 22,
-    color: '#133F7C',
+    color: '#811458',
   },
   rightclick: {
     width: 110,
