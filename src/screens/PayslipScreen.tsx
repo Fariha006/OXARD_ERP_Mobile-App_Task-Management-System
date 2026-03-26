@@ -99,7 +99,7 @@ export default function PayslipScreen({ navigation }: { navigation?: any }) {
        await NotificationService.showDownloadComplete(`Payslip_${referenceNo}.pdf`, `${RNFS.ExternalDirectoryPath}/Payslip_${referenceNo}.pdf`);
       } else {
         // Mobile: use downloadPayslipPdf from api.tsx
-        const base64data = await downloadPayslipPdf('da6110', payslipId.toString(), token);
+        const base64data = await downloadPayslipPdf('da6110', payslipId.toString(), token, '0');
         console.log('PDF base64 preview (mobile):', base64data.substring(0, 40));
         if (!base64data.startsWith('JVBERi0')) {
           Alert.alert('Warning', 'Invalid PDF file data.');
@@ -615,10 +615,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#E5EEFD',
-    borderRadius: 12,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    backgroundColor: '#fafafa',
+    borderRadius: 10,
     width: '95%',
     height: '70%',
     shadowColor: '#000',
@@ -632,17 +630,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#133F7C',
+    color: '#811458',
   },
   modalCloseButton: {
     fontSize: 20,
-    color: '#666',
+    color: '#930606ff',
     fontWeight: 'bold',
   },
   pdfContainer: {
@@ -659,25 +655,24 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0'
+    borderTopColor: '#d3d3d3ff',
   },
   closeButton: {
-    backgroundColor: '#fce2e5ff',
+    backgroundColor: '#f3bf12',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
     flex: 0.48
   },
   closeButtonText: {
-    color: '#7c1313ff',
+    color: '#000000',
     fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center'
   },
   saveButton: {
-    backgroundColor: '#133F7C',
+    backgroundColor: '#811458',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
