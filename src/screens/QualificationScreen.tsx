@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   },
   pagetitle: {
     fontSize: 22,
-    color: '#133F7C',
+    color: '#811458',
   },
   backicon: {
     marginLeft: 15,
@@ -235,9 +235,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     borderRadius: 20,
+    backgroundColor: '#F0F0F0',
   },
   accordionHeaderOpen: {
-    backgroundColor: '#E2EDFC',
+    backgroundColor: '#F0F0F0',
   },
   accordionHeaderClosed: {
     borderColor: '#DEECFF',
@@ -261,7 +262,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   even: {
-    backgroundColor: '#F1F6FD',
+    backgroundColor: '#F0F0F0',
     marginBottom: 5,
     paddingBottom: 2,
     paddingTop: 2,

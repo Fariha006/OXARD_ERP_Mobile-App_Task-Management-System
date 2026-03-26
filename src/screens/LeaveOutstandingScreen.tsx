@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   back: { flexDirection: 'row', alignItems: 'flex-start', marginTop: 10 },
   toptitle: { flexDirection: 'row', justifyContent: 'space-between', width: '100%' },
   pagewrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  pagetitle: { fontSize: 22, color: AppColors.primary },
+  pagetitle: { fontSize: 22, color: '#811458' },
   backicon: { marginLeft: 20 },
   backiconimg: { width: 25, height: 25 },
   rightclick: { width: 110 },
