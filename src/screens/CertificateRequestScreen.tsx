@@ -789,7 +789,7 @@ const styles = StyleSheet.create({
     borderColor: '#90a4c3ff',
   },
   newRequestButtonText: {
-    color: '#133F7C',
+    color: '#811458',
     fontSize: 12,
   },
   modalOverlay: {
