@@ -1501,7 +1501,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.45)',
   },
   nestedPickerCard: {
-    backgroundColor: '#E5EEFD',
+    backgroundColor: '#fafafa',
     borderRadius: 12,
     width: '90%',
     maxHeight: '75%',
@@ -1514,7 +1514,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   modalContent: {
-    backgroundColor: '#E5EEFD',
+    backgroundColor: '#fafafa',
     borderRadius: 10,
     padding: 10,
     width: '80%',
@@ -1529,7 +1529,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 17,
-    color: '#133F7C',
+    color: '#811458',
   },
   closeButton: {
     fontSize: 20,
@@ -1562,7 +1562,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   saveButton: {
-    backgroundColor: '#133F7C',
+    backgroundColor: '#811458',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -1573,13 +1573,13 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   cancelButton: {
-    backgroundColor: '#fce2e5ff',
+    backgroundColor: '#f3bf12',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
   cancelButtonText: {
-    color: '#7c1313ff',
+    color: '#000000',
     fontSize: 14,
     fontWeight: 'bold',
   },
