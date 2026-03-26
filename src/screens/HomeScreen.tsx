@@ -13,6 +13,7 @@ import { getNotifications, getFileUrl, managetoken, fetchMessageForEdit } from '
 import UserStorage from '../utils/userStorage';
 import NotificationService from '../services/NotificationService';
 import { useFocusEffect } from '@react-navigation/native';
+import { AppColors } from '../theme/colors';
 
 // Add these declarations at the top for web compatibility
 // @ts-ignore
@@ -2584,13 +2585,13 @@ const styles = StyleSheet.create({
   // Modal styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: AppColors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: AppColors.surfaceSoft,
     borderRadius: 20,
     padding: 0,
     width: '95%',
@@ -2608,14 +2609,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 25,
     paddingVertical: 10,
-    backgroundColor: '#811458',
+    backgroundColor: AppColors.primary,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
   modalTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: AppColors.textOnPrimary,
     flex: 1,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 1 },
@@ -2625,15 +2626,15 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#fafafa',
+    backgroundColor: AppColors.surfaceSoft,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#fafafa',
+    borderColor: AppColors.surfaceSoft,
   },
   closeButtonText: {
     fontSize: 18,
-    color: '#811458',
+    color: AppColors.primary,
     fontWeight: 'bold',
     lineHeight: 18,
   },

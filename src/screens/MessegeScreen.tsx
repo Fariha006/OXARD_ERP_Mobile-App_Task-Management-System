@@ -12,6 +12,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { getMesseges, fetchMessageCategories, fetchSelectTypes, saveMessage, fetchMessageForEdit, uploadDocument } from '../api/api';
 import UserStorage from '../utils/userStorage';
 import NotificationService from '../services/NotificationService';
+import { AppColors } from '../theme/colors';
 const { MediaStoreModule } = NativeModules;
 
 
@@ -1507,7 +1508,7 @@ const styles = StyleSheet.create({
   },
   pagetitle: {
     fontSize: 22,
-    color: '#133F7C',
+    color: AppColors.primary,
   },
   backicon: {
     marginLeft: 20,
@@ -1536,7 +1537,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#133F7C',
+    color: AppColors.primary,
     marginBottom: 6,
   },
   cardLabel: {
@@ -1717,7 +1718,7 @@ const styles = StyleSheet.create({
   // Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: AppColors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
@@ -1735,10 +1736,10 @@ const styles = StyleSheet.create({
   },
   nestedPickerBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    backgroundColor: AppColors.overlaySoft,
   },
   nestedPickerCard: {
-    backgroundColor: '#E5EEFD',
+    backgroundColor: AppColors.surfaceSoft,
     borderRadius: 12,
     width: '90%',
     maxHeight: '75%',
@@ -1752,7 +1753,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     // backgroundColor: '#fff',
-    backgroundColor: '#E5EEFD',
+    backgroundColor: AppColors.surfaceSoft,
     borderRadius: 12,
     width: '90%',
     maxHeight: '80%',
@@ -1772,11 +1773,11 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 17,
-    color: '#133F7C',
+    color: AppColors.primary,
   },
   closeButton: {
     fontSize: 20,
-    color: '#930606ff',
+    color: AppColors.danger,
   },
   modalBody: {
     padding: 20,
@@ -1792,7 +1793,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: AppColors.border,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
@@ -1852,25 +1853,25 @@ const styles = StyleSheet.create({
     borderTopColor: '#e0e0e0',
   },
   saveButton: {
-    backgroundColor: '#133F7C',
+    backgroundColor: AppColors.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
   saveButtonText: {
-    color: '#fff',
+    color: AppColors.textOnPrimary,
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
   },
   cancelButton: {
-    backgroundColor: '#fce2e5ff',
+    backgroundColor: AppColors.warning,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
   cancelButtonText: {
-    color: '#7c1313ff',
+    color: AppColors.text,
     fontSize: 14,
     fontWeight: 'bold',
   },

@@ -9,6 +9,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import UserStorage from '../utils/userStorage';
 import { getCertificateRequests, getCertificateTypes, getCertificateDetails, saveCertificateRequest } from '../api/api';
+import { AppColors } from '../theme/colors';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -619,7 +620,7 @@ const styles = StyleSheet.create({
   },
   pagetitle: {
     fontSize: 22,
-    color: '#133F7C',
+    color: AppColors.primary,
   },
   backicon: {
     marginLeft: 20,
@@ -795,7 +796,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: AppColors.overlay,
     position: 'relative',
   },
   nestedPickerOverlay: {
@@ -810,10 +811,10 @@ const styles = StyleSheet.create({
   },
   nestedPickerBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    backgroundColor: AppColors.overlaySoft,
   },
   nestedPickerCard: {
-    backgroundColor: '#E5EEFD',
+    backgroundColor: AppColors.surfaceSoft,
     borderRadius: 12,
     width: '90%',
     maxHeight: '75%',
@@ -826,7 +827,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   modalContent: {
-    backgroundColor: '#E5EEFD',
+    backgroundColor: AppColors.surfaceSoft,
     borderRadius: 12,
     width: '90%',
     maxHeight: '80%',
@@ -846,11 +847,11 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 17,
-    color: '#133F7C',
+    color: AppColors.primary,
   },
   closeButton: {
     fontSize: 20,
-    color: '#930606ff',
+    color: AppColors.danger,
   },
   modalBody: {
     padding: 20,
@@ -866,11 +867,11 @@ const styles = StyleSheet.create({
   },
   textInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: AppColors.border,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: AppColors.surface,
   },
   textArea: {
     minHeight: 80,
@@ -885,10 +886,10 @@ const styles = StyleSheet.create({
   },
   datePickerButton: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: AppColors.border,
     borderRadius: 8,
     padding: 12,
-    backgroundColor: '#ffffff',
+    backgroundColor: AppColors.surface,
   },
   datePickerButtonText: {
     fontSize: 16,
@@ -896,7 +897,7 @@ const styles = StyleSheet.create({
   },
   dropdownButton: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: AppColors.border,
     borderRadius: 8,
     padding: 10,
     flexDirection: 'row',
@@ -1006,13 +1007,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   cancelButton: {
-    backgroundColor: '#fce2e5ff',
+    backgroundColor: AppColors.warning,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
   cancelButtonText: {
-    color: '#7c1313ff',
+    color: AppColors.text,
     fontSize: 14,
     fontWeight: 'bold',
   },
@@ -1029,13 +1030,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   submitButton: {
-    backgroundColor: '#133F7C',
+    backgroundColor: AppColors.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
   submitButtonText: {
-    color: '#fff',
+    color: AppColors.textOnPrimary,
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
