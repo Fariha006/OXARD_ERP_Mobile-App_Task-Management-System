@@ -1686,10 +1686,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 8,
     borderWidth: .5,
-    borderColor: '#90a4c3ff',
+    borderColor: '#811458',
   },
   newRequestButtonText: {
-    color: '#133F7C',
+    color: '#811458',
     fontSize: 12,
   },
 
