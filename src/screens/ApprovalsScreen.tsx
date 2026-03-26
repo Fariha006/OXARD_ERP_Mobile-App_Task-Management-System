@@ -378,7 +378,7 @@ export default function ApprovalsScreen({ navigation }: Props) {
                 onPress={closeModal}
                 disabled={submitting}
               >
-                <Text style={styles.modalButtonText}>Close</Text>
+                <Text style={[styles.modalButtonText, styles.modalCloseButtonText]}>Close</Text>
               </TouchableOpacity>
           
 
@@ -660,7 +660,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#E2EDFC',
+    backgroundColor: '#fafafa',
     borderRadius: 10,
     padding: 20,
     margin: 20,
@@ -670,7 +670,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#133F7C',
+    color: '#811458',
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -702,18 +702,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   acceptButton: {
-    backgroundColor: '#28a745',
+    backgroundColor: '#811458',
   },
   rejectButton: {
     backgroundColor: '#dc3545',
   },
   closeButton: {
-    backgroundColor: '#6c757d',
+    backgroundColor: '#f3bf12',
   },
   modalButtonText: {
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '600',
+  },
+  modalCloseButtonText: {
+    color: '#000000',
   },
   // PDF Modal styles
   pdfModalContent: {
