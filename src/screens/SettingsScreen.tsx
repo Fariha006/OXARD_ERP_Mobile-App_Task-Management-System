@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import UserStorage from '../utils/userStorage';
 import BiometricSettings from '../utils/biometricSettings';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { AppColors } from '../theme/colors';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
@@ -79,7 +80,7 @@ export default function SettingsScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#133F7C" barStyle="light-content" />
+      <StatusBar backgroundColor={AppColors.primary} barStyle="light-content" />
       
       {/* Header */}
       <View style={[styles.back, styles.toptitle]}>
@@ -129,8 +130,8 @@ export default function SettingsScreen({ navigation }: Props) {
             <Switch
               value={isBiometricEnabled}
               onValueChange={handleBiometricToggle}
-              trackColor={{ false: '#e0e0e0', true: '#133F7C' }}
-              thumbColor={isBiometricEnabled ? '#ffffff' : '#f4f3f4'}
+              trackColor={{ false: '#e0e0e0', true: AppColors.accent }}
+              thumbColor={isBiometricEnabled ? AppColors.surface : '#f4f3f4'}
               ios_backgroundColor="#e0e0e0"
             />
           </View>
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
   },
   pagetitle: {
     fontSize: 22,
-    color: '#133F7C',
+    color: AppColors.primary,
   },
   backicon: {
     marginLeft: 20,

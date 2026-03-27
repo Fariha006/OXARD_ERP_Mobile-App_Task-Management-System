@@ -10,6 +10,7 @@ import Pdf from 'react-native-pdf';
 import RNFS from 'react-native-fs';
 import RNFetchBlob from 'react-native-blob-util';
 import NotificationService from '../services/NotificationService';
+import { AppColors } from '../theme/colors';
 const { MediaStoreModule } = NativeModules;
 
 const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
@@ -20,9 +21,15 @@ const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
   const [base64Data, setBase64Data] = useState<string>('');
   const [pdfModalVisible, setPdfModalVisible] = useState(false);
 
-  const onChange = (_event: any, selectedDate?: Date) => {
-    setShowPicker(Platform.OS === 'ios');
-    if (selectedDate) setDate(selectedDate);
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowPicker(false);
+    if (event?.type === 'set' && selectedDate) {
+      setDate(selectedDate);
+    }
+  };
+
+  const showDatePickerModal = () => {
+    setShowPicker(true);
   };
 
   const formatDate = (d: Date) => {
@@ -159,15 +166,15 @@ const LeaveOutstandingScreen = ({ navigation }: { navigation?: any }) => {
 
       <View style={styles.formGroup}>
         <Text style={styles.label}>As on Date</Text>
-        <TouchableOpacity style={styles.dateInput} onPress={() => setShowPicker(true)}>
+        <TouchableOpacity style={styles.dateInput} onPress={showDatePickerModal}>
           <Text style={styles.dateText}>{formatDate(date)}</Text>
         </TouchableOpacity>
         {showPicker && (
           <DateTimePicker
             value={date}
             mode="date"
-            display="default"
-            onChange={onChange}
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={handleDateChange}
           />
         )}
       </View>
@@ -235,7 +242,7 @@ const styles = StyleSheet.create({
   back: { flexDirection: 'row', alignItems: 'flex-start', marginTop: 10 },
   toptitle: { flexDirection: 'row', justifyContent: 'space-between', width: '100%' },
   pagewrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  pagetitle: { fontSize: 22, color: '#133F7C' },
+  pagetitle: { fontSize: 22, color: '#811458' },
   backicon: { marginLeft: 20 },
   backiconimg: { width: 25, height: 25 },
   rightclick: { width: 110 },
@@ -255,39 +262,39 @@ const styles = StyleSheet.create({
     borderTopColor: '#e0e0e0'
   },
   closeButton: {
-    backgroundColor: '#fce2e5ff',
+    backgroundColor: AppColors.warning,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
     flex: 0.48
   },
   closeButtonText: {
-    color: '#7c1313ff',
+    color: AppColors.text,
     fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center'
   },
   saveButton: {
-    backgroundColor: '#133F7C',
+    backgroundColor: AppColors.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
     flex: 0.48
   },
   saveButtonText: {
-    color: '#FFFFFF',
+    color: AppColors.textOnPrimary,
     fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center'
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: AppColors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#E5EEFD',
+    backgroundColor: AppColors.surfaceSoft,
     borderRadius: 12,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
@@ -310,11 +317,11 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#133F7C',
+    color: AppColors.primary,
   },
   modalCloseButton: {
     fontSize: 20,
-    color: '#666',
+    color: AppColors.danger,
     fontWeight: 'bold',
   },
   pdfContainer: {

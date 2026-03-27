@@ -13,6 +13,7 @@ import { getNotifications, getFileUrl, managetoken, fetchMessageForEdit } from '
 import UserStorage from '../utils/userStorage';
 import NotificationService from '../services/NotificationService';
 import { useFocusEffect } from '@react-navigation/native';
+import { AppColors } from '../theme/colors';
 
 // Add these declarations at the top for web compatibility
 // @ts-ignore
@@ -1857,7 +1858,9 @@ const styles = StyleSheet.create({
   tile: {
     width: '13%',
     aspectRatio: 1,
-    backgroundColor: '#E5EEFD',
+    // backgroundColor: '#f2f2eb',
+   // backgroundColor: '#ebebeb',
+   backgroundColor: '#fafafa',
     borderRadius: 10,
     marginBottom: 5,
     marginLeft: 0,
@@ -1865,20 +1868,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 10,
-    color: '#101010',
+    // color: '#101010',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 3.84,
     elevation: 5,
+    // borderColor: '#811458',
+    // borderWidth: 1,
   },
   title: {
     fontSize: 11,
     textAlign: 'center',
+    color: '#000000',
   },
   tileContent: {
     alignItems: 'center',
     justifyContent: 'center',
+    
   },
   badge: {
     position: 'absolute',
@@ -1918,7 +1928,7 @@ const styles = StyleSheet.create({
     marginLeft: 0, // Zero left margin
     padding: 10,
     paddingLeft: 10,
-    backgroundColor: '#e5eefd',
+    backgroundColor: '#fce3f3',
     borderRadius: 10,
     height: 210,
   },
@@ -2575,13 +2585,13 @@ const styles = StyleSheet.create({
   // Modal styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: AppColors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: AppColors.surfaceSoft,
     borderRadius: 20,
     padding: 0,
     width: '95%',
@@ -2599,14 +2609,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 25,
     paddingVertical: 10,
-    backgroundColor: '#133F7C',
+    backgroundColor: AppColors.primary,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
   modalTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: AppColors.textOnPrimary,
     flex: 1,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 1 },
@@ -2616,15 +2626,15 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: AppColors.surfaceSoft,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: AppColors.surfaceSoft,
   },
   closeButtonText: {
     fontSize: 18,
-    color: '#FFFFFF',
+    color: AppColors.primary,
     fontWeight: 'bold',
     lineHeight: 18,
   },
@@ -2639,8 +2649,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 15,
     borderLeftWidth: 5,
-    borderLeftColor: '#133F7C',
-    shadowColor: '#133F7C',
+    borderLeftColor: '#811458',
+    shadowColor: '#811458',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,

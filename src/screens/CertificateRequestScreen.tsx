@@ -9,6 +9,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import UserStorage from '../utils/userStorage';
 import { getCertificateRequests, getCertificateTypes, getCertificateDetails, saveCertificateRequest } from '../api/api';
+import { AppColors } from '../theme/colors';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -235,15 +236,74 @@ export default function CertificateRequestScreen({ navigation }: Props) {
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setShowDatePicker(false);
-    if (selectedDate) {
-      setNewRequest({ ...newRequest, requestedDate: selectedDate });
+    if (event?.type === 'set' && selectedDate) {
+      setNewRequest((prev) => ({ ...prev, requestedDate: selectedDate }));
     }
+  };
+
+  const showDatePickerModal = () => {
+    setShowDatePicker(true);
+  };
+
+  const closeCertificateTypePicker = () => {
+    setCertificateTypeModalVisible(false);
+  };
+
+  const handleOpenCertificateTypeModal = () => {
+    setCertificateTypeModalVisible(true);
+  };
+
+  /** iOS does not reliably support a second Modal on top of the certificate form Modal (hangs / blank). Render picker as an overlay inside the same modal. */
+  const renderCertificateTypePickerOverlay = () => {
+    if (!certificateTypeModalVisible || !modalVisible) {
+      return null;
+    }
+    return (
+      <View style={styles.nestedPickerOverlay}>
+        <TouchableOpacity
+          style={styles.nestedPickerBackdrop}
+          activeOpacity={1}
+          onPress={closeCertificateTypePicker}
+          accessibilityRole="button"
+          accessibilityLabel="Dismiss picker"
+        />
+        <View style={styles.nestedPickerCard}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Select Certificate Type</Text>
+            <TouchableOpacity onPress={closeCertificateTypePicker}>
+              <Text style={styles.closeButton}>✕</Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            style={styles.modalBody}
+            data={certificateTypes}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.dropdownItem}
+                activeOpacity={0.7}
+                onPress={() => handleCertificateTypeSelect(item)}>
+                <Text style={styles.dropdownItemText}>{item.CertificateName}</Text>
+              </TouchableOpacity>
+            )}
+            showsVerticalScrollIndicator={true}
+            ListEmptyComponent={
+              <View style={styles.dropdownItem}>
+                <Text style={styles.dropdownItemText}>
+                  {loadingCertificateTypes ? 'Loading...' : 'No certificate types available'}
+                </Text>
+              </View>
+            }
+          />
+        </View>
+      </View>
+    );
   };
 
   const handleCertificateTypeSelect = (type: any) => {
     setSelectedCertificateType(type.CertificateName);
-    setNewRequest({ ...newRequest, certificateType: type.ReportId.toString() });
-    setCertificateTypeModalVisible(false);
+    setNewRequest((prev) => ({ ...prev, certificateType: type.ReportId.toString() }));
+    closeCertificateTypePicker();
   };
 
   const handleEditRequest = async (item: any) => {
@@ -451,7 +511,10 @@ export default function CertificateRequestScreen({ navigation }: Props) {
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => {
+          setCertificateTypeModalVisible(false);
+          setModalVisible(false);
+        }}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -480,7 +543,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                 <Text style={styles.inputLabel}>Requested Date:</Text>
                 <TouchableOpacity
                   style={styles.datePickerButton}
-                  onPress={() => setShowDatePicker(true)}>
+                  onPress={showDatePickerModal}>
                   <Text style={styles.datePickerButtonText}>
                     {newRequest.requestedDate.toLocaleDateString().replace(/\//g, '-')}
                   </Text>
@@ -489,7 +552,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                   <DateTimePicker
                     value={newRequest.requestedDate}
                     mode="date"
-                    display="default"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                     onChange={handleDateChange}
                   />
                 )}
@@ -499,7 +562,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
                 <Text style={styles.inputLabel}>Certificate Type:</Text>
                 <TouchableOpacity
                   style={styles.dropdownButton}
-                  onPress={() => setCertificateTypeModalVisible(true)}
+                  onPress={handleOpenCertificateTypeModal}
                   disabled={loadingCertificateTypes}>
                   <Text style={styles.dropdownButtonText}>
                     {loadingCertificateTypes ? 'Loading...' : (selectedCertificateType || 'Select certificate type')}
@@ -525,45 +588,7 @@ export default function CertificateRequestScreen({ navigation }: Props) {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
-      </Modal>
-
-      {/* Certificate Type Selection Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={certificateTypeModalVisible}
-        onRequestClose={() => setCertificateTypeModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Certificate Type</Text>
-              <TouchableOpacity onPress={() => setCertificateTypeModalVisible(false)}>
-                <Text style={styles.closeButton}>✕</Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              style={styles.modalBody}
-              data={certificateTypes}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.dropdownItem}
-                  activeOpacity={0.7}
-                  onPress={() => handleCertificateTypeSelect(item)}>
-                  <Text style={styles.dropdownItemText}>{item.CertificateName}</Text>
-                </TouchableOpacity>
-              )}
-              showsVerticalScrollIndicator={true}
-              ListEmptyComponent={
-                <View style={styles.dropdownItem}>
-                  <Text style={styles.dropdownItemText}>
-                    {loadingCertificateTypes ? 'Loading...' : 'No certificate types available'}
-                  </Text>
-                </View>
-              }
-            />
-          </View>
+          {renderCertificateTypePickerOverlay()}
         </View>
       </Modal>
     </SafeAreaView>
@@ -595,7 +620,7 @@ const styles = StyleSheet.create({
   },
   pagetitle: {
     fontSize: 22,
-    color: '#133F7C',
+    color: '#811458',
   },
   backicon: {
     marginLeft: 20,
@@ -661,9 +686,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     borderRadius: 20,
+    backgroundColor: '#F0F0F0',
   },
   accordionHeaderOpen: {
-    backgroundColor: '#E2EDFC',
+    backgroundColor: '#F0F0F0',
   },
   accordionHeaderClosed: {
     borderColor: '#DEECFF',
@@ -711,7 +737,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   even: {
-    backgroundColor: '#F1F6FD',
+    backgroundColor: '#F0F0F0',
     marginBottom: 5,
     paddingBottom: 2,
     paddingTop: 2,
@@ -764,17 +790,45 @@ const styles = StyleSheet.create({
     borderColor: '#90a4c3ff',
   },
   newRequestButtonText: {
-    color: '#133F7C',
+    color: '#811458',
     fontSize: 12,
   },
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: AppColors.overlay,
+    position: 'relative',
+  },
+  nestedPickerOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  nestedPickerBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: AppColors.overlaySoft,
+  },
+  nestedPickerCard: {
+    backgroundColor: AppColors.surfaceSoft,
+    borderRadius: 12,
+    width: '90%',
+    maxHeight: '75%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 8,
+    zIndex: 1001,
+    overflow: 'hidden',
   },
   modalContent: {
-    backgroundColor: '#E5EEFD',
+    backgroundColor: AppColors.surfaceSoft,
     borderRadius: 12,
     width: '90%',
     maxHeight: '80%',
@@ -794,11 +848,11 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 17,
-    color: '#133F7C',
+    color: AppColors.primary,
   },
   closeButton: {
     fontSize: 20,
-    color: '#930606ff',
+    color: AppColors.danger,
   },
   modalBody: {
     padding: 20,
@@ -814,11 +868,11 @@ const styles = StyleSheet.create({
   },
   textInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: AppColors.border,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: AppColors.surface,
   },
   textArea: {
     minHeight: 80,
@@ -833,10 +887,10 @@ const styles = StyleSheet.create({
   },
   datePickerButton: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: AppColors.border,
     borderRadius: 8,
     padding: 12,
-    backgroundColor: '#ffffff',
+    backgroundColor: AppColors.surface,
   },
   datePickerButtonText: {
     fontSize: 16,
@@ -844,7 +898,7 @@ const styles = StyleSheet.create({
   },
   dropdownButton: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: AppColors.border,
     borderRadius: 8,
     padding: 10,
     flexDirection: 'row',
@@ -954,13 +1008,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   cancelButton: {
-    backgroundColor: '#fce2e5ff',
+    backgroundColor: AppColors.warning,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
   cancelButtonText: {
-    color: '#7c1313ff',
+    color: AppColors.text,
     fontSize: 14,
     fontWeight: 'bold',
   },
@@ -977,13 +1031,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   submitButton: {
-    backgroundColor: '#133F7C',
+    backgroundColor: AppColors.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
   submitButtonText: {
-    color: '#fff',
+    color: AppColors.textOnPrimary,
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',

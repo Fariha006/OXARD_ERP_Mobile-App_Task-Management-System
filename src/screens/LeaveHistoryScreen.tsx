@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   },
   pagetitle: {
     fontSize: 22,
-    color: '#133F7C',
+    color: '#811458',
   },
   backicon: {
     marginLeft: 15,
@@ -348,9 +348,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     borderRadius: 20,
+    backgroundColor: '#F0F0F0',
   },
   accordionHeaderOpen: {
-    backgroundColor: '#E2EDFC',
+    backgroundColor: '#F0F0F0',
   },
   accordionHeaderClosed: {
     borderColor: '#DEECFF',
@@ -390,7 +391,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   even: {
-    backgroundColor: '#F1F6FD',
+    backgroundColor: '#F0F0F0',
     marginBottom: 5,
     paddingBottom: 2,
     paddingTop: 2,
@@ -436,10 +437,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 8,
     borderWidth: .5,
-    borderColor: '#90a4c3ff',
+    borderColor: '#811458',
   },
   newRequestButtonText: {
-    color: '#133F7C',
+    color: '#811458',
     fontSize: 12,
   },
   savedLeaveActions: {

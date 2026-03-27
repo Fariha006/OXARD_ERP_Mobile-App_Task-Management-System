@@ -4,6 +4,7 @@ import { getDocumentData, downloadFile, getFileUrl } from '../api/api';
 import UserStorage from '../utils/userStorage';
 import RNFetchBlob from 'react-native-blob-util';
 import NotificationService from '../services/NotificationService';
+import { AppColors } from '../theme/colors';
 const { MediaStoreModule } = NativeModules;
 
 // Add these declarations at the top for web compatibility
@@ -578,7 +579,7 @@ const styles = StyleSheet.create({
   },
   pagetitle: {
     fontSize: 22,
-    color: '#133F7C',
+    color: '#811458',
   },
   backicon: {
     marginLeft: 15,
@@ -617,9 +618,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     borderRadius: 20,
+    backgroundColor: '#F0F0F0',
   },
   accordionHeaderOpen: {
-    backgroundColor: '#E2EDFC',
+    backgroundColor: '#F0F0F0',
   },
   accordionHeaderClosed: {
     borderColor: '#DEECFF',
@@ -643,7 +645,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   even: {
-    backgroundColor: '#F1F6FD',
+    backgroundColor: '#F0F0F0',
     marginBottom: 5,
     paddingBottom: 2,
     paddingTop: 2,
@@ -695,12 +697,12 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: AppColors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContainer: {
-    backgroundColor: '#ffffff',
+    backgroundColor: AppColors.surfaceSoft,
     borderRadius: 10,
     padding: 20,
     margin: 20,
@@ -724,7 +726,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#133F7C',
+    color: AppColors.primary,
     flex: 1,
   },
   closeButton: {
@@ -733,7 +735,7 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 20,
-    color: '#666',
+    color: AppColors.danger,
     fontWeight: 'bold',
   },
   fileList: {
@@ -745,8 +747,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-    backgroundColor: '#FAFAFA',
+    borderBottomColor: AppColors.border,
+    backgroundColor: AppColors.surface,
     marginVertical: 2,
     borderRadius: 6,
   },

@@ -234,7 +234,7 @@ export default function LoginScreen({ navigation }: Props) {
          navigation.navigate('Main', { screen: 'Home' });
         } else {
           console.log('LoginScreen: Login failed:', response.message);
-          Alert.alert('Login Failed', response.message || 'Invalid credentials');
+          Alert.alert('Login Failed-1', response.message || 'Invalid credentials');
         }
       } catch (error) {
         console.error('Login error:', error);

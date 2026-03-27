@@ -383,8 +383,8 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
 export default CustomDrawer;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 0, paddingLeft: 15, backgroundColor: "#E5EEFD" },
-  headsep: { height: 20, backgroundColor: '#E5EEFD', marginBottom: 17, },
+  container: { flex: 1, paddingTop: 0, paddingLeft: 15, backgroundColor: "#fafafa" },
+  headsep: { height: 20, backgroundColor: '#fafafa', marginBottom: 17, },
   drawwraper: { paddingLeft: 1, paddingRight: 5, },
   title: { fontSize: 18, marginBottom: 20 },
   userimagewraper:
@@ -426,10 +426,11 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderWidth: 1,
     marginBottom: 17,
+    marginEnd:15
   },
   downarows: {},
-  Useremail: { color: 'black', fontSize: 13, fontWeight: '300' },
-  Username: { color: '#133F7C', fontWeight: 'bold', fontSize: 15, },
+  Useremail: { color: '#636363', fontSize: 13, fontWeight: '300' },
+  Username: { color: '#811458', fontWeight: 'bold', fontSize: 15, },
   menuItem:{ 
     display: 'flex',
     flexDirection: 'row',
@@ -459,6 +460,7 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderWidth: 1,
     marginTop: 17,
+    marginEnd:10
     
 
   },

@@ -1,111 +1,128 @@
-
-
-// import React from 'react';
-// import { NavigationContainer } from '@react-navigation/native';
-
-// import AppNavigator from './src/navigation/DrawerNavigator';
-
-// export default function App() {
-//   return (
-
-//        <AppNavigator /> 
-//   );
-// }
-
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { StatusBar,PermissionsAndroid, Platform, Alert, View, Text } from 'react-native';
+import {
+  StatusBar,
+  PermissionsAndroid,
+  Platform,
+  Alert,
+  View,
+  Text,
+  ActivityIndicator,
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DrawerLayout from './src/navigation/DrawerLayout';
 import LoginScreen from './src/screens/LoginScreen';
-import DetailsScreen from './src/screens/DetailsScreen';
-import Header from './src/components/Header';
 import CustomDrawer from './src/navigation/CustomDrawer';
 import SplashScreen from './src/components/SplashScreen';
 import { DrawerProvider } from './src/context/DrawerContext'; 
 import messaging from '@react-native-firebase/messaging';
-import { API_CONFIG } from './src/config/apiConfig';
-import { managetoken } from './src/api/api';
+import firebase from '@react-native-firebase/app';
 import notifee, { AndroidImportance } from '@notifee/react-native';
 import UserStorage from './src/utils/userStorage';
+
 const Drawer = createDrawerNavigator();
 
 async function createChannel() {
-  // Creates a channel called "Default Channel"
   await notifee.createChannel({
-    id: 'default',           // Channel ID
-    name: 'Default Channel', // Channel name (visible to users)
-    importance: AndroidImportance.HIGH, // High importance = makes sound & heads-up notification
+    id: 'default',
+    name: 'Default Channel',
+    importance: AndroidImportance.HIGH,
   });
 }
 
-
 async function requestUserPermission(): Promise<boolean> {
+  if (Platform.OS === 'ios') {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+    return enabled;
+  }
+
   if (Platform.OS === 'android' && Platform.Version >= 33) {
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
     );
     return granted === PermissionsAndroid.RESULTS.GRANTED;
   }
-  return true; // iOS permission handled by Firebase
+  return true;
 }
+
 async function getFcmToken(): Promise<void> {
   try {
+    if (Platform.OS === 'ios') {
+      await messaging().registerDeviceForRemoteMessages();
+    }
+
     const token = await messaging().getToken();
-    //Alert.alert('FCM Token:', token);
     console.log('🔑 FCM Token:', token);
-    
-    // Save FCM token to AsyncStorage
+
     await UserStorage.storeFcmToken(token);
-    console.log('✅ FCM token saved to storage');
-    
+    console.log('✅ FCM token saved');
   } catch (error) {
-    console.error('❌ Error getting FCM token:', error);
-  //  Alert.alert('Error', 'Failed to get FCM token');
+    console.error('❌ FCM error:', error);
   }
 }
 
 export default function App() {
   const [isSplashVisible, setIsSplashVisible] = useState(true);
+  const [iosVectorFontsReady, setIosVectorFontsReady] = useState(Platform.OS !== 'ios');
 
   useEffect(() => {
+    if (Platform.OS !== 'ios') return;
+    let cancelled = false;
+    const failOpenTimer = setTimeout(() => {
+      if (!cancelled) setIosVectorFontsReady(true);
+    }, 5000);
+    Promise.all([Ionicons.loadFont(), MaterialIcons.loadFont()])
+      .catch((e) => console.warn('Vector icon fonts failed to load:', e))
+      .finally(() => {
+        clearTimeout(failOpenTimer);
+        if (!cancelled) setIosVectorFontsReady(true);
+      });
+    return () => {
+      cancelled = true;
+      clearTimeout(failOpenTimer);
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log('🔥 Firebase apps:', firebase.apps);
+
+    // 🚨 If Firebase not initialized → stop here
+    if (!firebase.apps.length) {
+      console.error('❌ Firebase NOT initialized (iOS issue)');
+      return;
+    }
+
     const initFCM = async () => {
       const hasPermission = await requestUserPermission();
+
       if (hasPermission) {
         await getFcmToken();
       }
-      else{
-        //Alert.alert('Permission not granted');
-      }
 
-      // Foreground messages
-      const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
+      const unsubscribe = messaging().onMessage(async remoteMessage => {
         console.log('📩 Foreground message:', remoteMessage);
-        Alert.alert(remoteMessage.notification?.title ?? 'New Message', remoteMessage.notification?.body ?? '');
-      
-    
-    
-    });
 
-      
-
-      // When app is opened from a notification (background state)
-      messaging().onNotificationOpenedApp(remoteMessage => {
-        console.log('📂 App opened from background state:', remoteMessage);
+        Alert.alert(
+          remoteMessage.notification?.title ?? 'New Message',
+          remoteMessage.notification?.body ?? ''
+        );
       });
 
-      // When app is opened from a notification (quit state)
-      messaging()
-        .getInitialNotification()
-        .then(remoteMessage => {
-          if (remoteMessage) {
-            console.log('📂 App opened from quit state:', remoteMessage);
-          }
-        });
+      messaging().onNotificationOpenedApp(remoteMessage => {
+        console.log('📂 Opened from background:', remoteMessage);
+      });
 
-      return () => {
-        unsubscribeOnMessage();
-      };
+      const initialMessage = await messaging().getInitialNotification();
+      if (initialMessage) {
+        console.log('📂 Opened from quit:', initialMessage);
+      }
+
+      return unsubscribe;
     };
 
     initFCM();
@@ -123,24 +140,40 @@ export default function App() {
     return <SplashScreen onFinish={handleSplashFinish} />;
   }
 
+  if (!iosVectorFontsReady) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#133F7C' }}>
+        <ActivityIndicator size="large" color="#ffffff" />
+      </View>
+    );
+  }
+
   return (
-    <>
-   
-      <DrawerProvider>
-        <NavigationContainer>
-          <Drawer.Navigator initialRouteName="Login" drawerContent={(props) => <CustomDrawer {...props} />}>
-            <Drawer.Screen name="Main" component={DrawerLayout} options={{ headerShown: false}}/>
+    <DrawerProvider>
+      <NavigationContainer>
+        <Drawer.Navigator
+          initialRouteName="Login"
+          screenOptions={{
+            drawerStyle: { width: '75%' },
+          }}
+          drawerContent={(props) => <CustomDrawer {...props} />}
+        >
+          <Drawer.Screen
+            name="Main"
+            component={DrawerLayout}
+            options={{ headerShown: false }}
+          />
 
-            <Drawer.Screen name="Login" component={LoginScreen}  options={{ headerShown: false ,drawerItemStyle: { display: 'none' },}}  />
-
-              
-          </Drawer.Navigator>
-        </NavigationContainer>
-      </DrawerProvider>
-    </>
+          <Drawer.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{
+              headerShown: false,
+              drawerItemStyle: { display: 'none' },
+            }}
+          />
+        </Drawer.Navigator>
+      </NavigationContainer>
+    </DrawerProvider>
   );
 }
-
-
-
-

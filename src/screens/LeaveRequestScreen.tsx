@@ -195,9 +195,8 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
-      // Store in YYYY-MM-DD format for internal consistency
+    setShowDatePicker(false);
+    if (event?.type === 'set' && selectedDate) {
       setRequestDate(selectedDate.toISOString().split('T')[0]);
     }
   };
@@ -237,21 +236,19 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
   };
 
   const handleStartDateChange = (event: any, selectedDate?: Date) => {
-    setShowStartDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
+    setShowStartDatePicker(false);
+    if (event?.type === 'set' && selectedDate) {
       const formattedDate = selectedDate.toISOString().split('T')[0];
       setStartDate(formattedDate);
-      // Use the new formattedDate instead of startDate state
       calculateLeaveDaysAndHolidays(formattedDate, endDate, startHD, endHD);
     }
   };
 
   const handleEndDateChange = (event: any, selectedDate?: Date) => {
-    setShowEndDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
+    setShowEndDatePicker(false);
+    if (event?.type === 'set' && selectedDate) {
       const formattedDate = selectedDate.toISOString().split('T')[0];
       setEndDate(formattedDate);
-      // Use the new formattedDate instead of endDate state
       calculateLeaveDaysAndHolidays(startDate, formattedDate, startHD, endHD);
     }
   };
@@ -334,6 +331,57 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
 
   const showEndDatePickerModal = () => {
     setShowEndDatePicker(true);
+  };
+
+  const closeLeaveTypePicker = () => {
+    setLeaveTypeModalVisible(false);
+  };
+
+  const handleOpenLeaveTypeModal = () => {
+    setLeaveTypeModalVisible(true);
+  };
+
+  /** iOS does not reliably support a second Modal on top of the leave form Modal (hangs / blank). Render picker as an overlay inside the same modal. */
+  const renderLeaveTypePickerOverlay = () => {
+    if (!leaveTypeModalVisible) {
+      return null;
+    }
+    return (
+      <View style={styles.nestedPickerOverlay}>
+        <TouchableOpacity
+          style={styles.nestedPickerBackdrop}
+          activeOpacity={1}
+          onPress={closeLeaveTypePicker}
+          accessibilityRole="button"
+          accessibilityLabel="Dismiss picker"
+        />
+        <View style={styles.nestedPickerCard}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Select Leave Type</Text>
+            <TouchableOpacity onPress={closeLeaveTypePicker}>
+              <Text style={styles.closeButton}>✕</Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            style={styles.modalBody}
+            data={leaveData?.Item2 || []}
+            keyExtractor={(item) => item.PayheadId.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.dropdownItem}
+                activeOpacity={0.7}
+                onPress={() => {
+                  setSelectedLeaveType(item.PayheadId);
+                  closeLeaveTypePicker();
+                }}>
+                <Text style={styles.dropdownText}>{item.PayHeadName}</Text>
+              </TouchableOpacity>
+            )}
+            showsVerticalScrollIndicator={true}
+          />
+        </View>
+      </View>
+    );
   };
 
   const validateLeaveData = () => {
@@ -1159,7 +1207,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
                   <Text style={styles.formLabel}>Leave Type</Text>
                   <TouchableOpacity
                     style={styles.dropdown}
-                    onPress={() => setLeaveTypeModalVisible(true)}>
+                    onPress={handleOpenLeaveTypeModal}>
                     <Text style={styles.dropdownText}>
                       {selectedLeaveType !== null && leaveData?.Item2
                         ? leaveData.Item2.find((item: any) => item.PayheadId === selectedLeaveType)?.PayHeadName
@@ -1300,41 +1348,7 @@ export default function LeaveRequestScreen({ navigation, route }: Props) {
               </View>
             )}
           </View>
-        </View>
-      </Modal>
-
-      {/* Leave Type Selection Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={leaveTypeModalVisible}
-        onRequestClose={() => setLeaveTypeModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Leave Type</Text>
-              <TouchableOpacity onPress={() => setLeaveTypeModalVisible(false)}>
-                <Text style={styles.closeButton}>✕</Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              style={styles.modalBody}
-              data={leaveData?.Item2 || []}
-              keyExtractor={(item) => item.PayheadId.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.dropdownItem}
-                  activeOpacity={0.7}
-                  onPress={() => {
-                    setSelectedLeaveType(item.PayheadId);
-                    setLeaveTypeModalVisible(false);
-                  }}>
-                  <Text style={styles.dropdownText}>{item.PayHeadName}</Text>
-                </TouchableOpacity>
-              )}
-              showsVerticalScrollIndicator={true}
-            />
-          </View>
+          {renderLeaveTypePickerOverlay()}
         </View>
       </Modal>
     </SafeAreaView>
@@ -1366,7 +1380,7 @@ const styles = StyleSheet.create({
   },
   pagetitle: {
     fontSize: 22,
-    color: '#133F7C',
+    color: '#811458',
   },
   backicon: {
     marginLeft: 20,
@@ -1388,15 +1402,24 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   formContainer: {
-    backgroundColor: '#E2EDFC',
+   // backgroundColor: '#ededed',
+   backgroundColor: '#fafafa',
     borderRadius: 10,
     padding: 16,
     marginBottom: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.08,
+    // shadowRadius: 4,
+    // elevation: 2,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  
   },
   actionbtnwraper: {
     flexDirection: 'row',
@@ -1461,9 +1484,37 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.5)',
+    position: 'relative',
+  },
+  nestedPickerOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  nestedPickerBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+  },
+  nestedPickerCard: {
+    backgroundColor: '#fafafa',
+    borderRadius: 12,
+    width: '90%',
+    maxHeight: '75%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 8,
+    zIndex: 1001,
+    overflow: 'hidden',
   },
   modalContent: {
-    backgroundColor: '#E5EEFD',
+    backgroundColor: '#fafafa',
     borderRadius: 10,
     padding: 10,
     width: '80%',
@@ -1478,7 +1529,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 17,
-    color: '#133F7C',
+    color: '#811458',
   },
   closeButton: {
     fontSize: 20,
@@ -1511,7 +1562,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   saveButton: {
-    backgroundColor: '#133F7C',
+    backgroundColor: '#811458',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -1522,13 +1573,13 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   cancelButton: {
-    backgroundColor: '#fce2e5ff',
+    backgroundColor: '#f3bf12',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
   cancelButtonText: {
-    color: '#7c1313ff',
+    color: '#000000',
     fontSize: 14,
     fontWeight: 'bold',
   },
@@ -1546,7 +1597,7 @@ const styles = StyleSheet.create({
     borderColor: '#90a4c3ff',
   },
   selectLeavesButtonText: {
-    color: '#133F7C',
+    color: '#811458',
     fontSize: 12,
   },
   dropdown: {
@@ -1630,13 +1681,13 @@ const styles = StyleSheet.create({
     paddingTop: 6,
     paddingLeft: 6,
     paddingRight: 6,
-    backgroundColor: '#eff7ffff',
+    backgroundColor: '#fafafa',
     borderRadius: 8,
   },
   savedLeavesTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#133F7C',
+    color: '#811458',
     marginBottom: 12,
   },
   savedLeaveItem: {
@@ -1734,7 +1785,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveAllButton: {
-    backgroundColor: '#133F7C',
+    backgroundColor: '#811458',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -1761,13 +1812,13 @@ const styles = StyleSheet.create({
   },
   fileUploadButtonText: {
     fontSize: 14,
-    color: '#133F7C',
+    color: '#811458',
     fontWeight: '500',
   },
   uploadedFilesContainer: {
     marginTop: 15,
     padding: 12,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#fafafa',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e9ecef',
@@ -1775,7 +1826,7 @@ const styles = StyleSheet.create({
   uploadedFilesTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#133F7C',
+    color: '#811458',
     marginBottom: 10,
   },
   uploadedFileItem: {
@@ -1804,12 +1855,12 @@ const styles = StyleSheet.create({
   },
   uploadedFileName: {
     fontSize: 13,
-    color: '#333',
+    color: '#000000',
     fontWeight: '600',
     marginBottom: 2,
   },
   downloadableFileName: {
-    color: '#133F7C',
+    color: '#000000',
     textDecorationLine: 'underline',
   },
   uploadedFileSize: {

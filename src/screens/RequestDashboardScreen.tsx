@@ -8,6 +8,7 @@ import {
   Image,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { AppColors } from '../theme/colors';
 
 type Props = NativeStackScreenProps<any>;
 
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
   },
   pagetitle: {
     fontSize: 22,
-    color: '#133F7C',
+    color: AppColors.primary,
   },
   backicon: {
     marginLeft: 20,
@@ -134,7 +135,7 @@ const styles = StyleSheet.create({
   },
   requestButton: {
     // backgroundColor: '#ffffffff',
-    backgroundColor: '#E5EEFD',
+    backgroundColor: '#fafafa',
     borderRadius: 12,
     padding: 10,
     marginBottom: 16,
