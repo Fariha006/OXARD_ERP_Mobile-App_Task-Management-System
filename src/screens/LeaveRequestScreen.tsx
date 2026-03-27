@@ -1681,13 +1681,13 @@ const styles = StyleSheet.create({
     paddingTop: 6,
     paddingLeft: 6,
     paddingRight: 6,
-    backgroundColor: '#eff7ffff',
+    backgroundColor: '#fafafa',
     borderRadius: 8,
   },
   savedLeavesTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#133F7C',
+    color: '#811458',
     marginBottom: 12,
   },
   savedLeaveItem: {
@@ -1785,7 +1785,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveAllButton: {
-    backgroundColor: '#133F7C',
+    backgroundColor: '#811458',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -1818,7 +1818,7 @@ const styles = StyleSheet.create({
   uploadedFilesContainer: {
     marginTop: 15,
     padding: 12,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#fafafa',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e9ecef',
@@ -1826,7 +1826,7 @@ const styles = StyleSheet.create({
   uploadedFilesTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#133F7C',
+    color: '#811458',
     marginBottom: 10,
   },
   uploadedFileItem: {
@@ -1855,12 +1855,12 @@ const styles = StyleSheet.create({
   },
   uploadedFileName: {
     fontSize: 13,
-    color: '#333',
+    color: '#000000',
     fontWeight: '600',
     marginBottom: 2,
   },
   downloadableFileName: {
-    color: '#133F7C',
+    color: '#000000',
     textDecorationLine: 'underline',
   },
   uploadedFileSize: {
