@@ -647,6 +647,7 @@ export default function HomeScreen({ navigation }: Props) {
 
   const tiles = [
     { id: 1, title: 'My Desk', image: require('../../assets/images/home/mydesk.png'), route: 'Main', screen: 'MyDesk' },
+    { id: 8, title: 'CRM', image: require('../../assets/images/home/crmdashboard.png'), route: 'Main', screen: 'CrmDashboard' },
     { id: 4, title: 'Approval', image: require('../../assets/images/home/aproval.png'), route: 'Main', screen: 'Approvals' },
     { id: 6, title: 'Messages', image: require('../../assets/images/home/msgs.png'), route: 'Main', screen: 'Messege' },
     { id: 2, title: 'My Requests', image: require('../../assets/images/home/request.png'), route: 'Main', screen: 'RequestDashboard' },

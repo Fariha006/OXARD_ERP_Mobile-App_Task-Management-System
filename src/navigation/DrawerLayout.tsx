@@ -28,6 +28,7 @@ import MessegeScreen from '../screens/MessegeScreen';
 import LeaveRequestScreen from '../screens/LeaveRequestScreen';
 import RequestDashboardScreen from '../screens/RequestDashboardScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import CrmDashboardMenu from '../screens/crm/crmdashboardmenu';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Stack = createStackNavigator();
@@ -208,6 +209,15 @@ const InnerStack = () => (
             header: () => <Header navigation={navigation} route={route} />
           })}
         /> 
+        <Stack.Screen
+          name="CrmDashboard"
+          component={CrmDashboardMenu}
+          options={({ navigation, route }) => ({
+            header: () => <Header navigation={navigation} route={route} />
+          })}
+        /> 
+
+
 
   </Stack.Navigator>
 );
