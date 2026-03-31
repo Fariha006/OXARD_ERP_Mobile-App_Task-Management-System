@@ -1,22 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import UserStorage from '../../utils/userStorage';
 import { getFileUrl } from '../../config/apiConfig';
 
 const menuItems = [
-  'Lead',
-  'Deal',
-  'Notes',
-  'Documents',
-  'Tasks',
-  'Meetings',
-  'Calls',
-  'Accounts',
-  'Contacts',
+  { text: 'Lead', url: 'leadordeal', image: '', params: { StatusId: 1, menutype: 1 } },
+  { text: 'Deal', url: 'leadordeal', image: '', params: { StatusId: 2, menutype: 1 } },
+  { text: 'Notes', url: '', image: '', params: undefined },
+  { text: 'Documents', url: '', image: '', params: undefined },
+  { text: 'Tasks', url: '', image: '', params: undefined },
+  { text: 'Meetings', url: '', image: '', params: undefined },
+  { text: 'Calls', url: '', image: '', params: undefined },
+  { text: 'Accounts', url: '', image: '', params: undefined },
+  { text: 'Contacts', url: '', image: '', params: undefined },
 ];
 
 const CrmDashboardMenu = () => {
   const [userData, setUserData] = useState<any>(null);
+  const navigation = useNavigation<any>();
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -32,6 +34,29 @@ const CrmDashboardMenu = () => {
 
     loadUserData();
   }, []);
+
+  const handleMenuPress = async (url: string, params?: Record<string, unknown>) => {
+    const trimmedUrl = url.trim();
+    if (!trimmedUrl) {
+      return;
+    }
+
+    const isExternalUrl = /^(https?:\/\/|mailto:|tel:)/i.test(trimmedUrl);
+
+    try {
+      if (isExternalUrl) {
+        const canOpen = await Linking.canOpenURL(trimmedUrl);
+        if (canOpen) {
+          await Linking.openURL(trimmedUrl);
+        }
+        return;
+      }
+
+      navigation.navigate(trimmedUrl, params);
+    } catch (error) {
+      console.error('CRM Dashboard: Failed to navigate:', error);
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -53,12 +78,17 @@ const CrmDashboardMenu = () => {
 
       <View style={styles.menuList}>
         {menuItems.map((item) => (
-          <View key={item} style={styles.menuRow}>
+          <TouchableOpacity
+            key={item.text}
+            style={styles.menuRow}
+            activeOpacity={0.7}
+            onPress={() => handleMenuPress(item.url, item.params)}
+          >
             <View style={styles.iconWrapper}>
-              <Text style={styles.iconText}>{item.charAt(0)}</Text>
+              <Text style={styles.iconText}>{item.text.charAt(0)}</Text>
             </View>
-            <Text style={styles.menuText}>{item}</Text>
-          </View>
+            <Text style={styles.menuText}>{item.text}</Text>
+          </TouchableOpacity>
         ))}
       </View>
     </ScrollView>
