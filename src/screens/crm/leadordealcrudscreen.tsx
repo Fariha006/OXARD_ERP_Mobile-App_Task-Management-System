@@ -126,12 +126,12 @@ const LeadOrDealCrudScreen = () => {
   const tabItems = [
     { key: 'company',   icon: 'home-variant',    label: 'Company'  },
     { key: 'contact',   icon: 'account',          label: 'Contact'  },
-    { key: 'activity',  icon: 'bell',             label: 'Activity' },
-    { key: 'email',     icon: 'email-outline',    label: 'Email'    },
-    { key: 'docs',      icon: 'camera-outline',   label: 'Docs'     },
-    { key: 'wishlist',  icon: 'heart-outline',    label: 'Wishlist' },
-    { key: 'rating',    icon: 'star-outline',     label: 'Rating'   },
-    { key: 'settings',  icon: 'cog-outline',      label: 'Settings' },
+    { key: 'activity',  icon: 'bell',             label: 'Notes' },
+    { key: 'email',     icon: 'email-outline',    label: 'Documents'    },
+    { key: 'docs',      icon: 'camera-outline',   label: 'Tasks'     },
+    { key: 'wishlist',  icon: 'heart-outline',    label: 'Meetings' },
+    { key: 'rating',    icon: 'star-outline',     label: 'Calls'   },
+    { key: 'settings',  icon: 'cog-outline',      label: 'Timeline' },
   ];
 
   // API submission state
