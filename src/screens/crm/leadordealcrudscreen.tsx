@@ -121,17 +121,21 @@ const LeadOrDealCrudScreen = () => {
   // save split-button menu
   const [showSaveMenu, setShowSaveMenu] = useState(false);
 
+  // top-bar kebab side panel
+  const [showKebabPanel, setShowKebabPanel] = useState(false);
+
+
   // bottom tab strip
   const [activeTab, setActiveTab] = useState<string>('company');
   const tabItems = [
-    { key: 'company',   icon: 'home-variant',    label: 'Company'  },
-    { key: 'contact',   icon: 'account',          label: 'Contact'  },
-    { key: 'activity',  icon: 'bell',             label: 'Notes' },
-    { key: 'email',     icon: 'email-outline',    label: 'Documents'    },
-    { key: 'docs',      icon: 'camera-outline',   label: 'Tasks'     },
-    { key: 'wishlist',  icon: 'heart-outline',    label: 'Meetings' },
-    { key: 'rating',    icon: 'star-outline',     label: 'Calls'   },
-    { key: 'settings',  icon: 'cog-outline',      label: 'Timeline' },
+    { key: 'company',  icon: 'home-variant',              label: 'Company',  color: '#133F7C' },
+    { key: 'contact',  icon: 'account',                   label: 'Contact',  color: '#811458' },
+    { key: 'activity', icon: 'note-text-outline',         label: 'Notes',    color: '#f59e0b' },
+    { key: 'email',    icon: 'file-document-outline',     label: 'Documents',color: '#10b981' },
+    { key: 'docs',     icon: 'checkbox-marked-outline',   label: 'Tasks',    color: '#3b82f6' },
+    { key: 'wishlist', icon: 'calendar-check',            label: 'Meetings', color: '#ef4444' },
+    { key: 'rating',   icon: 'phone-outline',             label: 'Calls',    color: '#8b5cf6' },
+    { key: 'settings', icon: 'timeline-clock-outline',    label: 'Timeline', color: '#6b7280' },
   ];
 
   // API submission state
@@ -547,7 +551,13 @@ const LeadOrDealCrudScreen = () => {
         <View style={styles.pageTitleWrap}>
           <Text style={styles.pageTitle}>{screenTitle.toUpperCase()}</Text>
         </View>
-        <View style={styles.topBarRight} />
+        <TouchableOpacity
+          style={styles.kebabBtn}
+          onPress={() => setShowKebabPanel(true)}
+          activeOpacity={0.7}
+        >
+          <Icon name="dots-vertical" size={26} color="#811458" />
+        </TouchableOpacity>
       </View>
 
       {/* ── Body ── */}
@@ -802,45 +812,7 @@ const LeadOrDealCrudScreen = () => {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* ── Bottom tab strip — 3 rows ── */}
-      <View style={styles.tabStrip}>
-        {[tabItems.slice(0, 4), tabItems.slice(4)].map(
-          (rowItems, rowIdx) => (
-            <View key={rowIdx} style={styles.tabRow}>
-              {rowItems.map((tab) => {
-                const active = activeTab === tab.key;
-                const tabDisabled = savedRelationId <= 0;
-                return (
-                  <TouchableOpacity
-                    key={tab.key}
-                    style={[
-                      styles.tabItem,
-                      active && !tabDisabled && styles.tabItemActive,
-                      tabDisabled && styles.tabItemDisabled,
-                    ]}
-                    onPress={() => !tabDisabled && setActiveTab(tab.key)}
-                    activeOpacity={tabDisabled ? 1 : 0.7}
-                    disabled={tabDisabled}
-                  >
-                    <Icon
-                      name={tab.icon}
-                      size={18}
-                      color={tabDisabled ? '#c0c0c0' : active ? '#ffffff' : '#811458'}
-                    />
-                    <Text style={[
-                      styles.tabLabel,
-                      !active && styles.tabLabelInactive,
-                      tabDisabled && styles.tabLabelDisabled,
-                    ]}>
-                      {tab.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          ),
-        )}
-      </View>
+    
 
       {/* ── Single-select modal ── */}
       {renderDropdownModal()}
@@ -874,6 +846,62 @@ const LeadOrDealCrudScreen = () => {
               <Text style={styles.saveMenuItemText}>Save and Continue</Text>
             </TouchableOpacity>
           </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* ── Kebab side panel ── */}
+      <Modal
+        transparent
+        animationType="fade"
+        visible={showKebabPanel}
+        onRequestClose={() => setShowKebabPanel(false)}
+      >
+        <TouchableOpacity
+          style={styles.kebabOverlay}
+          activeOpacity={1}
+          onPress={() => setShowKebabPanel(false)}
+        >
+          <TouchableOpacity activeOpacity={1} style={styles.kebabPanel}>
+            {/* icon grid */}
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.kebabGrid}>
+              {tabItems.map((tab) => {
+                const active = activeTab === tab.key;
+                const tabDisabled = savedRelationId <= 0;
+                return (
+                  <TouchableOpacity
+                    key={tab.key}
+                    style={styles.kebabGridItem}
+                    activeOpacity={tabDisabled ? 1 : 0.7}
+                    disabled={tabDisabled}
+                    onPress={() => {
+                      setActiveTab(tab.key);
+                      setShowKebabPanel(false);
+                    }}
+                  >
+                    <View style={[
+                      styles.kebabPanelIcon,
+                      { backgroundColor: tabDisabled ? '#555' : tab.color },
+                      active && styles.kebabPanelIconActive,
+                    ]}>
+                      <Icon name={tab.icon} size={22} color="#ffffff" />
+                      {active && (
+                        <View style={styles.kebabActiveIndicator}>
+                          <Icon name="check" size={8} color="#ffffff" />
+                        </View>
+                      )}
+                    </View>
+                    <Text style={[
+                      styles.kebabPanelItemText,
+                      tabDisabled && styles.kebabPanelItemTextDisabled,
+                      active && styles.kebabPanelItemTextActive,
+                    ]}>
+                      {tab.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
     </SafeAreaView>
@@ -915,8 +943,90 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#811458',
   },
-  topBarRight: {
-    width: 50,
+  kebabBtn: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 4,
+  },
+
+  /* Kebab side panel */
+  kebabOverlay: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.55)',
+  },
+  kebabPanel: {
+    width: '28%',
+    backgroundColor: 'rgba(255,255,255,0.75)',
+  },
+  kebabPanelHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+  },
+  kebabPanelTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#811458',
+  },
+  kebabGrid: {
+    flexDirection: 'column',
+    paddingHorizontal: 8,
+    paddingBottom: 20,
+    gap: 4,
+  },
+  kebabGridItem: {
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: 10,
+    gap: 6,
+  },
+  kebabPanelIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  kebabPanelIconActive: {
+    borderWidth: 2,
+    borderColor: '#ffffff',
+    shadowOpacity: 0.5,
+    elevation: 8,
+  },
+  kebabActiveIndicator: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: 'rgba(255,255,255,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  kebabPanelItemText: {
+    fontSize: 10,
+    color: '#111827',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  kebabPanelItemTextActive: {
+    color: '#811458',
+    fontWeight: '800',
+  },
+  kebabPanelItemTextDisabled: {
+    color: '#c0c0c0',
   },
 
   /* Scroll */
