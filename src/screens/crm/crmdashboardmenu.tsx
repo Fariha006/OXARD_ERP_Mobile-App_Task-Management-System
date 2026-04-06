@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, Linking, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import UserStorage from '../../utils/userStorage';
@@ -103,54 +103,103 @@ const CrmDashboardMenu = () => {
 
   if (loModeLoading) {
     return (
-      <View style={styles.loadingWrap}>
-        <ActivityIndicator size="large" color="#811458" />
-        <Text style={styles.loadingText}>Loading CRM…</Text>
-      </View>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.loadingWrap}>
+          <ActivityIndicator size="large" color="#811458" />
+          <Text style={styles.loadingText}>Loading CRM…</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {loModeError ? (
-        <Text style={styles.bannerError}>{loModeError}</Text>
-      ) : null}
-      <View style={styles.logoContainer}>
-        <View style={styles.profilepic}>
-          <Image
-            source={
-              userData?.EmployeePhotoUrl
-                ? { uri: getFileUrl(`/${userData.EmployeePhotoUrl}`) }
-                : require('../../../assets/images/profile-picture.png')
-            }
-            style={styles.bannerImage}
-            resizeMode="contain"
-          />
+    <SafeAreaView style={styles.safeArea}>
+      {/* ── Top bar ── */}
+      <View style={styles.topBar}>
+        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
+          <View style={styles.backIconWrap}>
+            <Image
+              source={require('../../../assets/images/backarow.png')}
+              style={styles.backIconImg}
+              resizeMode="contain"
+            />
+          </View>
+        </TouchableOpacity>
+        <View style={styles.pageTitleWrap}>
+          <Text style={styles.pageTitle}>CRM MODULE</Text>
         </View>
+        <View style={styles.topBarRight} />
       </View>
 
-      <Text style={styles.title}>CRM MODULE</Text>
+      <ScrollView contentContainerStyle={styles.container}>
+        {loModeError ? (
+          <Text style={styles.bannerError}>{loModeError}</Text>
+        ) : null}
+        <View style={styles.logoContainer}>
+          <View style={styles.profilepic}>
+            <Image
+              source={
+                userData?.EmployeePhotoUrl
+                  ? { uri: getFileUrl(`/${userData.EmployeePhotoUrl}`) }
+                  : require('../../../assets/images/profile-picture.png')
+              }
+              style={styles.bannerImage}
+              resizeMode="contain"
+            />
+          </View>
+        </View>
 
-      <View style={styles.menuList}>
-        {menuItems.map((item) => (
-          <TouchableOpacity
-            key={item.text}
-            style={styles.menuRow}
-            activeOpacity={0.7}
-            onPress={() => handleMenuPress(item.url, item.params)}
-          >
-            <View style={styles.iconWrapper}>
-              <Text style={styles.iconText}>{item.text.charAt(0)}</Text>
-            </View>
-            <Text style={styles.menuText}>{item.text}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </ScrollView>
+        <View style={styles.menuList}>
+          {menuItems.map((item) => (
+            <TouchableOpacity
+              key={item.text}
+              style={styles.menuRow}
+              activeOpacity={0.7}
+              onPress={() => handleMenuPress(item.url, item.params)}
+            >
+              <View style={styles.iconWrapper}>
+                <Text style={styles.iconText}>{item.text.charAt(0)}</Text>
+              </View>
+              <Text style={styles.menuText}>{item.text}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingRight: 10,
+  },
+  backIconWrap: {
+    marginLeft: 20,
+  },
+  backIconImg: {
+    width: 25,
+    height: 25,
+  },
+  pageTitleWrap: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  pageTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#811458',
+  },
+  topBarRight: {
+    width: 25,
+  },
   loadingWrap: {
     flex: 1,
     justifyContent: 'center',
@@ -191,13 +240,6 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 100,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#811458',
-    marginBottom: 16,
-    textAlign: 'center',
   },
   menuList: {
     width: '100%',
