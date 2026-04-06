@@ -210,7 +210,7 @@ const LeadOrDealScreen = () => {
                     onPress={() =>
                       navigation.navigate('leadordealcrud', {
                         StatusId: statusId,
-                        searchid: item.RelationId,
+                        RelationId: item.RelationId,
                       })
                     }
                   >

@@ -18,6 +18,7 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { API_CONFIG, getApiUrl } from '../../config/apiConfig';
 import UserStorage from '../../utils/userStorage';
 
@@ -99,7 +100,7 @@ const LeadOrDealCrudScreen = () => {
   const route = useRoute<any>();
 
   const statusId = Number(route?.params?.StatusId ?? 1);
-  const searchid = route?.params?.searchid ? Number(route.params.searchid) : null;
+  const searchid = route?.params?.RelationId ? Number(route.params.RelationId) : null;
 
   const screenTitle = statusId === 2 ? 'Deal' : 'Lead';
 
@@ -120,8 +121,24 @@ const LeadOrDealCrudScreen = () => {
   // save split-button menu
   const [showSaveMenu, setShowSaveMenu] = useState(false);
 
+  // bottom tab strip
+  const [activeTab, setActiveTab] = useState<string>('company');
+  const tabItems = [
+    { key: 'company',   icon: 'home-variant',    label: 'Company'  },
+    { key: 'contact',   icon: 'account',          label: 'Contact'  },
+    { key: 'activity',  icon: 'bell',             label: 'Activity' },
+    { key: 'email',     icon: 'email-outline',    label: 'Email'    },
+    { key: 'docs',      icon: 'camera-outline',   label: 'Docs'     },
+    { key: 'wishlist',  icon: 'heart-outline',    label: 'Wishlist' },
+    { key: 'rating',    icon: 'star-outline',     label: 'Rating'   },
+    { key: 'settings',  icon: 'cog-outline',      label: 'Settings' },
+  ];
+
   // API submission state
   const [isSaving, setIsSaving] = useState(false);
+
+  // tracks the persisted RelationId; tabs are enabled only when > 0
+  const [savedRelationId, setSavedRelationId] = useState<number>(searchid ?? 0);
 
   const [leadTypeOptions, setLeadTypeOptions] = useState<DropdownOption[]>([]);
   const [accountOptions, setAccountOptions] = useState<DropdownOption[]>([]);
@@ -328,10 +345,12 @@ const LeadOrDealCrudScreen = () => {
       const result = Array.isArray(response.data) ? response.data[0] : null;
 
       if (result?.IsSuccess === 'True') {
+        if (result.RelationId > 0) {
+          setSavedRelationId(result.RelationId);
+          setField('RelationId', String(result.RelationId));
+        }
         if (andContinue) {
           Alert.alert('Saved', `Record saved successfully. (ID: ${result.RelationId})`);
-          setForm(INITIAL_FORM);
-          setErrors({});
         } else {
           navigation.goBack();
         }
@@ -783,6 +802,46 @@ const LeadOrDealCrudScreen = () => {
         </ScrollView>
       </KeyboardAvoidingView>
 
+      {/* ── Bottom tab strip — 3 rows ── */}
+      <View style={styles.tabStrip}>
+        {[tabItems.slice(0, 4), tabItems.slice(4)].map(
+          (rowItems, rowIdx) => (
+            <View key={rowIdx} style={styles.tabRow}>
+              {rowItems.map((tab) => {
+                const active = activeTab === tab.key;
+                const tabDisabled = savedRelationId <= 0;
+                return (
+                  <TouchableOpacity
+                    key={tab.key}
+                    style={[
+                      styles.tabItem,
+                      active && !tabDisabled && styles.tabItemActive,
+                      tabDisabled && styles.tabItemDisabled,
+                    ]}
+                    onPress={() => !tabDisabled && setActiveTab(tab.key)}
+                    activeOpacity={tabDisabled ? 1 : 0.7}
+                    disabled={tabDisabled}
+                  >
+                    <Icon
+                      name={tab.icon}
+                      size={18}
+                      color={tabDisabled ? '#c0c0c0' : active ? '#ffffff' : '#811458'}
+                    />
+                    <Text style={[
+                      styles.tabLabel,
+                      !active && styles.tabLabelInactive,
+                      tabDisabled && styles.tabLabelDisabled,
+                    ]}>
+                      {tab.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          ),
+        )}
+      </View>
+
       {/* ── Single-select modal ── */}
       {renderDropdownModal()}
 
@@ -1196,6 +1255,54 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#2e7d32',
     fontWeight: '600',
+  },
+
+  /* Bottom tab strip */
+  tabStrip: {
+    flexDirection: 'column',
+    backgroundColor: '#ffffff',
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    gap: 5,
+  },
+  tabRow: {
+    flexDirection: 'row',
+    gap: 5,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#811458',
+    backgroundColor: '#ffffff',
+    flexDirection: 'column',
+    gap: 2,
+  },
+  tabItemActive: {
+    backgroundColor: '#811458',
+    borderColor: '#811458',
+  },
+  tabLabel: {
+    fontSize: 9,
+    color: '#ffffff',
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  tabLabelInactive: {
+    color: '#811458',
+  },
+  tabItemDisabled: {
+    backgroundColor: '#f0f0f0',
+    borderColor: '#d0d0d0',
+    opacity: 0.55,
+  },
+  tabLabelDisabled: {
+    color: '#c0c0c0',
   },
 });
 
