@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserData, MenuItem } from '../api/api';
+import type { CrmLoModeResponse } from '../types/crmLoMode';
 
 // Storage keys
 const STORAGE_KEYS = {
@@ -7,6 +8,8 @@ const STORAGE_KEYS = {
   USER_DATA: 'userData',
   MENU_ITEMS: 'menuItems',
   FCM_TOKEN: 'fcmToken',
+  /** CRM lookup payload from /api/cr5010/LO_Mode; shared by CRM screens on this device (AsyncStorage is local per install). */
+  CRM_LO_MODE: 'crmLoModeData',
 };
 
 // User storage utility class
@@ -122,6 +125,28 @@ class UserStorage {
     }
   }
 
+  static async storeCrmLoModeData(data: CrmLoModeResponse): Promise<void> {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.CRM_LO_MODE, JSON.stringify(data));
+    } catch (error) {
+      console.error('Error storing CRM LO_Mode data:', error);
+      throw error;
+    }
+  }
+
+  static async getCrmLoModeData(): Promise<CrmLoModeResponse | null> {
+    try {
+      const raw = await AsyncStorage.getItem(STORAGE_KEYS.CRM_LO_MODE);
+      if (!raw) {
+        return null;
+      }
+      return JSON.parse(raw) as CrmLoModeResponse;
+    } catch (error) {
+      console.error('Error getting CRM LO_Mode data:', error);
+      return null;
+    }
+  }
+
   // Clear all user session data (logout)
   static async clearSessionData(): Promise<void> {
     try {
@@ -129,6 +154,7 @@ class UserStorage {
         STORAGE_KEYS.USER_TOKEN,
         STORAGE_KEYS.USER_DATA,
         STORAGE_KEYS.MENU_ITEMS,
+        STORAGE_KEYS.CRM_LO_MODE,
       ]);
     } catch (error) {
       console.error('Error clearing session data:', error);

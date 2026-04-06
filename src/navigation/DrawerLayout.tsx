@@ -31,6 +31,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import CrmDashboardMenu from '../screens/crm/crmdashboardmenu';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LeadorDealScreen from '../screens/crm/leadordealscreen';
+import LeadOrDealCrudScreen from '../screens/crm/leadordealcrudscreen';
 
 const Stack = createStackNavigator();
 
@@ -220,8 +221,9 @@ const InnerStack = () => (
         <Stack.Screen name="leadordeal" component={LeadorDealScreen} options={({ navigation, route }) => ({
           header: () => <Header navigation={navigation} route={route} />
         })} />
-
-
+        <Stack.Screen name="leadordealcrud" component={LeadOrDealCrudScreen} options={({ navigation, route }) => ({
+          header: () => <Header navigation={navigation} route={route} />
+        })} />
 
   </Stack.Navigator>
 );

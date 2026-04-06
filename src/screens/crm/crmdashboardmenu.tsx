@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 import UserStorage from '../../utils/userStorage';
-import { getFileUrl } from '../../config/apiConfig';
+import { API_CONFIG, getApiUrl, getFileUrl } from '../../config/apiConfig';
+import type { CrmLoModeResponse } from '../../types/crmLoMode';
 
 const menuItems = [
   { text: 'Lead', url: 'leadordeal', image: '', params: { StatusId: 1, menutype: 1 } },
@@ -18,6 +20,8 @@ const menuItems = [
 
 const CrmDashboardMenu = () => {
   const [userData, setUserData] = useState<any>(null);
+  const [loModeLoading, setLoModeLoading] = useState(true);
+  const [loModeError, setLoModeError] = useState<string | null>(null);
   const navigation = useNavigation<any>();
 
   useEffect(() => {
@@ -32,7 +36,46 @@ const CrmDashboardMenu = () => {
       }
     };
 
+    const fetchAndStoreLoMode = async () => {
+      setLoModeLoading(true);
+      setLoModeError(null);
+      try {
+        const token = await UserStorage.getToken();
+        const storedUser = await UserStorage.getUserData();
+        if (!token) {
+          setLoModeError('Not signed in.');
+          return;
+        }
+
+        const compid = storedUser?.CompId ?? 0;
+        const userId = storedUser?.UserId ?? 0;
+        const apiurl = getApiUrl('/api/cr5010/LO_Mode');
+        const requestBody = {
+          Compid: String(compid),
+          LanguageId: '1',
+          UserId: String(userId),
+          Status: '1',
+        };
+
+        const response = await axios.post<CrmLoModeResponse>(apiurl, requestBody, {
+          headers: {
+            ...API_CONFIG.DEFAULT_HEADERS,
+            Authorization: `Bearer ${token}`,
+          },
+          timeout: API_CONFIG.TIMEOUT,
+        });
+
+        await UserStorage.storeCrmLoModeData(response.data);
+      } catch (error: any) {
+        console.error('CRM Dashboard: LO_Mode fetch failed:', error);
+        setLoModeError(error?.message || 'Failed to load CRM options.');
+      } finally {
+        setLoModeLoading(false);
+      }
+    };
+
     loadUserData();
+    fetchAndStoreLoMode();
   }, []);
 
   const handleMenuPress = async (url: string, params?: Record<string, unknown>) => {
@@ -58,8 +101,20 @@ const CrmDashboardMenu = () => {
     }
   };
 
+  if (loModeLoading) {
+    return (
+      <View style={styles.loadingWrap}>
+        <ActivityIndicator size="large" color="#811458" />
+        <Text style={styles.loadingText}>Loading CRM…</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {loModeError ? (
+        <Text style={styles.bannerError}>{loModeError}</Text>
+      ) : null}
       <View style={styles.logoContainer}>
         <View style={styles.profilepic}>
           <Image
@@ -96,6 +151,24 @@ const CrmDashboardMenu = () => {
 };
 
 const styles = StyleSheet.create({
+  loadingWrap: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    padding: 24,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#374151',
+  },
+  bannerError: {
+    color: '#b91c1c',
+    fontSize: 14,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
   container: {
     paddingHorizontal: 16,
     paddingVertical: 20,

@@ -126,7 +126,13 @@ const LeadOrDealScreen = () => {
         <View style={styles.pagewrap}>
           <Text style={styles.pagetitle}>{screenTitle}</Text>
         </View>
-        <TouchableOpacity style={styles.rightclick} />
+        <TouchableOpacity
+          style={styles.newEntryButton}
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('leadordealcrud', { StatusId: statusId })}
+        >
+          <Text style={styles.newEntryButtonText}>New Entry</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.topControlsContainer}>
@@ -197,6 +203,20 @@ const LeadOrDealScreen = () => {
                   <Text style={styles.lbl}>Status:</Text>
                   <Text style={styles.vlue}>{item.StatusName || item.Status?.toString?.() || '-'}</Text>
                 </View>
+                <View style={styles.editRow}>
+                  <TouchableOpacity
+                    style={styles.editButton}
+                    activeOpacity={0.8}
+                    onPress={() =>
+                      navigation.navigate('leadordealcrud', {
+                        StatusId: statusId,
+                        searchid: item.RelationId,
+                      })
+                    }
+                  >
+                    <Text style={styles.editButtonText}>✎  Edit</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             )}
           </View>
@@ -224,8 +244,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   pagewrap: {
-    width: '100%',
-    paddingRight: 50,
+    flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
   },
@@ -240,8 +259,19 @@ const styles = StyleSheet.create({
     width: 25,
     height: 25,
   },
-  rightclick: {
-    width: 110,
+  newEntryButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: '#811458',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 92,
+  },
+  newEntryButtonText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '700',
   },
   topControlsContainer: {
     flexDirection: 'row',
@@ -342,6 +372,26 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#000000',
     paddingLeft: 12,
+  },
+  editRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingTop: 6,
+    paddingBottom: 4,
+    paddingRight: 4,
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#133F7C',
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  editButtonText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '700',
   },
   emptyText: {
     fontSize: 12,
