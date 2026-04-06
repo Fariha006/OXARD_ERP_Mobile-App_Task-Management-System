@@ -26,6 +26,9 @@ import UserStorage from '../../utils/userStorage';
 
 type DropdownOption = { label: string; value: string };
 
+type RawProduct    = { ProductId: number; ProductCode: string; ProductName: string };
+type RawLeadSource = { LeadSourceId: number; LeadSourceCode: string; LeadSourceName: string };
+
 type FormState = {
   RelationId: string;
   RegisterDate: string;
@@ -147,7 +150,11 @@ const LeadOrDealCrudScreen = () => {
   const [leadTypeOptions, setLeadTypeOptions] = useState<DropdownOption[]>([]);
   const [accountOptions, setAccountOptions] = useState<DropdownOption[]>([]);
   const [productOptions, setProductOptions] = useState<DropdownOption[]>([]);
+  const [rawProductData, setRawProductData] = useState<RawProduct[]>([]);
   const [leadSourceOptions, setLeadSourceOptions] = useState<DropdownOption[]>([]);
+  const [rawLeadSourceData, setRawLeadSourceData] = useState<RawLeadSource[]>([]);
+  const [defaultLeadStatusId, setDefaultLeadStatusId] = useState<string>('0');
+  const [defaultDealStatusId, setDefaultDealStatusId] = useState<string>('0');
 
   // ── Load LO_Mode lookup data ──────────────────────────────────────────────
 
@@ -167,20 +174,36 @@ const LeadOrDealCrudScreen = () => {
           );
         }
 
-        // Item3 → Products  { ProductId, ProductName }
+        // Item3 → Products  { ProductId, ProductCode, ProductName }
         if (Array.isArray(data.Item3)) {
+          const items = data.Item3 as any[];
+          setRawProductData(
+            items.map((i) => ({
+              ProductId:   Number(i.ProductId ?? 0),
+              ProductCode: String(i.ProductCode ?? ''),
+              ProductName: String(i.ProductName ?? ''),
+            })),
+          );
           setProductOptions(
-            (data.Item3 as any[]).map((i) => ({
+            items.map((i) => ({
               label: i.ProductName ?? String(i.ProductId ?? ''),
               value: String(i.ProductId ?? ''),
             })),
           );
         }
 
-        // Item4 → Lead Source  { LeadSourceId, LeadSourceName }
+        // Item4 → Lead Source  { LeadSourceId, LeadSourceCode, LeadSourceName }
         if (Array.isArray(data.Item4)) {
+          const items = data.Item4 as any[];
+          setRawLeadSourceData(
+            items.map((i) => ({
+              LeadSourceId:   Number(i.LeadSourceId ?? 0),
+              LeadSourceCode: String(i.LeadSourceCode ?? ''),
+              LeadSourceName: String(i.LeadSourceName ?? ''),
+            })),
+          );
           setLeadSourceOptions(
-            (data.Item4 as any[]).map((i) => ({
+            items.map((i) => ({
               label: i.LeadSourceName ?? String(i.LeadSourceId ?? ''),
               value: String(i.LeadSourceId ?? ''),
             })),
@@ -195,6 +218,18 @@ const LeadOrDealCrudScreen = () => {
               value: String(i.AccountId ?? ''),
             })),
           );
+        }
+
+        // Rest.Item7 → Lead Status  { id, text, color } — use first item's id as default
+        const restItem7 = (data.Rest as any)?.Item7;
+        if (Array.isArray(restItem7) && restItem7.length > 0) {
+          setDefaultLeadStatusId(String((restItem7[0] as any).id ?? '0'));
+        }
+
+        // Rest.Rest.Item7 → Deal Status  { id, text, color } — use first item's id as default
+        const restRestItem7 = (data.Rest as any)?.Rest?.Item7;
+        if (Array.isArray(restRestItem7) && restRestItem7.length > 0) {
+          setDefaultDealStatusId(String((restRestItem7[0] as any).id ?? '0'));
         }
       } catch (e) {
         console.error('LeadOrDealCrudScreen: failed to load lookup data', e);
@@ -327,10 +362,24 @@ const LeadOrDealCrudScreen = () => {
         Status:         '1',
         AccountName:    form.CompanyName,
         IsAccount:      form.FkAccountId ? '1' : '0',
-        LeadStatus:     '0',
-        DealStatus:     '0',
-        cr0030List:     form.cr0030List.join(','),
-        cr0040List:     form.cr0040List.join(','),
+        LeadStatus:     defaultLeadStatusId,
+        DealStatus:     defaultDealStatusId,
+        cr0030List:     form.cr0030List.map((id) => {
+          const p = rawProductData.find((r) => String(r.ProductId) === id);
+          return {
+            ProductId:   p?.ProductId   ?? Number(id),
+            ProductCode: p?.ProductCode ?? '',
+            ProductName: p?.ProductName ?? '',
+          };
+        }),
+        cr0040List:     form.cr0040List.map((id) => {
+          const s = rawLeadSourceData.find((r) => String(r.LeadSourceId) === id);
+          return {
+            LeadSourceId:   s?.LeadSourceId   ?? Number(id),
+            LeadSourceCode: s?.LeadSourceCode ?? '',
+            LeadSourceName: s?.LeadSourceName ?? '',
+          };
+        }),
       };
 
       const apiUrl = getApiUrl('/api/cr5010/I_U_D_Mode');
