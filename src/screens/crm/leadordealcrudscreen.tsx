@@ -24,7 +24,7 @@ import UserStorage from '../../utils/userStorage';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type DropdownOption = { label: string; value: string };
+type DropdownOption = { label: string; value: string; color?: string };
 
 type RawProduct    = { ProductId: number; ProductCode: string; ProductName: string };
 type RawLeadSource = { LeadSourceId: number; LeadSourceCode: string; LeadSourceName: string };
@@ -233,6 +233,7 @@ const LeadOrDealCrudScreen = () => {
           const opts = restItem7.map((i: any) => ({
             label: String(i.text ?? ''),
             value: String(i.id ?? ''),
+            color: i.color ? String(i.color) : undefined,
           }));
           setLeadStatusOptions(opts);
           const firstId = String((restItem7[0] as any).id ?? '0');
@@ -248,6 +249,7 @@ const LeadOrDealCrudScreen = () => {
           const opts = restRestItem1.map((i: any) => ({
             label: String(i.text ?? ''),
             value: String(i.id ?? ''),
+            color: i.color ? String(i.color) : undefined,
           }));
           setDealStatusOptions(opts);
           const firstId = String((restRestItem1[0] as any).id ?? '0');
@@ -363,6 +365,59 @@ const LeadOrDealCrudScreen = () => {
     }
   };
 
+  const handleStatusChange = (newValue: string, label: string) => {
+    setActiveDropdown(null);
+    Alert.alert(
+      'Change Status',
+      `Do you want to change status to "${label}"?`,
+      [
+        { text: 'No', style: 'cancel' },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            try {
+              const token    = await UserStorage.getToken();
+              const userData = await UserStorage.getUserData();
+              const compid   = String(userData?.CompId ?? '0');
+              const userId   = String(userData?.UserId ?? '0');
+
+              const apiUrl = getApiUrl('/api/cr5010/Status_Mode');
+              const response = await axios.post<{ ReplyStatus: string }[]>(
+                apiUrl,
+                {
+                  Compid:     compid,
+                  LanguageId: '1',
+                  UserId:     userId,
+                  RelationId: form.RelationId,
+                  Status:     newValue,
+                },
+                {
+                  headers: {
+                    ...API_CONFIG.DEFAULT_HEADERS,
+                    Authorization: `Bearer ${token}`,
+                  },
+                  timeout: API_CONFIG.TIMEOUT,
+                },
+              );
+
+              const result = Array.isArray(response.data) ? response.data[0] : null;
+              if (result?.ReplyStatus === 'Success') {
+                setField('StatusId', newValue);
+              } else {
+                Alert.alert('Error', 'Failed to update status. Please try again.');
+              }
+            } catch (error: any) {
+              const message = error?.response?.data?.message
+                ?? error?.message
+                ?? 'Failed to update status.';
+              Alert.alert('Error', message);
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const optionsForKey = (key: DropdownKey): DropdownOption[] => {
     switch (key) {
       case 'LeadTypeId':  return leadTypeOptions;
@@ -378,6 +433,9 @@ const LeadOrDealCrudScreen = () => {
     const opts = optionsForKey(key);
     return opts.find((o) => o.value === form[key])?.label ?? '';
   };
+
+  const colorForKey = (key: SingleDropdownKey): string | undefined =>
+    optionsForKey(key).find((o) => o.value === form[key])?.color;
 
   const placeholderForKey = (key: DropdownKey): string => {
     switch (key) {
@@ -470,7 +528,7 @@ const LeadOrDealCrudScreen = () => {
         RelationId:     form.RelationId      || '0',
         RegisterDate:   form.RegisterDate,
         LeadTypeId:     form.LeadTypeId      || '0',
-        FkAccountId:    form.FkAccountId     || '0',
+        FkAccountId:    (form.FkAccountId && form.FkAccountId !== '0') ? form.FkAccountId : null,
         CompanyName:    form.CompanyName,
         ContactPerson:  form.ContactPerson,
         MobileNumber:   form.MobileNumber,
@@ -609,10 +667,17 @@ const LeadOrDealCrudScreen = () => {
                       style={[styles.pickerItem, isSelected && styles.pickerItemActive]}
                       activeOpacity={0.7}
                       onPress={() => {
-                        setField(activeDropdown, item.value);
-                        setActiveDropdown(null);
+                        if (activeDropdown === 'StatusId') {
+                          handleStatusChange(item.value, item.label);
+                        } else {
+                          setField(activeDropdown, item.value);
+                          setActiveDropdown(null);
+                        }
                       }}
                     >
+                      {item.color && (
+                        <View style={[styles.statusDot, { backgroundColor: item.color }]} />
+                      )}
                       <Text style={[styles.pickerItemText, isSelected && styles.pickerItemTextActive]}>
                         {item.label}
                       </Text>
@@ -752,15 +817,38 @@ const LeadOrDealCrudScreen = () => {
         >
           <View style={styles.formCard}>
 
-            {/* Relation Track No — read-only, shown only for existing records */}
+            {/* Relation Track No + Status — shown only for existing records */}
             {Number(form.RelationId) > 0 && (
-              <InputField label="Relation Track No">
-                <View style={styles.readonlyField}>
-                  <Text style={styles.readonlyValue}>
-                    {form.RelationTrackNo || '-'}
-                  </Text>
+              <View style={styles.rowTwo}>
+                <View style={styles.rowTwoItem}>
+                  <InputField label="Relation Track No">
+                    <View style={styles.readonlyField}>
+                      <Text style={styles.readonlyValue}>
+                        {form.RelationTrackNo || '-'}
+                      </Text>
+                    </View>
+                  </InputField>
                 </View>
-              </InputField>
+                <View style={styles.rowTwoItem}>
+                  <InputField label="Status" error={errors.StatusId}>
+                    <TouchableOpacity
+                      style={styles.dropdownBtn}
+                      onPress={() => setActiveDropdown('StatusId')}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.statusBtnInner}>
+                        {colorForKey('StatusId') && (
+                          <View style={[styles.statusDot, { backgroundColor: colorForKey('StatusId') }]} />
+                        )}
+                        <Text style={form.StatusId ? styles.dropdownValue : styles.dropdownPlaceholder}>
+                          {labelForKey('StatusId') || placeholderForKey('StatusId')}
+                        </Text>
+                      </View>
+                      <Text style={styles.dropdownChevron}>▼</Text>
+                    </TouchableOpacity>
+                  </InputField>
+                </View>
+              </View>
             )}
 
             {/* Register Date */}
@@ -942,21 +1030,6 @@ const LeadOrDealCrudScreen = () => {
               />
             </InputField>
 
-            {/* Status — only visible when editing an existing record */}
-            {Number(form.RelationId) > 0 && (
-              <InputField label="Status" error={errors.StatusId}>
-                <TouchableOpacity
-                  style={styles.dropdownBtn}
-                  onPress={() => setActiveDropdown('StatusId')}
-                  activeOpacity={0.7}
-                >
-                  <Text style={form.StatusId ? styles.dropdownValue : styles.dropdownPlaceholder}>
-                    {labelForKey('StatusId') || placeholderForKey('StatusId')}
-                  </Text>
-                  <Text style={styles.dropdownChevron}>▼</Text>
-                </TouchableOpacity>
-              </InputField>
-            )}
 
           </View>
 
@@ -969,14 +1042,6 @@ const LeadOrDealCrudScreen = () => {
               disabled={isSaving}
             >
               <Text style={styles.footerBtnTextDark}>Clear</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.footerBtn, styles.btnDelete, isSaving && styles.btnDisabled]}
-              onPress={handleDelete}
-              activeOpacity={0.8}
-              disabled={isSaving}
-            >
-              <Text style={styles.footerBtnText}>Delete</Text>
             </TouchableOpacity>
             {/* Save — split button */}
             <View style={[styles.footerBtn, styles.btnSave, styles.splitWrapper, isSaving && styles.btnDisabled]}>
@@ -1110,6 +1175,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
   },
   flex: {
+    flex: 1,
+  },
+
+  /* Two-column row */
+  rowTwo: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  rowTwoItem: {
     flex: 1,
   },
 
@@ -1389,6 +1463,20 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: '#f5f5f5',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  statusDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  statusBtnInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
   },
   pickerItemActive: {
     backgroundColor: '#fdf0f7',
@@ -1495,7 +1583,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e53935',
   },
   btnSave: {
-    backgroundColor: '#2e7d32',
+    backgroundColor: '#811458',
   },
   btnDisabled: {
     opacity: 0.55,

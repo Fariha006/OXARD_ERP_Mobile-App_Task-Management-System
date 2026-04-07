@@ -383,13 +383,13 @@ const styles = StyleSheet.create({
   editButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#133F7C',
+    backgroundColor: '#f59e0b',
     borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
   editButtonText: {
-    color: '#ffffff',
+    color: '#1a1a1a',
     fontSize: 12,
     fontWeight: '700',
   },
