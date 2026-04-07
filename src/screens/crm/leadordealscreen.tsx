@@ -129,7 +129,7 @@ const LeadOrDealScreen = () => {
         <TouchableOpacity
           style={styles.newEntryButton}
           activeOpacity={0.8}
-          onPress={() => navigation.navigate('leadordealcrud', { StatusId: statusId })}
+          onPress={() => navigation.navigate('leadordealcrud', { StatusId: statusId,RelationId: 0 })}
         >
           <Text style={styles.newEntryButtonText}>New Entry</Text>
         </TouchableOpacity>

@@ -42,13 +42,14 @@ type FormState = {
   cr0040List: string[];   // Lead Source — multi-select
   ExpectedBudget: string;
   Requirements: string;
+  StatusId: string;
 };
 
 type StringFormKey = Exclude<keyof FormState, 'cr0030List' | 'cr0040List'>;
 
 type FormErrors = Partial<Record<keyof FormState, string>>;
 
-type SingleDropdownKey = 'LeadTypeId' | 'FkAccountId';
+type SingleDropdownKey = 'LeadTypeId' | 'FkAccountId' | 'StatusId';
 type MultiDropdownKey  = 'cr0030List' | 'cr0040List';
 type DropdownKey = SingleDropdownKey | MultiDropdownKey;
 
@@ -67,6 +68,7 @@ const INITIAL_FORM: FormState = {
   cr0040List: [],
   ExpectedBudget: '',
   Requirements: '',
+  StatusId: '',
 };
 
 // ─── Reusable InputField component ───────────────────────────────────────────
@@ -155,6 +157,8 @@ const LeadOrDealCrudScreen = () => {
   const [rawLeadSourceData, setRawLeadSourceData] = useState<RawLeadSource[]>([]);
   const [defaultLeadStatusId, setDefaultLeadStatusId] = useState<string>('0');
   const [defaultDealStatusId, setDefaultDealStatusId] = useState<string>('0');
+  const [leadStatusOptions, setLeadStatusOptions] = useState<DropdownOption[]>([]);
+  const [dealStatusOptions, setDealStatusOptions] = useState<DropdownOption[]>([]);
 
   // ── Load LO_Mode lookup data ──────────────────────────────────────────────
 
@@ -220,16 +224,34 @@ const LeadOrDealCrudScreen = () => {
           );
         }
 
-        // Rest.Item7 → Lead Status  { id, text, color } — use first item's id as default
+        // Rest.Item7 → Lead Status options  { id, text, color }
         const restItem7 = (data.Rest as any)?.Item7;
         if (Array.isArray(restItem7) && restItem7.length > 0) {
-          setDefaultLeadStatusId(String((restItem7[0] as any).id ?? '0'));
+          const opts = restItem7.map((i: any) => ({
+            label: String(i.text ?? ''),
+            value: String(i.id ?? ''),
+          }));
+          setLeadStatusOptions(opts);
+          const firstId = String((restItem7[0] as any).id ?? '0');
+          setDefaultLeadStatusId(firstId);
+          if (statusId !== 2) {
+            setForm((prev) => ({ ...prev, StatusId: firstId }));
+          }
         }
 
-        // Rest.Rest.Item7 → Deal Status  { id, text, color } — use first item's id as default
-        const restRestItem7 = (data.Rest as any)?.Rest?.Item7;
-        if (Array.isArray(restRestItem7) && restRestItem7.length > 0) {
-          setDefaultDealStatusId(String((restRestItem7[0] as any).id ?? '0'));
+        // Rest.Rest.Item1 → Deal Status options  { id, text, color }
+        const restRestItem1 = (data.Rest as any)?.Rest?.Item1;
+        if (Array.isArray(restRestItem1) && restRestItem1.length > 0) {
+          const opts = restRestItem1.map((i: any) => ({
+            label: String(i.text ?? ''),
+            value: String(i.id ?? ''),
+          }));
+          setDealStatusOptions(opts);
+          const firstId = String((restRestItem1[0] as any).id ?? '0');
+          setDefaultDealStatusId(firstId);
+          if (statusId === 2) {
+            setForm((prev) => ({ ...prev, StatusId: firstId }));
+          }
         }
       } catch (e) {
         console.error('LeadOrDealCrudScreen: failed to load lookup data', e);
@@ -254,6 +276,7 @@ const LeadOrDealCrudScreen = () => {
       case 'FkAccountId': return accountOptions;
       case 'cr0030List':  return productOptions;
       case 'cr0040List':  return leadSourceOptions;
+      case 'StatusId':    return statusId === 2 ? dealStatusOptions : leadStatusOptions;
     }
   };
 
@@ -269,6 +292,7 @@ const LeadOrDealCrudScreen = () => {
       case 'FkAccountId': return 'Select account';
       case 'cr0030List':  return 'Select products';
       case 'cr0040List':  return 'Select lead sources';
+      case 'StatusId':    return 'Select status';
     }
   };
 
@@ -278,6 +302,7 @@ const LeadOrDealCrudScreen = () => {
       case 'FkAccountId': return 'Account';
       case 'cr0030List':  return 'Products';
       case 'cr0040List':  return 'Lead Source';
+      case 'StatusId':    return 'Status';
     }
   };
 
@@ -362,8 +387,8 @@ const LeadOrDealCrudScreen = () => {
         Status:         '1',
         AccountName:    form.CompanyName,
         IsAccount:      form.FkAccountId ? '1' : '0',
-        LeadStatus:     defaultLeadStatusId,
-        DealStatus:     defaultDealStatusId,
+        LeadStatus:     statusId !== 2 ? (form.StatusId || defaultLeadStatusId) : defaultLeadStatusId,
+        DealStatus:     statusId === 2 ? (form.StatusId || defaultDealStatusId) : defaultDealStatusId,
         cr0030List:     form.cr0030List.map((id) => {
           const p = rawProductData.find((r) => String(r.ProductId) === id);
           return {
@@ -811,6 +836,20 @@ const LeadOrDealCrudScreen = () => {
                 numberOfLines={5}
                 textAlignVertical="top"
               />
+            </InputField>
+
+            {/* Status */}
+            <InputField label="Status" error={errors.StatusId}>
+              <TouchableOpacity
+                style={styles.dropdownBtn}
+                onPress={() => setActiveDropdown('StatusId')}
+                activeOpacity={0.7}
+              >
+                <Text style={form.StatusId ? styles.dropdownValue : styles.dropdownPlaceholder}>
+                  {labelForKey('StatusId') || placeholderForKey('StatusId')}
+                </Text>
+                <Text style={styles.dropdownChevron}>▼</Text>
+              </TouchableOpacity>
             </InputField>
 
           </View>
