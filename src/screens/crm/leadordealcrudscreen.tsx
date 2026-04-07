@@ -145,6 +145,7 @@ const LeadOrDealCrudScreen = () => {
 
   // API submission state
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingRecord, setIsLoadingRecord] = useState(false);
 
   // tracks the persisted RelationId; tabs are enabled only when > 0
   const [savedRelationId, setSavedRelationId] = useState<number>(searchid ?? 0);
@@ -260,6 +261,95 @@ const LeadOrDealCrudScreen = () => {
 
     loadLookupData();
   }, []);
+
+  // ── Load existing record when RelationId > 0 ─────────────────────────────
+
+  useEffect(() => {
+    if (!searchid || searchid <= 0) { return; }
+
+    const loadRecord = async () => {
+      try {
+        setIsLoadingRecord(true);
+
+        const token    = await UserStorage.getToken();
+        const userData = await UserStorage.getUserData();
+
+        if (!token) { return; }
+
+        const requestBody = {
+          RelationId: String(searchid),
+          Compid:     userData?.CompId  ?? 0,
+          UserId:     userData?.UserId  ?? 0,
+          LanguageId: 1,
+          Status:     statusId,
+        };
+
+        const apiUrl   = getApiUrl('/api/cr5010/SE_Mode');
+        const response = await axios.post<any>(apiUrl, requestBody, {
+          headers: {
+            ...API_CONFIG.DEFAULT_HEADERS,
+            Authorization: `Bearer ${token}`,
+          },
+          timeout: API_CONFIG.TIMEOUT,
+        });
+
+        const res = response.data;
+
+        // Item1[0] → header fields
+        const rec = Array.isArray(res?.Item1) && res.Item1.length > 0 ? res.Item1[0] : null;
+        if (rec) {
+          setForm((prev) => ({
+            ...prev,
+            RelationId:     String(rec.RelationId    ?? prev.RelationId),
+            RegisterDate:   rec.RegisterDate
+              ? String(rec.RegisterDate).split('T')[0]
+              : prev.RegisterDate,
+            LeadTypeId:     String(rec.LeadTypeId    ?? ''),
+            FkAccountId:    String(rec.FkAccountId   ?? ''),
+            CompanyName:    String(rec.CompanyName    ?? ''),
+            ContactPerson:  String(rec.ContactPerson  ?? ''),
+            MobileNumber:   String(rec.MobileNumber   ?? ''),
+            Email:          String(rec.Email          ?? ''),
+            ExpectedBudget: rec.ExpectedBudget != null ? String(rec.ExpectedBudget) : '',
+            Requirements:   String(rec.Requirements   ?? ''),
+          }));
+          if (rec.RelationId > 0) {
+            setSavedRelationId(Number(rec.RelationId));
+          }
+        }
+
+        // Item2 → Products (cr0030List)
+        if (Array.isArray(res?.Item2)) {
+          setForm((prev) => ({
+            ...prev,
+            cr0030List: (res.Item2 as any[]).map((p) => String(p.ProductId ?? '')),
+          }));
+        }
+
+        // Item3 → Lead Source (cr0040List)
+        if (Array.isArray(res?.Item3)) {
+          setForm((prev) => ({
+            ...prev,
+            cr0040List: (res.Item3 as any[]).map((s) => String(s.LeadSourceId ?? '')),
+          }));
+        }
+
+        // Item7[0] → Status
+        if (Array.isArray(res?.Item7) && res.Item7.length > 0) {
+          setForm((prev) => ({
+            ...prev,
+            StatusId: String((res.Item7[0] as any).id ?? ''),
+          }));
+        }
+      } catch (e) {
+        console.error('LeadOrDealCrudScreen: failed to load record', e);
+      } finally {
+        setIsLoadingRecord(false);
+      }
+    };
+
+    loadRecord();
+  }, [searchid]);
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -608,6 +698,17 @@ const LeadOrDealCrudScreen = () => {
 
   // ── Render ────────────────────────────────────────────────────────────────
 
+  if (isLoadingRecord) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#811458" />
+          <Text style={styles.loadingText}>Loading record…</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
 
@@ -838,19 +939,21 @@ const LeadOrDealCrudScreen = () => {
               />
             </InputField>
 
-            {/* Status */}
-            <InputField label="Status" error={errors.StatusId}>
-              <TouchableOpacity
-                style={styles.dropdownBtn}
-                onPress={() => setActiveDropdown('StatusId')}
-                activeOpacity={0.7}
-              >
-                <Text style={form.StatusId ? styles.dropdownValue : styles.dropdownPlaceholder}>
-                  {labelForKey('StatusId') || placeholderForKey('StatusId')}
-                </Text>
-                <Text style={styles.dropdownChevron}>▼</Text>
-              </TouchableOpacity>
-            </InputField>
+            {/* Status — only visible when editing an existing record */}
+            {Number(form.RelationId) > 0 && (
+              <InputField label="Status" error={errors.StatusId}>
+                <TouchableOpacity
+                  style={styles.dropdownBtn}
+                  onPress={() => setActiveDropdown('StatusId')}
+                  activeOpacity={0.7}
+                >
+                  <Text style={form.StatusId ? styles.dropdownValue : styles.dropdownPlaceholder}>
+                    {labelForKey('StatusId') || placeholderForKey('StatusId')}
+                  </Text>
+                  <Text style={styles.dropdownChevron}>▼</Text>
+                </TouchableOpacity>
+              </InputField>
+            )}
 
           </View>
 
@@ -1005,6 +1108,20 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
+  },
+
+  /* Loading overlay */
+  loadingOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#811458',
+    fontWeight: '600',
   },
 
   /* Top bar */
