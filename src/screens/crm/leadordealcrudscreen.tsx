@@ -31,6 +31,7 @@ type RawLeadSource = { LeadSourceId: number; LeadSourceCode: string; LeadSourceN
 
 type FormState = {
   RelationId: string;
+  RelationTrackNo: string;
   RegisterDate: string;
   LeadTypeId: string;
   FkAccountId: string;
@@ -57,6 +58,7 @@ type DropdownKey = SingleDropdownKey | MultiDropdownKey;
 
 const INITIAL_FORM: FormState = {
   RelationId: '',
+  RelationTrackNo: '',
   RegisterDate: new Date().toISOString().split('T')[0],
   LeadTypeId: '',
   FkAccountId: '',
@@ -300,18 +302,19 @@ const LeadOrDealCrudScreen = () => {
         if (rec) {
           setForm((prev) => ({
             ...prev,
-            RelationId:     String(rec.RelationId    ?? prev.RelationId),
-            RegisterDate:   rec.RegisterDate
+            RelationId:      String(rec.RelationId      ?? prev.RelationId),
+            RelationTrackNo: String(rec.RelationTrackNo ?? ''),
+            RegisterDate:    rec.RegisterDate
               ? String(rec.RegisterDate).split('T')[0]
               : prev.RegisterDate,
-            LeadTypeId:     String(rec.LeadTypeId    ?? ''),
-            FkAccountId:    String(rec.FkAccountId   ?? ''),
-            CompanyName:    String(rec.CompanyName    ?? ''),
-            ContactPerson:  String(rec.ContactPerson  ?? ''),
-            MobileNumber:   String(rec.MobileNumber   ?? ''),
-            Email:          String(rec.Email          ?? ''),
-            ExpectedBudget: rec.ExpectedBudget != null ? String(rec.ExpectedBudget) : '',
-            Requirements:   String(rec.Requirements   ?? ''),
+            LeadTypeId:      String(rec.LeadTypeId    ?? ''),
+            FkAccountId:     String(rec.FkAccountId   ?? ''),
+            CompanyName:     String(rec.CompanyName    ?? ''),
+            ContactPerson:   String(rec.ContactPerson  ?? ''),
+            MobileNumber:    String(rec.MobileNumber   ?? ''),
+            Email:           String(rec.Email          ?? ''),
+            ExpectedBudget:  rec.ExpectedBudget != null ? String(rec.ExpectedBudget) : '',
+            Requirements:    String(rec.Requirements   ?? ''),
           }));
           if (rec.RelationId > 0) {
             setSavedRelationId(Number(rec.RelationId));
@@ -749,16 +752,16 @@ const LeadOrDealCrudScreen = () => {
         >
           <View style={styles.formCard}>
 
-            {/* Relation Track No */}
-            <InputField label="Relation Track No" error={errors.RelationId}>
-              <TextInput
-                style={styles.textInput}
-                value={form.RelationId}
-                onChangeText={(v) => setField('RelationId', v)}
-                placeholder="Enter relation track no"
-                placeholderTextColor="#b0bec5"
-              />
-            </InputField>
+            {/* Relation Track No — read-only, shown only for existing records */}
+            {Number(form.RelationId) > 0 && (
+              <InputField label="Relation Track No">
+                <View style={styles.readonlyField}>
+                  <Text style={styles.readonlyValue}>
+                    {form.RelationTrackNo || '-'}
+                  </Text>
+                </View>
+              </InputField>
+            )}
 
             {/* Register Date */}
             <InputField label="Register Date" error={errors.RegisterDate}>
@@ -1108,6 +1111,21 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
+  },
+
+  /* Read-only display field */
+  readonlyField: {
+    borderWidth: 1,
+    borderColor: '#DEECFF',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+    backgroundColor: '#f4f8ff',
+  },
+  readonlyValue: {
+    fontSize: 14,
+    color: '#374151',
+    fontWeight: '600',
   },
 
   /* Loading overlay */
