@@ -1133,8 +1133,15 @@ const LeadOrDealCrudScreen = () => {
                     activeOpacity={tabDisabled ? 1 : 0.7}
                     disabled={tabDisabled}
                     onPress={() => {
-                      setActiveTab(tab.key);
                       setShowKebabPanel(false);
+                      if (tab.key === 'company') {
+                        navigation.navigate('companycrud', {
+                          RelationId: savedRelationId,
+                          pagetype:   statusId,
+                        });
+                      } else {
+                        setActiveTab(tab.key);
+                      }
                     }}
                   >
                     <View style={[
