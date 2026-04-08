@@ -477,35 +477,31 @@ const CompanyCrudScreen = () => {
               </TouchableOpacity>
             </InputField>
 
-            {/* Currency + Exch. Rate */}
-            <View style={styles.rowTwo}>
-              <View style={styles.rowTwoItem}>
-                <InputField label="Currency *" error={errors.FkCurrId}>
-                  <TouchableOpacity
-                    style={styles.dropdownBtn}
-                    onPress={() => setActiveDropdown('FkCurrId')}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={form.FkCurrId ? styles.dropdownValue : styles.dropdownPlaceholder}>
-                      {labelForKey('FkCurrId') || placeholderForKey('FkCurrId')}
-                    </Text>
-                    <Text style={styles.dropdownChevron}>▼</Text>
-                  </TouchableOpacity>
-                </InputField>
-              </View>
-              <View style={styles.rowTwoItem}>
-                <InputField label="Exch. Rate *" error={errors.ExchRate}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={form.ExchRate}
-                    onChangeText={(v) => setField('ExchRate', v)}
-                    placeholder="1"
-                    placeholderTextColor="#b0bec5"
-                    keyboardType="numeric"
-                  />
-                </InputField>
-              </View>
-            </View>
+            {/* Currency */}
+            <InputField label="Currency *" error={errors.FkCurrId}>
+              <TouchableOpacity
+                style={styles.dropdownBtn}
+                onPress={() => setActiveDropdown('FkCurrId')}
+                activeOpacity={0.7}
+              >
+                <Text style={form.FkCurrId ? styles.dropdownValue : styles.dropdownPlaceholder}>
+                  {labelForKey('FkCurrId') || placeholderForKey('FkCurrId')}
+                </Text>
+                <Text style={styles.dropdownChevron}>▼</Text>
+              </TouchableOpacity>
+            </InputField>
+
+            {/* Exch. Rate */}
+            <InputField label="Exch. Rate *" error={errors.ExchRate}>
+              <TextInput
+                style={styles.textInput}
+                value={form.ExchRate}
+                onChangeText={(v) => setField('ExchRate', v)}
+                placeholder="1"
+                placeholderTextColor="#b0bec5"
+                keyboardType="numeric"
+              />
+            </InputField>
 
             {/* Country */}
             <InputField label="Country *" error={errors.FkCountryId}>
@@ -521,31 +517,27 @@ const CompanyCrudScreen = () => {
               </TouchableOpacity>
             </InputField>
 
-            {/* State + City */}
-            <View style={styles.rowTwo}>
-              <View style={styles.rowTwoItem}>
-                <InputField label="State">
-                  <TextInput
-                    style={styles.textInput}
-                    value={form.State}
-                    onChangeText={(v) => setField('State', v)}
-                    placeholder="Enter state"
-                    placeholderTextColor="#b0bec5"
-                  />
-                </InputField>
-              </View>
-              <View style={styles.rowTwoItem}>
-                <InputField label="City">
-                  <TextInput
-                    style={styles.textInput}
-                    value={form.City}
-                    onChangeText={(v) => setField('City', v)}
-                    placeholder="Enter city"
-                    placeholderTextColor="#b0bec5"
-                  />
-                </InputField>
-              </View>
-            </View>
+            {/* State */}
+            <InputField label="State">
+              <TextInput
+                style={styles.textInput}
+                value={form.State}
+                onChangeText={(v) => setField('State', v)}
+                placeholder="Enter state"
+                placeholderTextColor="#b0bec5"
+              />
+            </InputField>
+
+            {/* City */}
+            <InputField label="City">
+              <TextInput
+                style={styles.textInput}
+                value={form.City}
+                onChangeText={(v) => setField('City', v)}
+                placeholder="Enter city"
+                placeholderTextColor="#b0bec5"
+              />
+            </InputField>
 
             {/* Street */}
             <InputField label="Street">
