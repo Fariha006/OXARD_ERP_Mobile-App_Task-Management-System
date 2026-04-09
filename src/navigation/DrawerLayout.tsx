@@ -34,6 +34,7 @@ import LeadorDealScreen from '../screens/crm/leadordealscreen';
 import LeadOrDealCrudScreen from '../screens/crm/leadordealcrudscreen';
 import CompanyCrudScreen from '../screens/crm/companycrudscreen';
 import CrnContactListScreen from '../screens/crm/crncontactlistscreen';
+import CrmContactCrudScreen from '../screens/crm/crmcontactcrud';
 
 const Stack = createStackNavigator();
 
@@ -230,6 +231,9 @@ const InnerStack = () => (
           header: () => <Header navigation={navigation} route={route} />
         })} />
         <Stack.Screen name="crncontactlist" component={CrnContactListScreen} options={({ navigation, route }) => ({
+          header: () => <Header navigation={navigation} route={route} />
+        })} />
+        <Stack.Screen name="crncontactcrud" component={CrmContactCrudScreen} options={({ navigation, route }) => ({
           header: () => <Header navigation={navigation} route={route} />
         })} />
   </Stack.Navigator>

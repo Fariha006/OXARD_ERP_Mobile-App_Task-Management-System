@@ -1144,6 +1144,7 @@ const LeadOrDealCrudScreen = () => {
                           RelationId: savedRelationId,
                           FullMode:   1,
                           FkAccIdContact: form.FkAccountId ?? 0,
+                          CompanyName: form.CompanyName ?? '',
                         });
                       } else {
                         setActiveTab(tab.key);

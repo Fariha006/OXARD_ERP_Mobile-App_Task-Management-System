@@ -49,6 +49,7 @@ const CrnContactListScreen = () => {
   const fkRelationId = route?.params?.RelationId ? String(route.params.RelationId) : '0';
   const fullMode = route?.params?.FullMode ? String(route.params.FullMode) : '1';
   const fkAccIdContact = route?.params?.FkAccIdContact ? String(route.params.FkAccIdContact) : '0';
+  const companyName = route?.params?.CompanyName ? String(route.params.CompanyName) : '';
 
   const [data, setData] = useState<ContactItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -159,7 +160,7 @@ const CrnContactListScreen = () => {
         <TouchableOpacity
           style={styles.newEntryButton}
           activeOpacity={0.8}
-          onPress={() => navigation.navigate('crncontactcrud', { RelationId: Number(fkRelationId), ContactId: 0 })}
+          onPress={() => navigation.navigate('crncontactcrud', { RelationId: Number(fkRelationId), AccountId: Number(fkAccIdContact), ContactId: 0, CompanyName: companyName })}
         >
           <Text style={styles.newEntryButtonText}>New Entry</Text>
         </TouchableOpacity>
