@@ -1139,6 +1139,12 @@ const LeadOrDealCrudScreen = () => {
                           RelationId: savedRelationId,
                           pagetype:   statusId,
                         });
+                      } else if (tab.key === 'contact') {
+                        navigation.navigate('crncontactlist', {
+                          RelationId: savedRelationId,
+                          FullMode:   1,
+                          FkAccIdContact: form.FkAccountId ?? 0,
+                        });
                       } else {
                         setActiveTab(tab.key);
                       }
