@@ -259,6 +259,22 @@ const CrnContactListScreen = () => {
                   <Text style={styles.lbl}>Other Info:</Text>
                   <Text style={styles.vlue}>{item.Otherinfo || '-'}</Text>
                 </View>
+                <View style={styles.editRow}>
+                  <TouchableOpacity
+                    style={styles.editButton}
+                    activeOpacity={0.8}
+                    onPress={() =>
+                      navigation.navigate('crncontactcrud', {
+                        RelationId: Number(fkRelationId),
+                        AccountId: Number(fkAccIdContact),
+                        ContactId: item.ContactId,
+                        CompanyName: companyName,
+                      })
+                    }
+                  >
+                    <Text style={styles.editButtonText}>✎  Edit</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             )}
           </View>
@@ -412,6 +428,26 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#000000',
     paddingLeft: 12,
+  },
+  editRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingTop: 6,
+    paddingBottom: 4,
+    paddingRight: 4,
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f59e0b',
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  editButtonText: {
+    color: '#1a1a1a',
+    fontSize: 12,
+    fontWeight: '700',
   },
   emptyText: {
     fontSize: 12,
