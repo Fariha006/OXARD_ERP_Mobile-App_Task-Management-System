@@ -123,13 +123,64 @@ const CrmTaskCrudScreen = () => {
   const [isLoadingRecord, setIsLoadingRecord] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  // Assigned-to dropdown
-  const [activeDropdown, setActiveDropdown] = useState<'FkAssignedTo' | null>(null);
+  // Dropdowns
+  const [activeDropdown, setActiveDropdown] = useState<'FkRelationId' | 'FkAssignedTo' | null>(null);
+  const [relationOptions, setRelationOptions] = useState<DropdownOption[]>([]);
   const [assignedToOptions, setAssignedToOptions] = useState<DropdownOption[]>([]);
 
   // Attachments
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+
+  // ── Load relation options on mount ────────────────────────────────────────
+
+  useEffect(() => {
+    const loadRelationOptions = async () => {
+      try {
+        const token = await UserStorage.getToken();
+        const userData = await UserStorage.getUserData();
+        if (!token) { return; }
+
+        const compid = String(userData?.CompId ?? '0');
+        const userId = String(userData?.UserId ?? '0');
+
+        const apiUrl = getApiUrl('/api/cr5014/LGT_Mode');
+        const response = await axios.post(apiUrl, {
+          Compid: compid,
+          UserId: userId,
+          LanguageId: 1,
+          MobileViewFlag: 1,
+          ShowFullData: 0,
+          FilterParams: '[]',
+          Status: status,
+          FkRelationId: 0,
+        }, {
+          headers: {
+            ...API_CONFIG.DEFAULT_HEADERS,
+            Authorization: `Bearer ${token}`,
+          },
+          timeout: API_CONFIG.TIMEOUT,
+        });
+
+        const result = response.data;
+        if (Array.isArray(result?.Item2)) {
+          const seen = new Set<string>();
+          const unique: DropdownOption[] = [];
+          for (const r of result.Item2) {
+            const value = String(r.RelationId ?? '');
+            if (!value || seen.has(value)) { continue; }
+            seen.add(value);
+            unique.push({ label: String(r.RelationTrackNo ?? ''), value });
+          }
+          setRelationOptions(unique);
+        }
+      } catch (e) {
+        console.error('CrmTaskCrudScreen: failed to load relation options', e);
+      }
+    };
+
+    loadRelationOptions();
+  }, [status]);
 
   // ── Load assigned-to options from CRM LO_Mode local storage (Rest.Item4) ──
 
@@ -249,6 +300,9 @@ const CrmTaskCrudScreen = () => {
       setErrors((prev) => ({ ...prev, [key]: undefined }));
     }
   };
+
+  const relationLabel = (): string =>
+    relationOptions.find((o) => o.value === form.FkRelationId)?.label ?? '';
 
   const assignedToLabel = (): string =>
     assignedToOptions.find((o) => o.value === form.FkAssignedTo)?.label ?? '';
@@ -449,6 +503,9 @@ const CrmTaskCrudScreen = () => {
   const validate = (): boolean => {
     const next: FormErrors = {};
 
+    if (!form.FkRelationId) {
+      next.FkRelationId = 'Relation is required.';
+    }
     if (!form.Title.trim()) {
       next.Title = 'Title is required.';
     }
@@ -534,7 +591,13 @@ const CrmTaskCrudScreen = () => {
 
   const renderDropdownModal = () => {
     if (!activeDropdown) { return null; }
-    const options = assignedToOptions;
+
+    const isRelation = activeDropdown === 'FkRelationId';
+    const options = isRelation ? relationOptions : assignedToOptions;
+    const title = isRelation ? 'Select Relation' : 'Select Assigned To';
+    const fieldKey = isRelation ? 'FkRelationId' : 'FkAssignedTo';
+    const selectedValue = isRelation ? form.FkRelationId : form.FkAssignedTo;
+
     return (
       <Modal
         transparent
@@ -550,7 +613,7 @@ const CrmTaskCrudScreen = () => {
           />
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Assigned To</Text>
+              <Text style={styles.modalTitle}>{title}</Text>
               <TouchableOpacity onPress={() => setActiveDropdown(null)}>
                 <Text style={styles.modalCloseBtn}>✕</Text>
               </TouchableOpacity>
@@ -563,13 +626,13 @@ const CrmTaskCrudScreen = () => {
                 keyExtractor={(item, index) => `${item.value}_${index}`}
                 style={styles.pickerList}
                 renderItem={({ item }) => {
-                  const isSelected = form.FkAssignedTo === item.value;
+                  const isSelected = selectedValue === item.value;
                   return (
                     <TouchableOpacity
                       style={[styles.pickerItem, isSelected && styles.pickerItemActive]}
                       activeOpacity={0.7}
                       onPress={() => {
-                        setField('FkAssignedTo', item.value);
+                        setField(fieldKey, item.value);
                         setActiveDropdown(null);
                       }}
                     >
@@ -633,6 +696,20 @@ const CrmTaskCrudScreen = () => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.formCard}>
+
+            {/* Relation */}
+            <InputField label="Relation" required error={errors.FkRelationId}>
+              <TouchableOpacity
+                style={styles.dropdownBtn}
+                onPress={() => setActiveDropdown('FkRelationId')}
+                activeOpacity={0.7}
+              >
+                <Text style={form.FkRelationId ? styles.dropdownValue : styles.dropdownPlaceholder}>
+                  {relationLabel() || 'Select relation'}
+                </Text>
+                <Text style={styles.dropdownChevron}>▼</Text>
+              </TouchableOpacity>
+            </InputField>
 
             {/* Title */}
             <InputField label="Title" required error={errors.Title}>
