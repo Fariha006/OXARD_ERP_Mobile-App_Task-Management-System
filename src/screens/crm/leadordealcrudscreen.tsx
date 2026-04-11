@@ -1146,6 +1146,11 @@ const LeadOrDealCrudScreen = () => {
                           FkAccIdContact: form.FkAccountId ?? 0,
                           CompanyName: form.CompanyName ?? '',
                         });
+                      } else if (tab.key === 'activity') {
+                        navigation.navigate('crmnotelist', {
+                          Status: statusId,
+                          RelationId: savedRelationId,
+                        });
                       } else {
                         setActiveTab(tab.key);
                       }
