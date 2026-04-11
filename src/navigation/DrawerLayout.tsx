@@ -40,6 +40,7 @@ import CrmNoteCrudScreen from '../screens/crm/crmnotecrud';
 import CrmDocumentListScreen from '../screens/crm/crmdocumentlist';
 import CrmDocumentCrudScreen from '../screens/crm/crmdocumentcrud';
 import CrmTaskListScreen from '../screens/crm/crmtasklist';
+import CrmTaskCrudScreen from '../screens/crm/crmtaskcrud';
 
 const Stack = createStackNavigator();
 
@@ -254,6 +255,9 @@ const InnerStack = () => (
           header: () => <Header navigation={navigation} route={route} />
         })} />
         <Stack.Screen name="crmtasklist" component={CrmTaskListScreen} options={({ navigation, route }) => ({
+          header: () => <Header navigation={navigation} route={route} />
+        })} />
+        <Stack.Screen name="crmtaskcrud" component={CrmTaskCrudScreen} options={({ navigation, route }) => ({
           header: () => <Header navigation={navigation} route={route} />
         })} />
   </Stack.Navigator>

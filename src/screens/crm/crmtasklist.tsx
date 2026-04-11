@@ -41,7 +41,6 @@ const CrmTaskListScreen = () => {
   const fkRelationId = route?.params?.RelationId ? Number(route.params.RelationId) : 0;
 
   const [data, setData] = useState<TaskItem[]>([]);
-  const [relationMap, setRelationMap] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openIndexes, setOpenIndexes] = useState<number[]>([]);
@@ -103,7 +102,6 @@ const CrmTaskListScreen = () => {
             RelationTrackNo: rMap[task.FkRelationId] || task.RelationTrackNo || '-',
           }));
 
-          setRelationMap(rMap);
           setData(merged);
           setOpenIndexes([]);
         } catch (e: any) {
@@ -164,6 +162,13 @@ const CrmTaskListScreen = () => {
         <View style={styles.pagewrap}>
           <Text style={styles.pagetitle}>Tasks</Text>
         </View>
+        <TouchableOpacity
+          style={styles.newEntryButton}
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('crmtaskcrud', { RelationId: fkRelationId, TaskId: 0, Status: status })}
+        >
+          <Text style={styles.newEntryButtonText}>New Entry</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.topControlsContainer}>
@@ -228,6 +233,21 @@ const CrmTaskListScreen = () => {
                   <View style={styles.even}>
                     <Text style={styles.lbl}>Status:</Text>
                     <Text style={styles.vlue}>{item.Status || '-'}</Text>
+                  </View>
+                  <View style={styles.editRow}>
+                    <TouchableOpacity
+                      style={styles.editButton}
+                      activeOpacity={0.8}
+                      onPress={() =>
+                        navigation.navigate('crmtaskcrud', {
+                          RelationId: item.FkRelationId,
+                          TaskId: item.TaskId,
+                          Status: status,
+                        })
+                      }
+                    >
+                      <Text style={styles.editButtonText}>✎  Edit</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
               )}
@@ -299,6 +319,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  newEntryButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: '#811458',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 92,
+  },
+  newEntryButtonText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '700',
+  },
   scrollContainer: {
     padding: 16,
   },
@@ -369,6 +403,26 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#000000',
     paddingLeft: 12,
+  },
+  editRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingTop: 6,
+    paddingBottom: 4,
+    paddingRight: 4,
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f59e0b',
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  editButtonText: {
+    color: '#1a1a1a',
+    fontSize: 12,
+    fontWeight: '700',
   },
   emptyText: {
     fontSize: 12,
