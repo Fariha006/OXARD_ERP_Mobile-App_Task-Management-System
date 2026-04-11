@@ -9,8 +9,8 @@ import type { CrmLoModeResponse } from '../../types/crmLoMode';
 const menuItems = [
   { text: 'Lead', url: 'leadordeal', image: '', params: { StatusId: 1, menutype: 1 } },
   { text: 'Deal', url: 'leadordeal', image: '', params: { StatusId: 2, menutype: 1 } },
-  { text: 'Notes', url: '', image: '', params: undefined },
-  { text: 'Documents', url: '', image: '', params: undefined },
+  { text: 'Notes', url: 'crmnotelist', image: '', params: { Status: 0, RelationId: 0 } },
+  { text: 'Documents', url: 'crmdocumentlist', image: '', params: { Status: 0, RelationId: 0 } },
   { text: 'Tasks', url: '', image: '', params: undefined },
   { text: 'Meetings', url: '', image: '', params: undefined },
   { text: 'Calls', url: '', image: '', params: undefined },

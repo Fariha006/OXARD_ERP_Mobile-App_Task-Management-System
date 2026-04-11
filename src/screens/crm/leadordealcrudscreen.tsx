@@ -1151,6 +1151,11 @@ const LeadOrDealCrudScreen = () => {
                           Status: statusId,
                           RelationId: savedRelationId,
                         });
+                      } else if (tab.key === 'email') {
+                        navigation.navigate('crmdocumentlist', {
+                          Status: statusId,
+                          RelationId: savedRelationId,
+                        });
                       } else {
                         setActiveTab(tab.key);
                       }
