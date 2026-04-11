@@ -503,11 +503,14 @@ const CrmTaskCrudScreen = () => {
   const validate = (): boolean => {
     const next: FormErrors = {};
 
-    if (!form.FkRelationId) {
-      next.FkRelationId = 'Relation is required.';
-    }
     if (!form.Title.trim()) {
       next.Title = 'Title is required.';
+    }
+    if (!form.TaskDate.trim()) {
+      next.TaskDate = 'Task Date is required.';
+    }
+    if (!form.Details.trim()) {
+      next.Details = 'Details is required.';
     }
     if (!form.FkAssignedTo) {
       next.FkAssignedTo = 'Assigned To is required.';
@@ -698,7 +701,7 @@ const CrmTaskCrudScreen = () => {
           <View style={styles.formCard}>
 
             {/* Relation */}
-            <InputField label="Relation" required error={errors.FkRelationId}>
+            <InputField label="Relation" error={errors.FkRelationId}>
               <TouchableOpacity
                 style={styles.dropdownBtn}
                 onPress={() => setActiveDropdown('FkRelationId')}
@@ -723,7 +726,7 @@ const CrmTaskCrudScreen = () => {
             </InputField>
 
             {/* Task Date */}
-            <InputField label="Task Date">
+            <InputField label="Task Date" required error={errors.TaskDate}>
               <TouchableOpacity
                 style={styles.dropdownBtn}
                 onPress={() => setShowDatePicker(true)}
@@ -744,7 +747,7 @@ const CrmTaskCrudScreen = () => {
             )}
 
             {/* Details */}
-            <InputField label="Details">
+            <InputField label="Details" required error={errors.Details}>
               <TextInput
                 style={[styles.textInput, styles.textArea]}
                 value={form.Details}
