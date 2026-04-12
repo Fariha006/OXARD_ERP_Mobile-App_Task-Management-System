@@ -11,7 +11,7 @@ const menuItems = [
   { text: 'Deal', url: 'leadordeal', image: '', params: { StatusId: 2, menutype: 1 } },
   { text: 'Notes', url: 'crmnotelist', image: '', params: { Status: 0, RelationId: 0 } },
   { text: 'Documents', url: 'crmdocumentlist', image: '', params: { Status: 0, RelationId: 0 } },
-  { text: 'Tasks', url: '', image: '', params: undefined },
+  { text: 'Tasks', url: 'crmtasklist', image: '', params: { Status: 0, RelationId: 0 } },
   { text: 'Meetings', url: '', image: '', params: undefined },
   { text: 'Calls', url: '', image: '', params: undefined },
   { text: 'Accounts', url: '', image: '', params: undefined },
