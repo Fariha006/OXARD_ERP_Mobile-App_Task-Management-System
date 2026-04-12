@@ -13,7 +13,7 @@ const menuItems = [
   { text: 'Documents', url: 'crmdocumentlist', image: '', params: { Status: 0, RelationId: 0 } },
   { text: 'Tasks', url: 'crmtasklist', image: '', params: { Status: 0, RelationId: 0 } },
   { text: 'Meetings', url: 'crmmeetinglist', image: '', params: { Status: 0, RelationId: 0 } },
-  { text: 'Calls', url: '', image: '', params: undefined },
+  { text: 'Calls', url: 'crmcalllist', image: '', params: { Status: 0, RelationId: 0 } },
   { text: 'Accounts', url: '', image: '', params: undefined },
   { text: 'Contacts', url: 'crncontactlist', image: '', params: { RelationId: 0, FullMode: 0, FkAccIdContact: 0, CompanyName: '' } },
 ];

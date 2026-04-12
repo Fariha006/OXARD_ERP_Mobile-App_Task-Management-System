@@ -1166,6 +1166,11 @@ const LeadOrDealCrudScreen = () => {
                           Status: statusId,
                           RelationId: savedRelationId,
                         });
+                      } else if (tab.key === 'rating') {
+                        navigation.navigate('crmcalllist', {
+                          Status: statusId,
+                          RelationId: savedRelationId,
+                        });
                       } else {
                         setActiveTab(tab.key);
                       }
