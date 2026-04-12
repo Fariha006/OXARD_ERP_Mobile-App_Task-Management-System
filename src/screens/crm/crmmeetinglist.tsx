@@ -168,9 +168,7 @@ const CrmMeetingListScreen = () => {
         <TouchableOpacity
           style={styles.newEntryButton}
           activeOpacity={0.8}
-          onPress={() => {
-            // New entry — no navigation yet
-          }}
+          onPress={() => navigation.navigate('crmmeetingcrud', { RelationId: fkRelationId, TaskId: 0, Status: status })}
         >
           <Text style={styles.newEntryButtonText}>New Entry</Text>
         </TouchableOpacity>
@@ -235,9 +233,13 @@ const CrmMeetingListScreen = () => {
                     <TouchableOpacity
                       style={styles.editButton}
                       activeOpacity={0.8}
-                      onPress={() => {
-                        // Edit — no navigation yet
-                      }}
+                      onPress={() =>
+                        navigation.navigate('crmmeetingcrud', {
+                          RelationId: item.FkRelationId,
+                          TaskId: item.TaskId,
+                          Status: status,
+                        })
+                      }
                     >
                       <Text style={styles.editButtonText}>✎  Edit</Text>
                     </TouchableOpacity>
