@@ -1161,6 +1161,11 @@ const LeadOrDealCrudScreen = () => {
                           Status: statusId,
                           RelationId: savedRelationId,
                         });
+                      } else if (tab.key === 'wishlist') {
+                        navigation.navigate('crmmeetinglist', {
+                          Status: statusId,
+                          RelationId: savedRelationId,
+                        });
                       } else {
                         setActiveTab(tab.key);
                       }
