@@ -266,9 +266,9 @@ const CrmCallCrudScreen = () => {
           }));
         }
 
-        // Load existing attachments from Item4
-        if (Array.isArray(res?.Item4)) {
-          const mappedAttachments = res.Item4.map((attachment: any, index: number) => ({
+        // Load existing attachments from Item5
+        if (Array.isArray(res?.Item5)) {
+          const mappedAttachments = res.Item5.map((attachment: any, index: number) => ({
             id: `existing-${index}`,
             fileName: attachment.FileNameSelected || attachment.FileNameServer || 'Unknown',
             fileSize: attachment.FileSize || 0,
@@ -739,20 +739,6 @@ const CrmCallCrudScreen = () => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.formCard}>
-
-            {/* Call Status */}
-            <InputField label="Call Status" error={errors.Status}>
-              <TouchableOpacity
-                style={styles.dropdownBtn}
-                onPress={() => setActiveDropdown('Status')}
-                activeOpacity={0.7}
-              >
-                <Text style={form.Status ? styles.dropdownValue : styles.dropdownPlaceholder}>
-                  {labelForSingle('Status') || placeholderForSingle('Status')}
-                </Text>
-                <Text style={styles.dropdownChevron}>▼</Text>
-              </TouchableOpacity>
-            </InputField>
 
             {/* RelationNo */}
             <InputField label="RelationNo" error={errors.FkRelationId}>
