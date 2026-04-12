@@ -45,6 +45,8 @@ import CrmMeetingListScreen from '../screens/crm/crmmeetinglist';
 import CrmMeetingCrudScreen from '../screens/crm/crmmeetingcrud';
 import CrmCallListScreen from '../screens/crm/crmcalllist';
 import CrmCallCrudScreen from '../screens/crm/crmcallcrud';
+import CrmReportMenuListScreen from '../screens/crm/crmreportmenulist';
+import CrmReportScreen from '../screens/crm/crmreportscreen';
 
 const Stack = createStackNavigator();
 
@@ -274,6 +276,12 @@ const InnerStack = () => (
           header: () => <Header navigation={navigation} route={route} />
         })} />
         <Stack.Screen name="crmcallcrud" component={CrmCallCrudScreen} options={({ navigation, route }) => ({
+          header: () => <Header navigation={navigation} route={route} />
+        })} />
+        <Stack.Screen name="crmreportmenulist" component={CrmReportMenuListScreen} options={({ navigation, route }) => ({
+          header: () => <Header navigation={navigation} route={route} />
+        })} />
+        <Stack.Screen name="crmreportscreen" component={CrmReportScreen} options={({ navigation, route }) => ({
           header: () => <Header navigation={navigation} route={route} />
         })} />
   </Stack.Navigator>

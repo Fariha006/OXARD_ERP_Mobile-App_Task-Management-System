@@ -16,6 +16,7 @@ const menuItems = [
   { text: 'Calls', url: 'crmcalllist', image: '', params: { Status: 0, RelationId: 0 } },
   { text: 'Accounts', url: '', image: '', params: undefined },
   { text: 'Contacts', url: 'crncontactlist', image: '', params: { RelationId: 0, FullMode: 0, FkAccIdContact: 0, CompanyName: '' } },
+  { text: 'Reports', url: 'crmreportmenulist', image: '', params: undefined },
 ];
 
 const CrmDashboardMenu = () => {
