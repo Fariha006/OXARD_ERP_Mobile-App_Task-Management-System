@@ -349,16 +349,24 @@ const CrmMeetingCrudScreen = () => {
             MeetingLink: String(rec.MeetingLink ?? ''),
             FkReminderId: rec.FkReminderId != null ? String(rec.FkReminderId) : '1',
             DurationApplicable: rec.DurationApplicable === 1 || rec.DurationApplicable === true,
-            Status: rec.RecStatus != null ? String(rec.RecStatus) : '0',
           }));
           if (rec.TaskDate) {
             setDateTimeValue(new Date(rec.TaskDate));
           }
         }
 
-        // Item3 → Colleagues
-        if (Array.isArray(res?.Item3) && res.Item3.length > 0) {
-          const colleagues = (res.Item3 as any[])
+        // Item6 → Status
+        if (Array.isArray(res?.Item6) && res.Item6.length > 0) {
+          const statusRec = res.Item6[0];
+          setForm((prev) => ({
+            ...prev,
+            Status: String(statusRec.id ?? '0'),
+          }));
+        }
+
+        // Item2 → Colleagues
+        if (Array.isArray(res?.Item2) && res.Item2.length > 0) {
+          const colleagues = (res.Item2 as any[])
             .filter((c) => c.EmpId != null && c.EmpId !== 0 && c.EmpId !== '')
             .map((c) => String(c.EmpId));
           if (colleagues.length > 0) {
@@ -369,17 +377,22 @@ const CrmMeetingCrudScreen = () => {
           }
         }
 
-        // Item5 → External Participants (Contacts)
-        if (Array.isArray(res?.Item5)) {
-          setForm((prev) => ({
-            ...prev,
-            cr5014AddContacts: (res.Item5 as any[]).map((c) => String(c.ContactId ?? '')),
-          }));
+        // Item3 → External Participants (Contacts)
+        if (Array.isArray(res?.Item3) && res.Item3.length > 0) {
+          const contacts = (res.Item3 as any[])
+            .filter((c) => c.ContactId != null && c.ContactId !== 0 && c.ContactId !== '')
+            .map((c) => String(c.ContactId));
+          if (contacts.length > 0) {
+            setForm((prev) => ({
+              ...prev,
+              cr5014AddContacts: contacts,
+            }));
+          }
         }
 
-        // Load existing attachments from Item7
-        if (Array.isArray(res?.Item7)) {
-          const mappedAttachments = res.Item7.map((attachment: any, index: number) => ({
+        // Load existing attachments from Item4
+        if (Array.isArray(res?.Item4)) {
+          const mappedAttachments = res.Item4.map((attachment: any, index: number) => ({
             id: `existing-${index}`,
             fileName: attachment.FileNameSelected || attachment.FileNameServer || 'Unknown',
             fileSize: attachment.FileSize || 0,
@@ -985,8 +998,22 @@ const CrmMeetingCrudScreen = () => {
         >
           <View style={styles.formCard}>
 
-            {/* Relation */}
-            <InputField label="Relation" error={errors.FkRelationId}>
+            {/* Meeting Status */}
+            <InputField label="Meeting Status" error={errors.Status}>
+              <TouchableOpacity
+                style={styles.dropdownBtn}
+                onPress={() => setActiveDropdown('Status')}
+                activeOpacity={0.7}
+              >
+                <Text style={form.Status ? styles.dropdownValue : styles.dropdownPlaceholder}>
+                  {labelForSingle('Status') || placeholderForSingle('Status')}
+                </Text>
+                <Text style={styles.dropdownChevron}>▼</Text>
+              </TouchableOpacity>
+            </InputField>
+
+            {/* RelationNo */}
+            <InputField label="RelationNo" error={errors.FkRelationId}>
               <TouchableOpacity
                 style={styles.dropdownBtn}
                 onPress={() => setActiveDropdown('FkRelationId')}
@@ -999,8 +1026,8 @@ const CrmMeetingCrudScreen = () => {
               </TouchableOpacity>
             </InputField>
 
-            {/* Title */}
-            <InputField label="Title" required error={errors.Title}>
+            {/* Meeting Title */}
+            <InputField label="Meeting Title" required error={errors.Title}>
               <TextInput
                 style={[styles.textInput, errors.Title ? styles.inputErrorBorder : null]}
                 value={form.Title}
@@ -1010,8 +1037,8 @@ const CrmMeetingCrudScreen = () => {
               />
             </InputField>
 
-            {/* Date & Time */}
-            <InputField label="Date & Time" required error={errors.TaskDate}>
+            {/* Date and Time */}
+            <InputField label="Date and Time" required error={errors.TaskDate}>
               <TouchableOpacity
                 style={styles.dropdownBtn}
                 onPress={() => setShowDatePicker(true)}
@@ -1040,8 +1067,8 @@ const CrmMeetingCrudScreen = () => {
               />
             )}
 
-            {/* Details */}
-            <InputField label="Details" required error={errors.Details}>
+            {/* Meeting Details */}
+            <InputField label="Meeting Details" required error={errors.Details}>
               <TextInput
                 style={[styles.textInput, styles.textArea]}
                 value={form.Details}
@@ -1054,8 +1081,8 @@ const CrmMeetingCrudScreen = () => {
               />
             </InputField>
 
-            {/* Assigned To */}
-            <InputField label="Assigned To" required error={errors.FkAssignedTo}>
+            {/* AssignedTo */}
+            <InputField label="AssignedTo" required error={errors.FkAssignedTo}>
               <TouchableOpacity
                 style={styles.dropdownBtn}
                 onPress={() => setActiveDropdown('FkAssignedTo')}
@@ -1064,6 +1091,56 @@ const CrmMeetingCrudScreen = () => {
                 <Text style={form.FkAssignedTo ? styles.dropdownValue : styles.dropdownPlaceholder}>
                   {labelForSingle('FkAssignedTo') || placeholderForSingle('FkAssignedTo')}
                 </Text>
+                <Text style={styles.dropdownChevron}>▼</Text>
+              </TouchableOpacity>
+            </InputField>
+
+            {/* Colleagues — multi-select */}
+            <InputField label="Colleagues">
+              <TouchableOpacity
+                style={[styles.dropdownBtn, { minHeight: 44 }]}
+                onPress={() => openMultiDropdown('cr5014AddColleagues')}
+                activeOpacity={0.7}
+              >
+                {form.cr5014AddColleagues.length === 0 ? (
+                  <Text style={styles.dropdownPlaceholder}>Select colleagues</Text>
+                ) : (
+                  <View style={styles.tagRow}>
+                    {form.cr5014AddColleagues.map((v, i) => {
+                      const lbl = colleagueOptions.find((o) => o.value === v)?.label ?? v;
+                      return (
+                        <View key={`${v}_${i}`} style={styles.tag}>
+                          <Text style={styles.tagText}>{lbl}</Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+                )}
+                <Text style={styles.dropdownChevron}>▼</Text>
+              </TouchableOpacity>
+            </InputField>
+
+            {/* External Participants — multi-select */}
+            <InputField label="External Participants">
+              <TouchableOpacity
+                style={[styles.dropdownBtn, { minHeight: 44 }]}
+                onPress={() => openMultiDropdown('cr5014AddContacts')}
+                activeOpacity={0.7}
+              >
+                {form.cr5014AddContacts.length === 0 ? (
+                  <Text style={styles.dropdownPlaceholder}>Select external participants</Text>
+                ) : (
+                  <View style={styles.tagRow}>
+                    {form.cr5014AddContacts.map((v, i) => {
+                      const lbl = contactOptions.find((o) => o.value === v)?.label ?? v;
+                      return (
+                        <View key={`${v}_${i}`} style={styles.tag}>
+                          <Text style={styles.tagText}>{lbl}</Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+                )}
                 <Text style={styles.dropdownChevron}>▼</Text>
               </TouchableOpacity>
             </InputField>
@@ -1090,20 +1167,6 @@ const CrmMeetingCrudScreen = () => {
                 autoCapitalize="none"
                 autoCorrect={false}
               />
-            </InputField>
-
-            {/* Status */}
-            <InputField label="Status" error={errors.Status}>
-              <TouchableOpacity
-                style={styles.dropdownBtn}
-                onPress={() => setActiveDropdown('Status')}
-                activeOpacity={0.7}
-              >
-                <Text style={form.Status ? styles.dropdownValue : styles.dropdownPlaceholder}>
-                  {labelForSingle('Status') || placeholderForSingle('Status')}
-                </Text>
-                <Text style={styles.dropdownChevron}>▼</Text>
-              </TouchableOpacity>
             </InputField>
 
             {/* Reminder */}
@@ -1133,31 +1196,6 @@ const CrmMeetingCrudScreen = () => {
                 <Text style={styles.checkboxLabel}>
                   {form.DurationApplicable ? 'Yes' : 'No'}
                 </Text>
-              </TouchableOpacity>
-            </InputField>
-
-            {/* Colleagues — multi-select */}
-            <InputField label="Colleagues">
-              <TouchableOpacity
-                style={[styles.dropdownBtn, { minHeight: 44 }]}
-                onPress={() => openMultiDropdown('cr5014AddColleagues')}
-                activeOpacity={0.7}
-              >
-                {form.cr5014AddColleagues.length === 0 ? (
-                  <Text style={styles.dropdownPlaceholder}>Select colleagues</Text>
-                ) : (
-                  <View style={styles.tagRow}>
-                    {form.cr5014AddColleagues.map((v, i) => {
-                      const lbl = colleagueOptions.find((o) => o.value === v)?.label ?? v;
-                      return (
-                        <View key={`${v}_${i}`} style={styles.tag}>
-                          <Text style={styles.tagText}>{lbl}</Text>
-                        </View>
-                      );
-                    })}
-                  </View>
-                )}
-                <Text style={styles.dropdownChevron}>▼</Text>
               </TouchableOpacity>
             </InputField>
 

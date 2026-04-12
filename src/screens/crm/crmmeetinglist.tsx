@@ -214,18 +214,22 @@ const CrmMeetingListScreen = () => {
               {openIndexes.includes(idx) && (
                 <View style={styles.accordionContent}>
                   <View style={styles.odd}>
+                    <Text style={styles.lbl}>Title:</Text>
+                    <Text style={styles.vlue}>{item.Title || '-'}</Text>
+                  </View>
+                  <View style={styles.even}>
                     <Text style={styles.lbl}>Employee Name:</Text>
                     <Text style={styles.vlue}>{item.EmployeeName || '-'}</Text>
                   </View>
-                  <View style={styles.even}>
+                  <View style={styles.odd}>
                     <Text style={styles.lbl}>Date:</Text>
                     <Text style={styles.vlue}>{item.Date || '-'}</Text>
                   </View>
-                  <View style={styles.odd}>
+                  <View style={styles.even}>
                     <Text style={styles.lbl}>Company Name:</Text>
                     <Text style={styles.vlue}>{item.CompanyName || '-'}</Text>
                   </View>
-                  <View style={styles.even}>
+                  <View style={styles.odd}>
                     <Text style={styles.lbl}>Status:</Text>
                     <Text style={styles.vlue}>{item.Status || '-'}</Text>
                   </View>
