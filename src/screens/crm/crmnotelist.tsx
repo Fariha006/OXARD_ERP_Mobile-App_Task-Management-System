@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
 import { API_CONFIG, getApiUrl } from '../../config/apiConfig';
 import UserStorage from '../../utils/userStorage';
@@ -49,8 +49,12 @@ const CrmNoteListScreen = () => {
   const [error, setError] = useState<string | null>(null);
   const [openIndexes, setOpenIndexes] = useState<number[]>([]);
   const [showFullData, setShowFullData] = useState(false);
+  const [isDeal, setIsDeal] = useState(status !== 1);
 
-  useEffect(() => {
+  const currentStatus = isDeal ? 2 : 1;
+
+  useFocusEffect(
+    useCallback(() => {
     const fetchNotes = async () => {
       setLoading(true);
       setError(null);
@@ -77,7 +81,7 @@ const CrmNoteListScreen = () => {
             MobileViewFlag: 1,
             ShowFullData: showFullData ? 1 : 0,
             FilterParams: '[]',
-            Status: status,
+            Status: currentStatus,
             FkRelationId: fkRelationId,
           },
           {
@@ -111,7 +115,8 @@ const CrmNoteListScreen = () => {
     };
 
     fetchNotes();
-  }, [status, fkRelationId, showFullData]);
+    }, [status, fkRelationId, showFullData, currentStatus])
+  );
 
   const toggleAccordion = (idx: number) => {
     setOpenIndexes(
@@ -162,13 +167,24 @@ const CrmNoteListScreen = () => {
         <TouchableOpacity
           style={styles.newEntryButton}
           activeOpacity={0.8}
-          onPress={() => navigation.navigate('crmnotecrud', { RelationId: fkRelationId, NoteId: 0, Status: status })}
+          onPress={() => navigation.navigate('crmnotecrud', { RelationId: fkRelationId, NoteId: 0, Status: currentStatus })}
         >
           <Text style={styles.newEntryButtonText}>New Entry</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.topControlsContainer}>
+        <View style={styles.showAllDataContainer}>
+          <Text style={styles.showAllDataLabel}>{isDeal ? 'Deal' : 'Lead'}</Text>
+          <View style={styles.switchContainer}>
+            <Switch
+              value={isDeal}
+              onValueChange={setIsDeal}
+              trackColor={{ false: '#767577', true: '#133F7C' }}
+              thumbColor={isDeal ? '#fff' : '#f4f3f4'}
+            />
+          </View>
+        </View>
         <View style={styles.showAllDataContainer}>
           <Text style={styles.showAllDataLabel}>Show full data</Text>
           <View style={styles.switchContainer}>
@@ -236,7 +252,7 @@ const CrmNoteListScreen = () => {
                         navigation.navigate('crmnotecrud', {
                           RelationId: item.FkRelationId,
                           NoteId: item.NotesDetailsId,
-                          Status: status,
+                          Status: currentStatus,
                         })
                       }
                     >

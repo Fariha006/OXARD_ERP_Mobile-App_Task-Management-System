@@ -495,9 +495,7 @@ const CrmNoteCrudScreen = () => {
 
       const result = Array.isArray(response.data) ? response.data[0] : null;
       if (result?.IsSuccess === 'True') {
-        Alert.alert('Success', 'Note saved successfully.', [
-          { text: 'OK', onPress: () => navigation.goBack() },
-        ]);
+        navigation.goBack();
       } else {
         Alert.alert('Error', 'Save failed. Please try again.');
       }
@@ -514,7 +512,8 @@ const CrmNoteCrudScreen = () => {
   const handleClear = () => {
     setForm({
       ...INITIAL_FORM,
-      FkRelationId: relationId ? String(relationId) : '',
+      NoteId: '0',
+      FkRelationId: '',
     });
     setUploadedFiles([]);
     setErrors({});

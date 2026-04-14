@@ -470,7 +470,7 @@ const CrmDocumentCrudScreen = () => {
       const userId = String(userData?.UserId ?? '0');
 
       const requestBody = {
-        Mode: documentId > 0 ? 'U' : 'I',
+        Mode: Number(form.DocumentId || '0') > 0 ? 'U' : 'I',
         Compid: compid,
         LanguageId: '1',
         UserId: userId,
@@ -509,7 +509,8 @@ const CrmDocumentCrudScreen = () => {
   const handleClear = () => {
     setForm({
       ...INITIAL_FORM,
-      FkRelationId: relationId ? String(relationId) : '',
+      DocumentId: '0',
+      FkRelationId: '',
     });
     setUploadedFiles([]);
     setErrors({});
