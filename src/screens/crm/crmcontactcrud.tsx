@@ -45,6 +45,7 @@ type FormState = {
   CityContact: string;
   ZipContact: string;
   OtherInformationContact: string;
+  Active: string;
 };
 
 type StringFormKey = Exclude<keyof FormState, 'ProductListContact'>;
@@ -72,6 +73,7 @@ const INITIAL_FORM: FormState = {
   CityContact: '',
   ZipContact: '',
   OtherInformationContact: '',
+  Active: '0',
 };
 
 // ─── Reusable InputField component ───────────────────────────────────────────
@@ -111,6 +113,7 @@ const CrmContactCrudScreen = () => {
   const accountId = route?.params?.AccountId ? Number(route.params.AccountId) : 0;
   const contactId = route?.params?.ContactId ? Number(route.params.ContactId) : 0;
   const companyName = route?.params?.CompanyName ? String(route.params.CompanyName) : '';
+  const [isEditMode, setIsEditMode] = useState(contactId > 0);
 
   const [form, setForm] = useState<FormState>({
     ...INITIAL_FORM,
@@ -237,6 +240,7 @@ const CrmContactCrudScreen = () => {
             CityContact: String(rec.City ?? ''),
             ZipContact: String(rec.Zip ?? ''),
             OtherInformationContact: String(rec.Otherinfo ?? ''),
+            Active: rec.Active != null ? String(rec.Active) : '0',
           }));
         }
 
@@ -316,11 +320,16 @@ const CrmContactCrudScreen = () => {
   const validate = (): boolean => {
     const next: FormErrors = {};
 
-    if (!form.ContactNameContact.trim()) {
-      next.ContactNameContact = 'Contact Name is required.';
-    }
-    if (!form.MobileNumberContact.trim()) {
-      next.MobileNumberContact = 'Mobile is required.';
+    if (!isEditMode) {
+      if (!form.ContactNameContact.trim()) {
+        next.ContactNameContact = 'Contact Name is required.';
+      }
+      if (!form.MobileNumberContact.trim()) {
+        next.MobileNumberContact = 'Mobile is required.';
+      }
+      if (!form.FkCountryContact.trim()) {
+        next.FkCountryContact = 'Country is required.';
+      }
     }
 
     setErrors(next);
@@ -347,7 +356,7 @@ const CrmContactCrudScreen = () => {
       const userId = String(userData?.UserId ?? '0');
 
       const requestBody = {
-        Mode: contactId > 0 ? 'U' : 'I',
+        Mode: Number(form.ContactId || '0') > 0 ? 'U' : 'I',
         Compid: compid,
         UserId: userId,
         LanguageId: 1,
@@ -376,6 +385,7 @@ const CrmContactCrudScreen = () => {
         CityContact: form.CityContact,
         ZipContact: form.ZipContact,
         OtherInformationContact: form.OtherInformationContact,
+        Active: form.Active,
       };
 
       const apiUrl = getApiUrl('/api/cr5011/I_U_D_Mode');
@@ -389,9 +399,7 @@ const CrmContactCrudScreen = () => {
 
       const result = Array.isArray(response.data) ? response.data[0] : null;
       if (result?.IsSuccess === 'True') {
-        Alert.alert('Success', 'Contact saved successfully.', [
-          { text: 'OK', onPress: () => navigation.goBack() },
-        ]);
+        navigation.goBack();
       } else {
         Alert.alert('Error', 'Save failed. Please try again.');
       }
@@ -406,8 +414,9 @@ const CrmContactCrudScreen = () => {
   };
 
   const handleClear = () => {
-    setForm(INITIAL_FORM);
+    setForm({ ...INITIAL_FORM, ContactId: '0' });
     setErrors({});
+    setIsEditMode(false);
   };
 
   // ── Single-select dropdown modal ──────────────────────────────────────────
@@ -585,22 +594,26 @@ const CrmContactCrudScreen = () => {
           <View style={styles.formCard}>
 
             {/* Company Name */}
-            <InputField label="Company Name" error={errors.AccountName}>
-              <TextInput
-                style={styles.textInput}
-                value={form.AccountName}
-                onChangeText={(v) => setField('AccountName', v)}
-                placeholder="Enter company name"
-                placeholderTextColor="#b0bec5"
-              />
-            </InputField>
+            {companyName.trim() !== '' && (
+              <InputField label="Company Name" error={errors.AccountName}>
+                <TextInput
+                  style={[styles.textInput, isEditMode && styles.inputDisabled]}
+                  value={form.AccountName}
+                  onChangeText={(v) => setField('AccountName', v)}
+                  placeholder="Enter company name"
+                  placeholderTextColor="#b0bec5"
+                  editable={!isEditMode}
+                />
+              </InputField>
+            )}
 
             {/* Accounts */}
             <InputField label="Accounts" error={errors.FkAccIdContact}>
               <TouchableOpacity
-                style={styles.dropdownBtn}
-                onPress={() => setActiveDropdown('FkAccIdContact')}
-                activeOpacity={0.7}
+                style={[styles.dropdownBtn, isEditMode && styles.inputDisabled]}
+                onPress={() => !isEditMode && setActiveDropdown('FkAccIdContact')}
+                activeOpacity={isEditMode ? 1 : 0.7}
+                disabled={isEditMode}
               >
                 <Text style={form.FkAccIdContact ? styles.dropdownValue : styles.dropdownPlaceholder}>
                   {labelForKey('FkAccIdContact') || placeholderForKey('FkAccIdContact')}
@@ -612,104 +625,113 @@ const CrmContactCrudScreen = () => {
             {/* Contact Name */}
             <InputField label="Contact Name" required error={errors.ContactNameContact}>
               <TextInput
-                style={[styles.textInput, errors.ContactNameContact ? styles.inputErrorBorder : null]}
+                style={[styles.textInput, errors.ContactNameContact ? styles.inputErrorBorder : null, isEditMode && styles.inputDisabled]}
                 value={form.ContactNameContact}
                 onChangeText={(v) => setField('ContactNameContact', v)}
                 placeholder="Enter contact name"
                 placeholderTextColor="#b0bec5"
+                editable={!isEditMode}
               />
             </InputField>
 
             {/* Email */}
             <InputField label="Email" error={errors.EmailContact}>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, isEditMode && styles.inputDisabled]}
                 value={form.EmailContact}
                 onChangeText={(v) => setField('EmailContact', v)}
                 placeholder="Enter email"
                 placeholderTextColor="#b0bec5"
                 keyboardType="email-address"
                 autoCapitalize="none"
+                editable={!isEditMode}
               />
             </InputField>
 
             {/* Secondary Email */}
             <InputField label="Secondary Email" error={errors.SecEmailContact}>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, isEditMode && styles.inputDisabled]}
                 value={form.SecEmailContact}
                 onChangeText={(v) => setField('SecEmailContact', v)}
                 placeholder="Enter secondary email"
                 placeholderTextColor="#b0bec5"
                 keyboardType="email-address"
                 autoCapitalize="none"
+                editable={!isEditMode}
               />
             </InputField>
 
             {/* Phone */}
             <InputField label="Phone" error={errors.PhoneContact}>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, isEditMode && styles.inputDisabled]}
                 value={form.PhoneContact}
                 onChangeText={(v) => setField('PhoneContact', v)}
                 placeholder="Enter phone"
                 placeholderTextColor="#b0bec5"
                 keyboardType="phone-pad"
+                editable={!isEditMode}
               />
             </InputField>
 
             {/* Alternate Phone */}
             <InputField label="Alternate Phone" error={errors.AlternatePhoneContact}>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, isEditMode && styles.inputDisabled]}
                 value={form.AlternatePhoneContact}
                 onChangeText={(v) => setField('AlternatePhoneContact', v)}
                 placeholder="Enter alternate phone"
                 placeholderTextColor="#b0bec5"
                 keyboardType="phone-pad"
+                editable={!isEditMode}
               />
             </InputField>
 
             {/* Mobile */}
             <InputField label="Mobile" required error={errors.MobileNumberContact}>
               <TextInput
-                style={[styles.textInput, errors.MobileNumberContact ? styles.inputErrorBorder : null]}
+                style={[styles.textInput, errors.MobileNumberContact ? styles.inputErrorBorder : null, isEditMode && styles.inputDisabled]}
                 value={form.MobileNumberContact}
                 onChangeText={(v) => setField('MobileNumberContact', v)}
                 placeholder="Enter mobile number"
                 placeholderTextColor="#b0bec5"
                 keyboardType="phone-pad"
+                editable={!isEditMode}
               />
             </InputField>
 
             {/* Fax */}
             <InputField label="Fax" error={errors.FaxContact}>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, isEditMode && styles.inputDisabled]}
                 value={form.FaxContact}
                 onChangeText={(v) => setField('FaxContact', v)}
                 placeholder="Enter fax"
                 placeholderTextColor="#b0bec5"
+                editable={!isEditMode}
               />
             </InputField>
 
             {/* Department */}
             <InputField label="Department" error={errors.DeparmentContact}>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, isEditMode && styles.inputDisabled]}
                 value={form.DeparmentContact}
                 onChangeText={(v) => setField('DeparmentContact', v)}
                 placeholder="Enter department"
                 placeholderTextColor="#b0bec5"
+                editable={!isEditMode}
               />
             </InputField>
 
             {/* Products — multi-select */}
             <InputField label="Products" error={errors.ProductListContact}>
               <TouchableOpacity
-                style={styles.dropdownBtn}
-                onPress={() => openMultiDropdown('ProductListContact')}
-                activeOpacity={0.7}
+                style={[styles.dropdownBtn, isEditMode && styles.inputDisabled]}
+                onPress={() => !isEditMode && openMultiDropdown('ProductListContact')}
+                activeOpacity={isEditMode ? 1 : 0.7}
+                disabled={isEditMode}
               >
                 {form.ProductListContact.length === 0 ? (
                   <Text style={[styles.dropdownPlaceholder, styles.flex1]}>
@@ -732,11 +754,12 @@ const CrmContactCrudScreen = () => {
             </InputField>
 
             {/* Country */}
-            <InputField label="Country" error={errors.FkCountryContact}>
+            <InputField label="Country" required error={errors.FkCountryContact}>
               <TouchableOpacity
-                style={styles.dropdownBtn}
-                onPress={() => setActiveDropdown('FkCountryContact')}
-                activeOpacity={0.7}
+                style={[styles.dropdownBtn, isEditMode && styles.inputDisabled]}
+                onPress={() => !isEditMode && setActiveDropdown('FkCountryContact')}
+                activeOpacity={isEditMode ? 1 : 0.7}
+                disabled={isEditMode}
               >
                 <Text style={form.FkCountryContact ? styles.dropdownValue : styles.dropdownPlaceholder}>
                   {labelForKey('FkCountryContact') || placeholderForKey('FkCountryContact')}
@@ -748,51 +771,55 @@ const CrmContactCrudScreen = () => {
             {/* State */}
             <InputField label="State" error={errors.StateContact}>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, isEditMode && styles.inputDisabled]}
                 value={form.StateContact}
                 onChangeText={(v) => setField('StateContact', v)}
                 placeholder="Enter state"
                 placeholderTextColor="#b0bec5"
+                editable={!isEditMode}
               />
             </InputField>
 
             {/* Street */}
             <InputField label="Street" error={errors.StreetContact}>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, isEditMode && styles.inputDisabled]}
                 value={form.StreetContact}
                 onChangeText={(v) => setField('StreetContact', v)}
                 placeholder="Enter street"
                 placeholderTextColor="#b0bec5"
+                editable={!isEditMode}
               />
             </InputField>
 
             {/* City */}
             <InputField label="City" error={errors.CityContact}>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, isEditMode && styles.inputDisabled]}
                 value={form.CityContact}
                 onChangeText={(v) => setField('CityContact', v)}
                 placeholder="Enter city"
                 placeholderTextColor="#b0bec5"
+                editable={!isEditMode}
               />
             </InputField>
 
             {/* Zip */}
             <InputField label="Zip" error={errors.ZipContact}>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, isEditMode && styles.inputDisabled]}
                 value={form.ZipContact}
                 onChangeText={(v) => setField('ZipContact', v)}
                 placeholder="Enter zip"
                 placeholderTextColor="#b0bec5"
+                editable={!isEditMode}
               />
             </InputField>
 
             {/* Other Information */}
             <InputField label="Other Information" error={errors.OtherInformationContact}>
               <TextInput
-                style={[styles.textInput, styles.textArea]}
+                style={[styles.textInput, styles.textArea, isEditMode && styles.inputDisabled]}
                 value={form.OtherInformationContact}
                 onChangeText={(v) => setField('OtherInformationContact', v)}
                 placeholder="Enter other information"
@@ -800,8 +827,23 @@ const CrmContactCrudScreen = () => {
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
+                editable={!isEditMode}
               />
             </InputField>
+
+            {/* Active */}
+            <View style={fieldStyles.wrapper}>
+              <TouchableOpacity
+                style={styles.checkboxRow}
+                activeOpacity={0.7}
+                onPress={() => setField('Active', form.Active === '1' ? '0' : '1')}
+              >
+                <View style={[styles.checkboxBox, form.Active === '1' && styles.checkboxBoxChecked]}>
+                  {form.Active === '1' && <Text style={styles.checkboxTick}>✓</Text>}
+                </View>
+                <Text style={styles.checkboxLabel}>Active</Text>
+              </TouchableOpacity>
+            </View>
 
           </View>
 
@@ -929,6 +971,10 @@ const styles = StyleSheet.create({
   },
   inputErrorBorder: {
     borderColor: '#e53935',
+  },
+  inputDisabled: {
+    backgroundColor: '#f0f0f0',
+    color: '#9e9e9e',
   },
   textArea: {
     height: 100,
@@ -1130,5 +1176,36 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     letterSpacing: 0.3,
+  },
+
+  /* Active checkbox */
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  checkboxBox: {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#9ca3af',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  checkboxBoxChecked: {
+    backgroundColor: '#811458',
+    borderColor: '#811458',
+  },
+  checkboxTick: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  checkboxLabel: {
+    fontSize: 14,
+    color: '#374151',
+    fontWeight: '500',
   },
 });
