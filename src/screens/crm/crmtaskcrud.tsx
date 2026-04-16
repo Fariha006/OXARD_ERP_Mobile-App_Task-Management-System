@@ -307,6 +307,17 @@ const CrmTaskCrudScreen = () => {
   const assignedToLabel = (): string =>
     assignedToOptions.find((o) => o.value === form.FkAssignedTo)?.label ?? '';
 
+  const formatDateDisplay = (dateStr: string): string => {
+    if (!dateStr) { return ''; }
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) { return dateStr; }
+    const day = String(d.getDate()).padStart(2, '0');
+    const mon = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day}-${mon}-${year}`;
+  };
+
   const handleDateChange = (event: any, selected?: Date) => {
     setShowDatePicker(false);
     if (event?.type === 'set' && selected) {
@@ -732,7 +743,7 @@ const CrmTaskCrudScreen = () => {
                 onPress={() => setShowDatePicker(true)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.dropdownValue}>{form.TaskDate || 'Select date'}</Text>
+                <Text style={styles.dropdownValue}>{form.TaskDate ? formatDateDisplay(form.TaskDate) : 'Select date'}</Text>
                 <Text style={styles.dropdownChevron}>📅</Text>
               </TouchableOpacity>
             </InputField>
