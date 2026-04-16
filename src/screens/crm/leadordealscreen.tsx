@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Image, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import axios from 'axios';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import UserStorage from '../../utils/userStorage';
 import { API_CONFIG, getApiUrl } from '../../config/apiConfig';
 
@@ -34,56 +34,58 @@ const LeadOrDealScreen = () => {
   const [openIndexes, setOpenIndexes] = useState<number[]>([]);
   const [showFullData, setShowFullData] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const token = await UserStorage.getToken();
-        const userData = await UserStorage.getUserData();
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const token = await UserStorage.getToken();
+          const userData = await UserStorage.getUserData();
 
-        if (!token) {
-          setError('No authentication token found. Please login again.');
+          if (!token) {
+            setError('No authentication token found. Please login again.');
+            setData([]);
+            return;
+          }
+
+          const compid = userData?.CompId ?? 0;
+          const userId = userData?.UserId ?? 0;
+          const status = statusId === 2 ? 2 : 1; // default to Lead when param missing/invalid
+
+          const apiurl = getApiUrl('/api/cr5010/LG_Mode');
+          const requestBody = {
+            Mode: 'LG',
+            MobileViewFlag: 1,
+            ShowFullData: showFullData ? 1 : 0,
+            Compid: compid,
+            LanguageId: 1,
+            UserId: userId,
+            Status: status,
+            FilterParams: '',
+          };
+
+          const response = await axios.post<LeadOrDealItem[]>(apiurl, requestBody, {
+            headers: {
+              ...API_CONFIG.DEFAULT_HEADERS,
+              Authorization: `Bearer ${token}`,
+            },
+            timeout: API_CONFIG.TIMEOUT,
+          });
+
+          setData(Array.isArray(response.data) ? response.data : []);
+          setOpenIndexes([]);
+        } catch (e: any) {
+          setError(e?.message || 'Failed to fetch data');
           setData([]);
-          return;
+        } finally {
+          setLoading(false);
         }
+      };
 
-        const compid = userData?.CompId ?? 0;
-        const userId = userData?.UserId ?? 0;
-        const status = statusId === 2 ? 2 : 1; // default to Lead when param missing/invalid
-
-        const apiurl = getApiUrl('/api/cr5010/LG_Mode');
-        const requestBody = {
-          Mode: 'LG',
-          MobileViewFlag: 1,
-          ShowFullData: showFullData ? 1 : 0,
-          Compid: compid,
-          LanguageId: 1,
-          UserId: userId,
-          Status: status,
-          FilterParams: '',
-        };
-
-        const response = await axios.post<LeadOrDealItem[]>(apiurl, requestBody, {
-          headers: {
-            ...API_CONFIG.DEFAULT_HEADERS,
-            Authorization: `Bearer ${token}`,
-          },
-          timeout: API_CONFIG.TIMEOUT,
-        });
-
-        setData(Array.isArray(response.data) ? response.data : []);
-        setOpenIndexes([]);
-      } catch (e: any) {
-        setError(e?.message || 'Failed to fetch data');
-        setData([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [statusId, showFullData]);
+      fetchData();
+    }, [statusId, showFullData]),
+  );
 
   const toggleAccordion = (idx: number) => {
     setOpenIndexes(openIndexes.includes(idx) ? openIndexes.filter(i => i !== idx) : [...openIndexes, idx]);

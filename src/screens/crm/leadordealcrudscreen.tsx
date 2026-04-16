@@ -41,6 +41,8 @@ type FormState = {
   Email: string;
   cr0030List: string[];   // Products  — multi-select
   cr0040List: string[];   // Lead Source — multi-select
+  FkEmpIdSalesPerson: string;
+  WinningPer: string;
   ExpectedBudget: string;
   Requirements: string;
   StatusId: string;
@@ -50,16 +52,33 @@ type StringFormKey = Exclude<keyof FormState, 'cr0030List' | 'cr0040List'>;
 
 type FormErrors = Partial<Record<keyof FormState, string>>;
 
-type SingleDropdownKey = 'LeadTypeId' | 'FkAccountId' | 'StatusId';
+type SingleDropdownKey = 'LeadTypeId' | 'FkAccountId' | 'StatusId' | 'FkEmpIdSalesPerson';
 type MultiDropdownKey  = 'cr0030List' | 'cr0040List';
 type DropdownKey = SingleDropdownKey | MultiDropdownKey;
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+const formatDateDMY = (d: Date): string => {
+  const dd  = String(d.getDate()).padStart(2, '0');
+  const mmm = MONTH_ABBR[d.getMonth()];
+  const yyyy = d.getFullYear();
+  return `${dd}-${mmm}-${yyyy}`;
+};
+
+const parseDateDMY = (s: string): Date => {
+  const [dd, mmm, yyyy] = s.split('-');
+  const monthIdx = MONTH_ABBR.findIndex(m => m.toLowerCase() === mmm.toLowerCase());
+  return new Date(Number(yyyy), monthIdx, Number(dd));
+};
 
 // ─── Static lookup data ───────────────────────────────────────────────────────
 
 const INITIAL_FORM: FormState = {
   RelationId: '',
   RelationTrackNo: '',
-  RegisterDate: new Date().toISOString().split('T')[0],
+  RegisterDate: formatDateDMY(new Date()),
   LeadTypeId: '',
   FkAccountId: '',
   CompanyName: '',
@@ -68,6 +87,8 @@ const INITIAL_FORM: FormState = {
   Email: '',
   cr0030List: [],
   cr0040List: [],
+  FkEmpIdSalesPerson: '',
+  WinningPer: '',
   ExpectedBudget: '',
   Requirements: '',
   StatusId: '',
@@ -162,6 +183,7 @@ const LeadOrDealCrudScreen = () => {
   const [defaultDealStatusId, setDefaultDealStatusId] = useState<string>('0');
   const [leadStatusOptions, setLeadStatusOptions] = useState<DropdownOption[]>([]);
   const [dealStatusOptions, setDealStatusOptions] = useState<DropdownOption[]>([]);
+  const [salesPersonOptions, setSalesPersonOptions] = useState<DropdownOption[]>([]);
 
   // ── Load LO_Mode lookup data ──────────────────────────────────────────────
 
@@ -173,12 +195,14 @@ const LeadOrDealCrudScreen = () => {
 
         // Item1 → Lead Type  { FieldId, FieldValue }
         if (Array.isArray(data.Item1)) {
-          setLeadTypeOptions(
-            (data.Item1 as any[]).map((i) => ({
-              label: String(i.FieldValue ?? ''),
-              value: String(i.FieldId ?? ''),
-            })),
-          );
+          const opts = (data.Item1 as any[]).map((i) => ({
+            label: String(i.FieldValue ?? ''),
+            value: String(i.FieldId ?? ''),
+          }));
+          setLeadTypeOptions(opts);
+          if (!searchid && opts.length > 0) {
+            setForm((prev) => ({ ...prev, LeadTypeId: opts[0].value }));
+          }
         }
 
         // Item3 → Products  { ProductId, ProductCode, ProductName }
@@ -215,6 +239,35 @@ const LeadOrDealCrudScreen = () => {
               value: String(i.LeadSourceId ?? ''),
             })),
           );
+        }
+
+        // Rest.Item4 → Sales Person (Assigned To) { EmpId, EmployeeName }
+        const restItem4 = (data.Rest as any)?.Item4;
+        if (Array.isArray(restItem4)) {
+          const seen = new Set<string>();
+          const unique: DropdownOption[] = [];
+          for (const i of restItem4) {
+            const empId = i.EmpId;
+            if (empId == null || empId === '') { continue; }
+            const value = String(empId);
+            if (!seen.has(value)) {
+              seen.add(value);
+              unique.push({
+                label: String(i.EmployeeName ?? ''),
+                value,
+              });
+            }
+          }
+          setSalesPersonOptions(unique);
+
+          // In create mode, default sales person to current user
+          if (!searchid) {
+            const userData = await UserStorage.getUserData();
+            const empId = String(userData?.EmpId ?? '');
+            if (empId && unique.some((o) => o.value === empId)) {
+              setForm((prev) => ({ ...prev, FkEmpIdSalesPerson: empId }));
+            }
+          }
         }
 
         // Item5 → Accounts  { AccountId, AccountName }
@@ -307,7 +360,7 @@ const LeadOrDealCrudScreen = () => {
             RelationId:      String(rec.RelationId      ?? prev.RelationId),
             RelationTrackNo: String(rec.RelationTrackNo ?? ''),
             RegisterDate:    rec.RegisterDate
-              ? String(rec.RegisterDate).split('T')[0]
+              ? formatDateDMY(new Date(rec.RegisterDate))
               : prev.RegisterDate,
             LeadTypeId:      String(rec.LeadTypeId    ?? ''),
             FkAccountId:     String(rec.FkAccountId   ?? ''),
@@ -315,6 +368,8 @@ const LeadOrDealCrudScreen = () => {
             ContactPerson:   String(rec.ContactPerson  ?? ''),
             MobileNumber:    String(rec.MobileNumber   ?? ''),
             Email:           String(rec.Email          ?? ''),
+            FkEmpIdSalesPerson: rec.FkEmpIdSalesPerson != null ? String(rec.FkEmpIdSalesPerson) : '',
+            WinningPer:      rec.WinningPer != null ? String(rec.WinningPer) : '',
             ExpectedBudget:  rec.ExpectedBudget != null ? String(rec.ExpectedBudget) : '',
             Requirements:    String(rec.Requirements   ?? ''),
           }));
@@ -422,6 +477,7 @@ const LeadOrDealCrudScreen = () => {
     switch (key) {
       case 'LeadTypeId':  return leadTypeOptions;
       case 'FkAccountId': return accountOptions;
+      case 'FkEmpIdSalesPerson': return salesPersonOptions;
       case 'cr0030List':  return productOptions;
       case 'cr0040List':  return leadSourceOptions;
       case 'StatusId':    return statusId === 2 ? dealStatusOptions : leadStatusOptions;
@@ -441,6 +497,7 @@ const LeadOrDealCrudScreen = () => {
     switch (key) {
       case 'LeadTypeId':  return 'Select lead type';
       case 'FkAccountId': return 'Select account';
+      case 'FkEmpIdSalesPerson': return 'Select sales person';
       case 'cr0030List':  return 'Select products';
       case 'cr0040List':  return 'Select lead sources';
       case 'StatusId':    return 'Select status';
@@ -451,6 +508,7 @@ const LeadOrDealCrudScreen = () => {
     switch (key) {
       case 'LeadTypeId':  return 'Lead Type';
       case 'FkAccountId': return 'Account';
+      case 'FkEmpIdSalesPerson': return 'Sales Person';
       case 'cr0030List':  return 'Products';
       case 'cr0040List':  return 'Lead Source';
       case 'StatusId':    return 'Status';
@@ -534,6 +592,8 @@ const LeadOrDealCrudScreen = () => {
         MobileNumber:   form.MobileNumber,
         Email:          form.Email,
         Requirements:   form.Requirements,
+        FkEmpIdSalesPerson: form.FkEmpIdSalesPerson ? Number(form.FkEmpIdSalesPerson) : null,
+        WinningPer:     form.WinningPer      || '0',
         ExpectedBudget: form.ExpectedBudget  || '0',
         Status:         '1',
         AccountName:    form.CompanyName,
@@ -625,7 +685,7 @@ const LeadOrDealCrudScreen = () => {
   const handleDateChange = (event: any, selected?: Date) => {
     setShowDatePicker(false);
     if (event?.type === 'set' && selected) {
-      setField('RegisterDate', selected.toISOString().split('T')[0]);
+      setField('RegisterDate', formatDateDMY(selected));
     }
   };
 
@@ -865,7 +925,7 @@ const LeadOrDealCrudScreen = () => {
               </TouchableOpacity>
               {showDatePicker && (
                 <DateTimePicker
-                  value={form.RegisterDate ? new Date(form.RegisterDate) : new Date()}
+                  value={form.RegisterDate ? parseDateDMY(form.RegisterDate) : new Date()}
                   mode="date"
                   display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                   onChange={handleDateChange}
@@ -1002,6 +1062,32 @@ const LeadOrDealCrudScreen = () => {
                 )}
                 <Text style={styles.dropdownChevron}>▼</Text>
               </TouchableOpacity>
+            </InputField>
+
+            {/* Sales Person */}
+            <InputField label="Sales Person" error={errors.FkEmpIdSalesPerson}>
+              <TouchableOpacity
+                style={styles.dropdownBtn}
+                onPress={() => setActiveDropdown('FkEmpIdSalesPerson')}
+                activeOpacity={0.7}
+              >
+                <Text style={form.FkEmpIdSalesPerson ? styles.dropdownValue : styles.dropdownPlaceholder}>
+                  {labelForKey('FkEmpIdSalesPerson') || 'Select sales person'}
+                </Text>
+                <Text style={styles.dropdownChevron}>▼</Text>
+              </TouchableOpacity>
+            </InputField>
+
+            {/* Winning Percentage */}
+            <InputField label="Winning %" error={errors.WinningPer}>
+              <TextInput
+                style={styles.textInput}
+                value={form.WinningPer}
+                onChangeText={(v) => setField('WinningPer', v)}
+                placeholder="Enter winning percentage"
+                placeholderTextColor="#b0bec5"
+                keyboardType="numeric"
+              />
             </InputField>
 
             {/* Expected Budget */}
