@@ -520,7 +520,15 @@ const CrmMeetingCrudScreen = () => {
 
   const displayDateTime = (): string => {
     if (!form.TaskDate) { return 'Select date & time'; }
-    return form.TaskDate;
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const d = new Date(form.TaskDate.replace(' ', 'T'));
+    if (isNaN(d.getTime())) { return form.TaskDate; }
+    const day = String(d.getDate()).padStart(2, '0');
+    const mon = months[d.getMonth()];
+    const year = d.getFullYear();
+    const hrs = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    return `${day}-${mon}-${year} ${hrs}:${mins}`;
   };
 
   // ── File Picker ──────────────────────────────────────────────────────────
@@ -748,14 +756,16 @@ const CrmMeetingCrudScreen = () => {
       const compid = String(userData?.CompId ?? '0');
       const userId = String(userData?.UserId ?? '0');
 
+      const currentTaskId = Number(form.TaskId) || 0;
+
       const requestBody = {
         AttachmentList: uploadedFiles.map((f) => f.attachmentItem),
         Compid: compid,
         UserId: userId,
         LanguageId: 1,
         Status: Number(form.Status) || 0,
-        TaskId: taskId > 0 ? taskId : null,
-        FkRelationId: Number(form.FkRelationId) || relationId,
+        TaskId: currentTaskId > 0 ? currentTaskId : null,
+        FkRelationId: Number(form.FkRelationId) || 0,
         Title: form.Title,
         TaskDate: form.TaskDate,
         Details: form.Details,
@@ -780,7 +790,7 @@ const CrmMeetingCrudScreen = () => {
           };
         }),
         CategoryId: 4,
-        Mode: 'I',
+        Mode: currentTaskId > 0 ? 'U' : 'I',
       };
 
       const apiUrl = getApiUrl('/api/cr5014/I_U_D_Mode');
