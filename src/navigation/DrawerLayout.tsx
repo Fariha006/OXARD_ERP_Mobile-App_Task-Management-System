@@ -50,6 +50,7 @@ import CrmReportScreen from '../screens/crm/crmreportscreen';
 import crmaccountlist from '../screens/crm/crmaccountlist';
 import { StackScreen } from 'react-native-screens';
 import crmaccountcrud from '../screens/crm/crmaccountcrud';
+import CrmTimeline from '../screens/crm/crmtimeline';
 
 const Stack = createStackNavigator();
 
@@ -295,6 +296,9 @@ const InnerStack = () => (
           header: () => <Header navigation={navigation} route={route} />
         })}
         />
+        <Stack.Screen name="crmtimeline" component={CrmTimeline} options={({ navigation, route }) => ({
+          header: () => <Header navigation={navigation} route={route} />
+        })} />
   </Stack.Navigator>
 );
 

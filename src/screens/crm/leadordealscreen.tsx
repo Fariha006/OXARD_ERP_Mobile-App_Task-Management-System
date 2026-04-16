@@ -207,6 +207,17 @@ const LeadOrDealScreen = () => {
                 </View>
                 <View style={styles.editRow}>
                   <TouchableOpacity
+                    style={styles.timelineButton}
+                    activeOpacity={0.8}
+                    onPress={() =>
+                      navigation.navigate('crmtimeline', {
+                        RelationId: item.RelationId,
+                      })
+                    }
+                  >
+                    <Text style={styles.timelineButtonText}>⏱  Timeline</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
                     style={styles.editButton}
                     activeOpacity={0.8}
                     onPress={() =>
@@ -381,6 +392,20 @@ const styles = StyleSheet.create({
     paddingTop: 6,
     paddingBottom: 4,
     paddingRight: 4,
+    gap: 8,
+  },
+  timelineButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#133F7C',
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  timelineButtonText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '700',
   },
   editButton: {
     flexDirection: 'row',

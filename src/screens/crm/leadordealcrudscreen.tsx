@@ -1257,6 +1257,10 @@ const LeadOrDealCrudScreen = () => {
                           Status: statusId,
                           RelationId: savedRelationId,
                         });
+                      } else if (tab.key === 'settings') {
+                        navigation.navigate('crmtimeline', {
+                          RelationId: savedRelationId,
+                        });
                       } else {
                         setActiveTab(tab.key);
                       }
