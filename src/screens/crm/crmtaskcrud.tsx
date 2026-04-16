@@ -595,10 +595,14 @@ const CrmTaskCrudScreen = () => {
   const handleClear = () => {
     setForm({
       ...INITIAL_FORM,
-      FkRelationId: relationId ? String(relationId) : '',
+      TaskId: '0',
+      FkRelationId: '',
+      TaskDate: new Date().toISOString().split('T')[0],
     });
     setUploadedFiles([]);
     setErrors({});
+    setShowDatePicker(false);
+    setActiveDropdown(null);
   };
 
   // ── Dropdown modal ────────────────────────────────────────────────────────
