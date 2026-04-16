@@ -47,6 +47,9 @@ import CrmCallListScreen from '../screens/crm/crmcalllist';
 import CrmCallCrudScreen from '../screens/crm/crmcallcrud';
 import CrmReportMenuListScreen from '../screens/crm/crmreportmenulist';
 import CrmReportScreen from '../screens/crm/crmreportscreen';
+import crmaccountlist from '../screens/crm/crmaccountlist';
+import { StackScreen } from 'react-native-screens';
+import crmaccountcrud from '../screens/crm/crmaccountcrud';
 
 const Stack = createStackNavigator();
 
@@ -284,6 +287,14 @@ const InnerStack = () => (
         <Stack.Screen name="crmreportscreen" component={CrmReportScreen} options={({ navigation, route }) => ({
           header: () => <Header navigation={navigation} route={route} />
         })} />
+        <Stack.Screen name="crmaccountlist" component={crmaccountlist} options={({ navigation, route }) => ({
+          header: () => <Header navigation={navigation} route={route} />
+        })} />
+
+       <Stack.Screen name="crmaccountcrud" component={crmaccountcrud} options={({ navigation, route }) => ({
+          header: () => <Header navigation={navigation} route={route} />
+        })}
+        />
   </Stack.Navigator>
 );
 
