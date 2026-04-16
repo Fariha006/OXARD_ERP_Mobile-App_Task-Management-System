@@ -358,7 +358,15 @@ const CrmCallCrudScreen = () => {
 
   const displayDateTime = (): string => {
     if (!form.TaskDate) { return 'Select date & time'; }
-    return form.TaskDate;
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const d = new Date(form.TaskDate.replace(' ', 'T'));
+    if (isNaN(d.getTime())) { return form.TaskDate; }
+    const day = String(d.getDate()).padStart(2, '0');
+    const mon = months[d.getMonth()];
+    const year = d.getFullYear();
+    const hrs = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    return `${day}-${mon}-${year} ${hrs}:${mins}`;
   };
 
   // ── File Picker ──────────────────────────────────────────────────────────
@@ -580,20 +588,22 @@ const CrmCallCrudScreen = () => {
       const compid = String(userData?.CompId ?? '0');
       const userId = String(userData?.UserId ?? '0');
 
+      const currentTaskId = Number(form.TaskId) || 0;
+
       const requestBody = {
         AttachmentList: uploadedFiles.map((f) => f.attachmentItem),
         Compid: compid,
         UserId: userId,
         LanguageId: 1,
         Status: Number(form.Status) || 0,
-        TaskId: taskId > 0 ? taskId : null,
+        TaskId: currentTaskId > 0 ? currentTaskId : null,
         Title: form.Title,
-        FkRelationId: Number(form.FkRelationId) || relationId,
+        FkRelationId: Number(form.FkRelationId) || 0,
         TaskDate: form.TaskDate,
         CallTo: form.CallTo,
         Details: form.Details,
         CategoryId: 3,
-        Mode: 'I',
+        Mode: currentTaskId > 0 ? 'U' : 'I',
       };
 
       const apiUrl = getApiUrl('/api/cr5014/I_U_D_Mode');
@@ -624,10 +634,16 @@ const CrmCallCrudScreen = () => {
   const handleClear = () => {
     setForm({
       ...INITIAL_FORM,
-      FkRelationId: relationId ? String(relationId) : '',
+      TaskId: '0',
+      FkRelationId: '',
+      TaskDate: new Date().toISOString().replace('T', ' ').substring(0, 19),
     });
     setUploadedFiles([]);
     setErrors({});
+    setDateTimeValue(new Date());
+    setShowDatePicker(false);
+    setShowTimePicker(false);
+    setActiveDropdown(null);
   };
 
   // ── Single-select dropdown modal ──────────────────────────────────────────

@@ -47,6 +47,9 @@ const CrmCallListScreen = () => {
   const [error, setError] = useState<string | null>(null);
   const [openIndexes, setOpenIndexes] = useState<number[]>([]);
   const [showFullData, setShowFullData] = useState(false);
+  const [isDeal, setIsDeal] = useState(status !== 1);
+
+  const currentStatus = isDeal ? 2 : 1;
 
   useFocusEffect(
     useCallback(() => {
@@ -76,7 +79,7 @@ const CrmCallListScreen = () => {
               MobileViewFlag: 1,
               ShowFullData: showFullData ? 1 : 0,
               FilterParams: '[]',
-              Status: status,
+              Status: currentStatus,
               FkRelationId: fkRelationId,
             },
             {
@@ -115,7 +118,7 @@ const CrmCallListScreen = () => {
       };
 
       fetchCalls();
-    }, [status, fkRelationId, showFullData]),
+    }, [status, fkRelationId, showFullData, currentStatus]),
   );
 
   const toggleAccordion = (idx: number) => {
@@ -171,7 +174,7 @@ const CrmCallListScreen = () => {
             navigation.navigate('crmcallcrud', {
               RelationId: fkRelationId,
               TaskId: 0,
-              Status: status,
+              Status: currentStatus,
             });
           }}
         >
@@ -180,6 +183,17 @@ const CrmCallListScreen = () => {
       </View>
 
       <View style={styles.topControlsContainer}>
+        <View style={styles.showAllDataContainer}>
+          <Text style={styles.showAllDataLabel}>{isDeal ? 'Deal' : 'Lead'}</Text>
+          <View style={styles.switchContainer}>
+            <Switch
+              value={isDeal}
+              onValueChange={setIsDeal}
+              trackColor={{ false: '#767577', true: '#133F7C' }}
+              thumbColor={isDeal ? '#fff' : '#f4f3f4'}
+            />
+          </View>
+        </View>
         <View style={styles.showAllDataContainer}>
           <Text style={styles.showAllDataLabel}>Show full data</Text>
           <View style={styles.switchContainer}>
@@ -246,7 +260,7 @@ const CrmCallListScreen = () => {
                         navigation.navigate('crmcallcrud', {
                           RelationId: item.FkRelationId,
                           TaskId: item.TaskId,
-                          Status: status,
+                          Status: currentStatus,
                         });
                       }}
                     >
