@@ -15,7 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import { API_CONFIG, getApiUrl } from '../../config/apiConfig';
 import UserStorage from '../../utils/userStorage';
@@ -73,10 +73,14 @@ const ifStyles = StyleSheet.create({
 
 const CrmAccountCrud = () => {
   const navigation = useNavigation<any>();
-  const [form, setForm]             = useState<FormState>(INITIAL_FORM);
-  const [errors, setErrors]         = useState<FormErrors>({});
-  const [isSaving, setIsSaving]     = useState(false);
-  const [accountId, _setAccountId]  = useState<string>('');
+  const route      = useRoute<any>();
+  const routeAccountId = route?.params?.AccountId ? String(route.params.AccountId) : '';
+
+  const [form, setForm]           = useState<FormState>(INITIAL_FORM);
+  const [errors, setErrors]       = useState<FormErrors>({});
+  const [isSaving, setIsSaving]   = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [accountId, setAccountId] = useState<string>('');
   const [industryOptions, setIndustryOptions] = useState<DropdownOption[]>([]);
   const [currencyOptions, setCurrencyOptions]  = useState<DropdownOption[]>([]);
   const [countryOptions, setCountryOptions]    = useState<DropdownOption[]>([]);
@@ -118,6 +122,56 @@ const CrmAccountCrud = () => {
     };
     loadLookups();
   }, []);
+
+  useEffect(() => {
+    if (!routeAccountId || routeAccountId === '0') { return; }
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        const token    = await UserStorage.getToken();
+        const userData = await UserStorage.getUserData();
+        const compid   = String(userData?.CompId ?? '0');
+        const userId   = String(userData?.UserId ?? '0');
+        const apiUrl   = getApiUrl('/api/cr5010/LoadCompany');
+        const response = await axios.post<any[]>(
+          apiUrl,
+          { FkAccountId: routeAccountId, Compid: compid, UserId: userId, LanguageId: 1 },
+          {
+            headers: { ...API_CONFIG.DEFAULT_HEADERS, Authorization: `Bearer ${token}` },
+            timeout: API_CONFIG.TIMEOUT,
+          },
+        );
+        const acc = Array.isArray(response.data) && response.data.length > 0
+          ? response.data[0]
+          : null;
+        if (acc) {
+          setAccountId(String(acc.AccountId));
+          setForm({
+            AccountName:    String(acc.AccountName    ?? ''),
+            FkIndustryId:   acc.FkIndustryId  != null ? String(acc.FkIndustryId)  : '',
+            FkCurrId:       acc.FkCurrId       != null ? String(acc.FkCurrId)      : '',
+            ExchRate:       acc.ExchRate       != null ? String(acc.ExchRate)      : '1',
+            FkCountryId:    acc.FkCntryId      != null ? String(acc.FkCntryId)    : '',
+            Street:         String(acc.Street         ?? ''),
+            City:           String(acc.City           ?? ''),
+            State:          String(acc.State          ?? ''),
+            ZipCode:        String(acc.ZipCode        ?? ''),
+            Fax:            String(acc.Fax            ?? ''),
+            WebSite:        String(acc.WebSite        ?? ''),
+            AddDescription: String(acc.AddDescription ?? ''),
+            NoofEmployees:  acc.NoofEmployees  != null ? String(acc.NoofEmployees)  : '',
+            AnnualTurnOver: acc.AnnualTurnOver != null ? String(acc.AnnualTurnOver) : '',
+          });
+        }
+      } catch (error: any) {
+        const message = error?.response?.data?.message ?? error?.message ?? 'Failed to load account data.';
+        Alert.alert('Error', message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadData();
+  }, [routeAccountId]);
 
   const setField = <K extends keyof FormState>(key: K, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -268,6 +322,17 @@ const CrmAccountCrud = () => {
       </Modal>
     );
   };
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#811458" />
+          <Text style={styles.loadingText}>Loading…</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Top bar */}
@@ -472,7 +537,7 @@ const CrmAccountCrud = () => {
           <View style={styles.footer}>
             <TouchableOpacity
               style={[styles.footerBtn, styles.btnClear, isSaving && styles.btnDisabled]}
-              onPress={() => { setForm(INITIAL_FORM); setErrors({}); }}
+              onPress={() => { setForm(INITIAL_FORM); setErrors({}); setAccountId(''); }}
               activeOpacity={0.8}
               disabled={isSaving}
             >
@@ -501,6 +566,8 @@ const CrmAccountCrud = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f9f9f9' },
   flex: { flex: 1 },
+  loadingOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f9f9f9' },
+  loadingText: { marginTop: 12, fontSize: 14, color: '#811458', fontWeight: '600' },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',

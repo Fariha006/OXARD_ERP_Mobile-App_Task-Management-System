@@ -192,7 +192,7 @@ const CrmAccountList = () => {
                   <TouchableOpacity
                     style={styles.editButton}
                     activeOpacity={0.8}
-                    onPress={() => navigation.navigate('companycrud', { AccountId: item.AccountId })}
+                    onPress={() => navigation.navigate('crmaccountcrud', { AccountId: item.AccountId })}
                   >
                     <Text style={styles.editButtonText}>✎  Edit</Text>
                   </TouchableOpacity>
