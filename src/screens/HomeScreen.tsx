@@ -205,6 +205,8 @@ export default function HomeScreen({ navigation }: Props) {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [fetchedData, setFetchedData] = useState<any>(null);
   const [loadingModal, setLoadingModal] = useState(false);
+  const tileScrollRef    = useRef<ScrollView>(null);
+  const tileScrollOffset = useRef(0);
   const flatListRef = useRef<FlatList<any>>(null);
   const circularFlatListRef = useRef<FlatList<CircularItem>>(null);
   const eventFlatListRef = useRef<FlatList<EventItem>>(null);
@@ -641,9 +643,18 @@ export default function HomeScreen({ navigation }: Props) {
       setLoading(true);
       fetchData();
       loadCounts();
-      // No need to save FCM token every time
+      // Restore tile scroll position after re-render settles
+      const timer = setTimeout(() => {
+        tileScrollRef.current?.scrollTo({ x: tileScrollOffset.current, animated: false });
+      }, 50);
+      return () => clearTimeout(timer);
     }, [])
   );
+
+  const SCREEN_WIDTH = Dimensions.get('window').width;
+  const TILE_MARGIN  = 10;
+  const TILE_PADDING = 12;
+  const TILE_SIZE    = Math.floor((SCREEN_WIDTH - TILE_PADDING - 4 * TILE_MARGIN) / 4);
 
   const tiles = [
     { id: 1, title: 'My Desk', image: require('../../assets/images/home/mydesk.png'), route: 'Main', screen: 'MyDesk' },
@@ -1445,11 +1456,11 @@ export default function HomeScreen({ navigation }: Props) {
       <View style={styles.container}>
         <View style={styles.btncontainer}>
           <ScrollView
-            contentContainerStyle={styles.scrollContainer}
+            contentContainerStyle={styles.tileScrollContainer}
             showsVerticalScrollIndicator={false} horizontal={true} showsHorizontalScrollIndicator={false}>
             <View style={styles.grid}>
                              {tiles.map((tile) => (
-                 <TouchableOpacity onPress={() => navigation.navigate(tile.route as any, { screen: tile.screen })} key={tile.id} style={styles.tile}>
+                 <TouchableOpacity onPress={() => navigation.navigate(tile.route as any, { screen: tile.screen })} key={tile.id} style={[styles.tile, { width: TILE_SIZE, height: TILE_SIZE }]}>
                    <View style={styles.tileContent}>
                      <Image source={tile.image} style={styles.image} />
                      <Text style={styles.title}>{tile.title}</Text>
@@ -1843,22 +1854,22 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     padding: 0,
-    paddingRight: 12,
+    paddingRight: 20,
     paddingLeft: 12,
-  
+  },
+  tileScrollContainer: {
+    paddingLeft: 12,
+    paddingRight: 24,
+    alignItems: 'center',
   },
   grid: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingRight: 15, paddingLeft: 1,
-    marginRight: 10,
+    paddingLeft: 1,
   },
   image: {
     marginBottom: 1,
   },
   tile: {
-    width: '13%',
-    aspectRatio: 1,
     // backgroundColor: '#f2f2eb',
    // backgroundColor: '#ebebeb',
    backgroundColor: '#fafafa',
