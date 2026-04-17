@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -6,6 +6,7 @@ import {
   Image,
   KeyboardAvoidingView,
   Modal,
+  PermissionsAndroid,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -17,6 +18,8 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
+import { WebView } from 'react-native-webview';
+import Geolocation from '@react-native-community/geolocation';
 import { API_CONFIG, getApiUrl } from '../../config/apiConfig';
 import UserStorage from '../../utils/userStorage';
 
@@ -58,6 +61,43 @@ const INITIAL_FORM: FormState = {
   AnnualTurnOver: '',
 };
 
+// ─── Map HTML (Leaflet + OpenStreetMap) ───────────────────────────────────────
+const MAP_HTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; width: 100%; }
+    #map { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    var selectedLat = null, selectedLng = null, marker = null;
+    var map = L.map('map').setView([20, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    map.on('click', function(e) { setMarker(e.latlng.lat, e.latlng.lng); });
+    function setMarker(lat, lng) {
+      selectedLat = lat; selectedLng = lng;
+      var latlng = L.latLng(lat, lng);
+      if (marker) { marker.setLatLng(latlng); } else { marker = L.marker(latlng).addTo(map); }
+      map.panTo(latlng);
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'markerPlaced', latitude: lat, longitude: lng }));
+    }
+  </script>
+</body>
+</html>
+`;
+
 const InputField: React.FC<{ label: string; error?: string; children: React.ReactNode }> = ({ label, error, children }) => (
   <View style={ifStyles.wrapper}>
     <Text style={ifStyles.label}>{label}</Text>
@@ -85,6 +125,19 @@ const CrmAccountCrud = () => {
   const [currencyOptions, setCurrencyOptions]  = useState<DropdownOption[]>([]);
   const [countryOptions, setCountryOptions]    = useState<DropdownOption[]>([]);
   const [activeDropdown, setActiveDropdown]    = useState<DropdownKey | null>(null);
+
+  const [showMapModal, setShowMapModal]           = useState(false);
+  const [tempLat, setTempLat]                     = useState<number | null>(null);
+  const [tempLng, setTempLng]                     = useState<number | null>(null);
+  const [latitude, setLatitude]                   = useState<string>('');
+  const [longitude, setLongitude]                 = useState<string>('');
+  const [locationName, setLocationName]           = useState<string>('');
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [locationSearch, setLocationSearch]       = useState('');
+  const [locationSearchResults, setLocationSearchResults] = useState<any[]>([]);
+  const [isSearchingLocation, setIsSearchingLocation]     = useState(false);
+  const webViewRef        = useRef<any>(null);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const loadLookups = async () => {
@@ -162,6 +215,9 @@ const CrmAccountCrud = () => {
             NoofEmployees:  acc.NoofEmployees  != null ? String(acc.NoofEmployees)  : '',
             AnnualTurnOver: acc.AnnualTurnOver != null ? String(acc.AnnualTurnOver) : '',
           });
+          if (acc.Latitude  != null && String(acc.Latitude).trim()  !== '') { setLatitude(String(acc.Latitude)); }
+          if (acc.Longitude != null && String(acc.Longitude).trim() !== '') { setLongitude(String(acc.Longitude)); }
+          if (acc.Location  != null && String(acc.Location).trim()  !== '') { setLocationName(String(acc.Location)); }
         }
       } catch (error: any) {
         const message = error?.response?.data?.message ?? error?.message ?? 'Failed to load account data.';
@@ -184,7 +240,7 @@ const CrmAccountCrud = () => {
     switch (key) {
       case 'FkIndustryId': return industryOptions;
       case 'FkCurrId':     return currencyOptions;
-      case 'FkCountryId':    return countryOptions;
+      case 'FkCountryId':  return countryOptions;
     }
   };
   const labelForKey = (key: DropdownKey): string =>
@@ -193,26 +249,28 @@ const CrmAccountCrud = () => {
     switch (key) {
       case 'FkIndustryId': return 'Select industry';
       case 'FkCurrId':     return 'Select currency';
-      case 'FkCountryId':    return 'Select country';
+      case 'FkCountryId':  return 'Select country';
     }
   };
   const titleForKey = (key: DropdownKey): string => {
     switch (key) {
       case 'FkIndustryId': return 'Industry';
       case 'FkCurrId':     return 'Currency';
-      case 'FkCountryId':    return 'Country';
+      case 'FkCountryId':  return 'Country';
     }
   };
+
   const validate = (): boolean => {
     const next: FormErrors = {};
-    if (!form.AccountName.trim())  { next.AccountName  = 'Company Name is required.'; }
+    if (!form.AccountName.trim())  { next.AccountName  = 'Account Name is required.'; }
     if (!form.FkIndustryId)        { next.FkIndustryId = 'Industry is required.'; }
     if (!form.FkCurrId)            { next.FkCurrId     = 'Currency is required.'; }
     if (!form.ExchRate.trim())     { next.ExchRate     = 'Exch. Rate is required.'; }
-    if (!form.FkCountryId)           { next.FkCountryId   = 'Country is required.'; }
+    if (!form.FkCountryId)         { next.FkCountryId  = 'Country is required.'; }
     setErrors(next);
     return Object.keys(next).length === 0;
   };
+
   const handleSave = async () => {
     if (!validate()) { return; }
     try {
@@ -235,7 +293,7 @@ const CrmAccountCrud = () => {
           FkIndustryId:   form.FkIndustryId   || '0',
           FkCurrId:       form.FkCurrId        || '0',
           ExchRate:       form.ExchRate        || '1',
-          FkCountryId:    form.FkCountryId       || '0',
+          FkCountryId:    form.FkCountryId     || '0',
           State:          form.State,
           City:           form.City,
           Street:         form.Street,
@@ -245,12 +303,12 @@ const CrmAccountCrud = () => {
           AddDescription: form.AddDescription,
           NoofEmployees:  form.NoofEmployees   || null,
           AnnualTurnOver: form.AnnualTurnOver  || null,
+          Latitude:       latitude             || null,
+          Longitude:      longitude            || null,
+          Location:       locationName         || '',
         },
         {
-          headers: {
-            ...API_CONFIG.DEFAULT_HEADERS,
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { ...API_CONFIG.DEFAULT_HEADERS, Authorization: `Bearer ${token}` },
           timeout: API_CONFIG.TIMEOUT,
         },
       );
@@ -269,6 +327,205 @@ const CrmAccountCrud = () => {
       setIsSaving(false);
     }
   };
+
+  // ── Location handlers ──────────────────────────────────────────────────────
+
+  const handleWebViewMessage = (event: any) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      if (data.type === 'markerPlaced') {
+        setTempLat(data.latitude);
+        setTempLng(data.longitude);
+      }
+    } catch {}
+  };
+
+  const handleUseMyLocation = async () => {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      );
+      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+        Alert.alert('Permission Denied', 'Location permission is required.');
+        return;
+      }
+    }
+    setIsGettingLocation(true);
+    Geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        setTempLat(lat);
+        setTempLng(lng);
+        webViewRef.current?.injectJavaScript(
+          `setMarker(${lat}, ${lng}); map.setView([${lat}, ${lng}], 15); true;`,
+        );
+        setIsGettingLocation(false);
+      },
+      (error) => {
+        setIsGettingLocation(false);
+        Alert.alert('Location Error', error.message ?? 'Could not get current location.');
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
+    );
+  };
+
+  const handleLocationSearch = async (query: string) => {
+    if (!query.trim()) { return; }
+    try {
+      setIsSearchingLocation(true);
+      const res = await axios.get(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5`,
+        { headers: { 'Accept-Language': 'en', 'User-Agent': 'OxardERP/1.0' }, timeout: 8000 },
+      );
+      setLocationSearchResults(res.data ?? []);
+    } catch {
+      setLocationSearchResults([]);
+    } finally {
+      setIsSearchingLocation(false);
+    }
+  };
+
+  const handleSelectSearchResult = (item: any) => {
+    const lat = parseFloat(item.lat);
+    const lng = parseFloat(item.lon);
+    setTempLat(lat);
+    setTempLng(lng);
+    webViewRef.current?.injectJavaScript(
+      `setMarker(${lat}, ${lng}); map.setView([${lat}, ${lng}], 14); true;`,
+    );
+    setLocationSearchResults([]);
+    setLocationSearch('');
+  };
+
+  const handleConfirmLocation = async () => {
+    if (tempLat === null || tempLng === null) {
+      Alert.alert('No Location Selected', 'Tap on the map or use "My Location" first.');
+      return;
+    }
+    try {
+      setIsGettingLocation(true);
+      const res = await axios.get(
+        `https://nominatim.openstreetmap.org/reverse?lat=${tempLat}&lon=${tempLng}&format=json`,
+        { headers: { 'Accept-Language': 'en', 'User-Agent': 'OxardERP/1.0' }, timeout: 8000 },
+      );
+      setLocationName(res.data?.display_name ?? `${tempLat.toFixed(6)}, ${tempLng.toFixed(6)}`);
+    } catch {
+      setLocationName(`${tempLat.toFixed(6)}, ${tempLng.toFixed(6)}`);
+    } finally {
+      setLatitude(String(tempLat));
+      setLongitude(String(tempLng));
+      setIsGettingLocation(false);
+      setShowMapModal(false);
+    }
+  };
+
+  // ── Map modal ──────────────────────────────────────────────────────────────
+
+  const renderMapModal = () => (
+    <Modal
+      visible={showMapModal}
+      animationType="slide"
+      onRequestClose={() => setShowMapModal(false)}
+    >
+      <SafeAreaView style={styles.mapModalContainer}>
+        <View style={styles.mapModalHeader}>
+          <Text style={styles.mapModalTitle}>Pick Location</Text>
+          <TouchableOpacity onPress={() => setShowMapModal(false)}>
+            <Text style={styles.modalCloseBtn}>✕</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.mapSearchRow}>
+          <TextInput
+            style={styles.mapSearchInput}
+            value={locationSearch}
+            onChangeText={(text) => {
+              setLocationSearch(text);
+              if (searchDebounceRef.current) { clearTimeout(searchDebounceRef.current); }
+              if (!text.trim()) { setLocationSearchResults([]); return; }
+              searchDebounceRef.current = setTimeout(() => { handleLocationSearch(text); }, 500);
+            }}
+            placeholder="Search location…"
+            placeholderTextColor="#b0bec5"
+            returnKeyType="search"
+            onSubmitEditing={() => handleLocationSearch(locationSearch)}
+          />
+          <TouchableOpacity
+            style={styles.mapSearchBtn}
+            onPress={() => handleLocationSearch(locationSearch)}
+            disabled={isSearchingLocation}
+          >
+            {isSearchingLocation
+              ? <ActivityIndicator size="small" color="#fff" />
+              : <Text style={styles.mapSearchBtnText}>🔍</Text>
+            }
+          </TouchableOpacity>
+        </View>
+
+        {locationSearchResults.length > 0 && (
+          <View style={styles.mapSearchResults}>
+            <FlatList
+              data={locationSearchResults}
+              keyExtractor={(_, i) => String(i)}
+              keyboardShouldPersistTaps="handled"
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.mapSearchResultItem}
+                  onPress={() => handleSelectSearchResult(item)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.mapSearchResultText} numberOfLines={2}>
+                    {item.display_name}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        )}
+
+        <WebView
+          ref={webViewRef}
+          style={styles.mapWebView}
+          source={{ html: MAP_HTML }}
+          onMessage={handleWebViewMessage}
+          javaScriptEnabled
+          domStorageEnabled
+          originWhitelist={['*']}
+        />
+
+        {tempLat !== null && (
+          <View style={styles.mapCoordsRow}>
+            <Text style={styles.mapCoordsText}>
+              {tempLat.toFixed(6)}, {tempLng?.toFixed(6)}
+            </Text>
+          </View>
+        )}
+
+        <View style={styles.mapModalFooter}>
+          <TouchableOpacity
+            style={[styles.mapBtn, styles.mapBtnSecondary]}
+            onPress={handleUseMyLocation}
+            disabled={isGettingLocation}
+          >
+            {isGettingLocation
+              ? <ActivityIndicator size="small" color="#811458" />
+              : <Text style={styles.mapBtnTextDark}>📍 My Location</Text>
+            }
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.mapBtn, styles.mapBtnPrimary]}
+            onPress={handleConfirmLocation}
+            disabled={isGettingLocation || tempLat === null}
+          >
+            <Text style={styles.mapBtnText}>Confirm</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </Modal>
+  );
+
+  // ── Dropdown modal ─────────────────────────────────────────────────────────
+
   const renderDropdownModal = () => {
     if (!activeDropdown) { return null; }
     const options = optionsForKey(activeDropdown);
@@ -322,6 +579,7 @@ const CrmAccountCrud = () => {
       </Modal>
     );
   };
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -351,6 +609,7 @@ const CrmAccountCrud = () => {
         </View>
         <View style={styles.topBarPlaceholder} />
       </View>
+
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -363,16 +622,34 @@ const CrmAccountCrud = () => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.formCard}>
-            {/* Account Name */}
+            {/* Account Name + location icon */}
             <InputField label="Account Name *" error={errors.AccountName}>
-              <TextInput
-                style={styles.textInput}
-                value={form.AccountName}
-                onChangeText={(v) => setField('AccountName', v)}
-                placeholder="Enter account name"
-                placeholderTextColor="#b0bec5"
-              />
+              <View style={styles.accountNameRow}>
+                <TextInput
+                  style={[styles.textInput, styles.accountNameInput]}
+                  value={form.AccountName}
+                  onChangeText={(v) => setField('AccountName', v)}
+                  placeholder="Enter account name"
+                  placeholderTextColor="#b0bec5"
+                />
+                <TouchableOpacity
+                  style={styles.locationIconBtn}
+                  onPress={() => {
+                    setTempLat(latitude ? Number(latitude) : null);
+                    setTempLng(longitude ? Number(longitude) : null);
+                    setShowMapModal(true);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Image
+                    source={require('../../../assets/images/innerpage/location1.png')}
+                    style={[styles.locationIconImg, latitude && longitude ? styles.locationIconGreen : styles.locationIconRed]}
+                    resizeMode="contain"
+                  />
+                </TouchableOpacity>
+              </View>
             </InputField>
+
             {/* Industry */}
             <InputField label="Industry *" error={errors.FkIndustryId}>
               <TouchableOpacity
@@ -386,6 +663,7 @@ const CrmAccountCrud = () => {
                 <Text style={styles.dropdownChevron}>▼</Text>
               </TouchableOpacity>
             </InputField>
+
             {/* Currency */}
             <InputField label="Currency *" error={errors.FkCurrId}>
               <TouchableOpacity
@@ -399,6 +677,7 @@ const CrmAccountCrud = () => {
                 <Text style={styles.dropdownChevron}>▼</Text>
               </TouchableOpacity>
             </InputField>
+
             {/* Exch. Rate */}
             <InputField label="Exch. Rate *" error={errors.ExchRate}>
               <TextInput
@@ -410,6 +689,7 @@ const CrmAccountCrud = () => {
                 keyboardType="numeric"
               />
             </InputField>
+
             {/* Country */}
             <InputField label="Country *" error={errors.FkCountryId}>
               <TouchableOpacity
@@ -423,6 +703,7 @@ const CrmAccountCrud = () => {
                 <Text style={styles.dropdownChevron}>▼</Text>
               </TouchableOpacity>
             </InputField>
+
             {/* State */}
             <InputField label="State">
               <TextInput
@@ -433,6 +714,7 @@ const CrmAccountCrud = () => {
                 placeholderTextColor="#b0bec5"
               />
             </InputField>
+
             {/* City */}
             <InputField label="City">
               <TextInput
@@ -443,6 +725,7 @@ const CrmAccountCrud = () => {
                 placeholderTextColor="#b0bec5"
               />
             </InputField>
+
             {/* Street */}
             <InputField label="Street">
               <TextInput
@@ -453,6 +736,7 @@ const CrmAccountCrud = () => {
                 placeholderTextColor="#b0bec5"
               />
             </InputField>
+
             {/* Zip Code + Fax */}
             <View style={styles.rowTwo}>
               <View style={styles.rowTwoItem}>
@@ -479,6 +763,7 @@ const CrmAccountCrud = () => {
                 </InputField>
               </View>
             </View>
+
             {/* WebSite */}
             <InputField label="WebSite">
               <TextInput
@@ -491,6 +776,7 @@ const CrmAccountCrud = () => {
                 keyboardType="url"
               />
             </InputField>
+
             {/* Add Description */}
             <InputField label="Add Description">
               <TextInput
@@ -504,6 +790,7 @@ const CrmAccountCrud = () => {
                 textAlignVertical="top"
               />
             </InputField>
+
             {/* No. of Employees + Annual Turnover */}
             <View style={styles.rowTwo}>
               <View style={styles.rowTwoItem}>
@@ -533,11 +820,20 @@ const CrmAccountCrud = () => {
             </View>
           </View>
 
-          {/* ── Action buttons ── */}
+          {/* Action buttons */}
           <View style={styles.footer}>
             <TouchableOpacity
               style={[styles.footerBtn, styles.btnClear, isSaving && styles.btnDisabled]}
-              onPress={() => { setForm(INITIAL_FORM); setErrors({}); setAccountId(''); }}
+              onPress={() => {
+                setForm(INITIAL_FORM);
+                setErrors({});
+                setAccountId('');
+                setLatitude('');
+                setLongitude('');
+                setLocationName('');
+                setTempLat(null);
+                setTempLng(null);
+              }}
               activeOpacity={0.8}
               disabled={isSaving}
             >
@@ -558,7 +854,9 @@ const CrmAccountCrud = () => {
 
         </ScrollView>
       </KeyboardAvoidingView>
+
       {renderDropdownModal()}
+      {renderMapModal()}
     </SafeAreaView>
   );
 };
@@ -591,6 +889,7 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 15,
     marginBottom: 2,
+    color: '#111827',
   },
   dropdownBtn: {
     flexDirection: 'row',
@@ -650,6 +949,112 @@ const styles = StyleSheet.create({
   btnSave: { backgroundColor: '#811458' },
   btnDisabled: { opacity: 0.55 },
   footerBtnText: { color: '#ffffff', fontSize: 15, fontWeight: '700', letterSpacing: 0.3 },
+
+  /* Account name + location icon row */
+  accountNameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  accountNameInput: { flex: 1, marginBottom: 0 },
+  locationIconBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#DEECFF',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  locationIconImg: { width: 26, height: 26 },
+  locationIconRed:   { tintColor: '#e53935' },
+  locationIconGreen: { tintColor: '#2e7d32' },
+
+  /* Map modal */
+  mapModalContainer: { flex: 1, backgroundColor: '#fff' },
+  mapModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  mapModalTitle: { fontSize: 17, fontWeight: '700', color: '#111827' },
+  mapWebView: { flex: 1 },
+  mapCoordsRow: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#f9f9f9',
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  mapCoordsText: { fontSize: 12, color: '#6b7280', textAlign: 'center' },
+  mapModalFooter: {
+    flexDirection: 'row',
+    gap: 12,
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  mapBtn: { flex: 1, borderRadius: 8, paddingVertical: 13, alignItems: 'center', justifyContent: 'center' },
+  mapBtnPrimary:   { backgroundColor: '#811458' },
+  mapBtnSecondary: { backgroundColor: '#f3e8f0', borderWidth: 1, borderColor: '#811458' },
+  mapBtnText:     { color: '#fff', fontSize: 15, fontWeight: '700' },
+  mapBtnTextDark: { color: '#811458', fontSize: 14, fontWeight: '600' },
+
+  /* Map search */
+  mapSearchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    gap: 8,
+  },
+  mapSearchInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#DEECFF',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    fontSize: 14,
+    color: '#111827',
+    backgroundColor: '#fff',
+  },
+  mapSearchBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: '#811458',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mapSearchBtnText: { fontSize: 16 },
+  mapSearchResults: {
+    position: 'absolute',
+    top: 114,
+    left: 12,
+    right: 12,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    maxHeight: 200,
+    zIndex: 10,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+  },
+  mapSearchResultItem: {
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f5f5f5',
+  },
+  mapSearchResultText: { fontSize: 13, color: '#374151' },
 });
 
 export default CrmAccountCrud;
