@@ -209,6 +209,14 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
       screen: 'MyDesk',
       navigationParams: { screen: 'MyDesk' }
     },
+     {
+    id:'crm',
+    text:'CRM',
+    icon:require('../../assets/images/home/crmdashboard.png'),
+    screen:'Home',
+    navigationParams:{screen:'CrmDashboard'}
+    },
+
     {
       id: 'myrequests',
       text: 'My Requests',
@@ -235,7 +243,7 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
       text: 'Directory',
       icon: require('../../assets/images/directory.png'),
       screen: 'Details',
-      navigationParams: { screen: 'Directory' }
+      navigationParams: { screen: 'EmployeeDirectory' }
     },
     {
       id: 'messages',
@@ -326,7 +334,7 @@ const CustomDrawer = ({ navigation }: DrawerContentComponentProps) => {
 {menuItemsConfig.map((item, index) => {
           // Check if this menu item should be visible
        
-       if(item.id != 'settings'){
+       if(item.id != 'settings' && item.id !='crm') {
           const isVisible = isMenuItemVisible(item.text);
           
           // If not visible, don't render the TouchableOpacity
