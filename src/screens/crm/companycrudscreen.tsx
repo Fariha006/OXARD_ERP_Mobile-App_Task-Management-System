@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -6,6 +6,7 @@ import {
   Image,
   KeyboardAvoidingView,
   Modal,
+  PermissionsAndroid,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -17,6 +18,8 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
+import { WebView } from 'react-native-webview';
+import Geolocation from '@react-native-community/geolocation';
 import { API_CONFIG, getApiUrl } from '../../config/apiConfig';
 import UserStorage from '../../utils/userStorage';
 
@@ -61,6 +64,44 @@ const INITIAL_FORM: FormState = {
   AnnualTurnOver: '',
 };
 
+// ─── Map HTML (Leaflet + OpenStreetMap) ───────────────────────────────────────
+
+const MAP_HTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; width: 100%; }
+    #map { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    var selectedLat = null, selectedLng = null, marker = null;
+    var map = L.map('map').setView([20, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    map.on('click', function(e) { setMarker(e.latlng.lat, e.latlng.lng); });
+    function setMarker(lat, lng) {
+      selectedLat = lat; selectedLng = lng;
+      var latlng = L.latLng(lat, lng);
+      if (marker) { marker.setLatLng(latlng); } else { marker = L.marker(latlng).addTo(map); }
+      map.panTo(latlng);
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'markerPlaced', latitude: lat, longitude: lng }));
+    }
+  </script>
+</body>
+</html>
+`;
+
 // ─── InputField helper ────────────────────────────────────────────────────────
 
 const InputField: React.FC<{ label: string; error?: string; children: React.ReactNode }> = ({
@@ -99,6 +140,15 @@ const CompanyCrudScreen = () => {
   const [countryOptions, setCountryOptions]    = useState<DropdownOption[]>([]);
   const [activeDropdown, setActiveDropdown]    = useState<DropdownKey | null>(null);
   const [relationData, setRelationData]          = useState<any>(null);
+
+  const [showMapModal, setShowMapModal]       = useState(false);
+  const [tempLat, setTempLat]                 = useState<number | null>(null);
+  const [tempLng, setTempLng]                 = useState<number | null>(null);
+  const [latitude, setLatitude]               = useState<string>('');
+  const [longitude, setLongitude]             = useState<string>('');
+  const [locationName, setLocationName]       = useState<string>('');
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const webViewRef = useRef<any>(null);
 
   // ── Load lookup data from local storage ────────────────────────────────────
 
@@ -319,6 +369,9 @@ const CompanyCrudScreen = () => {
           AddDescription: form.AddDescription,
           NoofEmployees:  form.NoofEmployees   || null,
           AnnualTurnOver: form.AnnualTurnOver  || null,
+          Latitude:       latitude             || null,
+          Longitude:      longitude            || null,
+          Location:       locationName         || '',
         },
         {
           headers: {
@@ -347,6 +400,126 @@ const CompanyCrudScreen = () => {
       setIsSaving(false);
     }
   };
+
+  // ── Location handlers ─────────────────────────────────────────────────────
+
+  const handleWebViewMessage = (event: any) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      if (data.type === 'markerPlaced') {
+        setTempLat(data.latitude);
+        setTempLng(data.longitude);
+      }
+    } catch {}
+  };
+
+  const handleUseMyLocation = async () => {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      );
+      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+        Alert.alert('Permission Denied', 'Location permission is required.');
+        return;
+      }
+    }
+    setIsGettingLocation(true);
+    Geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        setTempLat(lat);
+        setTempLng(lng);
+        webViewRef.current?.injectJavaScript(
+          `setMarker(${lat}, ${lng}); map.setView([${lat}, ${lng}], 15); true;`,
+        );
+        setIsGettingLocation(false);
+      },
+      (error) => {
+        setIsGettingLocation(false);
+        Alert.alert('Location Error', error.message ?? 'Could not get current location.');
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
+    );
+  };
+
+  const handleConfirmLocation = async () => {
+    if (tempLat === null || tempLng === null) {
+      Alert.alert('No Location Selected', 'Tap on the map or use "My Location" first.');
+      return;
+    }
+    try {
+      setIsGettingLocation(true);
+      const res = await axios.get(
+        `https://nominatim.openstreetmap.org/reverse?lat=${tempLat}&lon=${tempLng}&format=json`,
+        { headers: { 'Accept-Language': 'en', 'User-Agent': 'OxardERP/1.0' }, timeout: 8000 },
+      );
+      setLocationName(res.data?.display_name ?? `${tempLat.toFixed(6)}, ${tempLng.toFixed(6)}`);
+    } catch {
+      setLocationName(`${tempLat.toFixed(6)}, ${tempLng.toFixed(6)}`);
+    } finally {
+      setLatitude(String(tempLat));
+      setLongitude(String(tempLng));
+      setIsGettingLocation(false);
+      setShowMapModal(false);
+    }
+  };
+
+  // ── Map modal ─────────────────────────────────────────────────────────────
+
+  const renderMapModal = () => (
+    <Modal
+      visible={showMapModal}
+      animationType="slide"
+      onRequestClose={() => setShowMapModal(false)}
+    >
+      <SafeAreaView style={styles.mapModalContainer}>
+        <View style={styles.mapModalHeader}>
+          <Text style={styles.mapModalTitle}>Pick Location</Text>
+          <TouchableOpacity onPress={() => setShowMapModal(false)}>
+            <Text style={styles.modalCloseBtn}>✕</Text>
+          </TouchableOpacity>
+        </View>
+
+        <WebView
+          ref={webViewRef}
+          style={styles.mapWebView}
+          source={{ html: MAP_HTML }}
+          onMessage={handleWebViewMessage}
+          javaScriptEnabled
+          domStorageEnabled
+          originWhitelist={['*']}
+        />
+
+        {tempLat !== null && (
+          <View style={styles.mapCoordsRow}>
+            <Text style={styles.mapCoordsText}>
+              {tempLat.toFixed(6)}, {tempLng?.toFixed(6)}
+            </Text>
+          </View>
+        )}
+
+        <View style={styles.mapModalFooter}>
+          <TouchableOpacity
+            style={[styles.mapBtn, styles.mapBtnSecondary]}
+            onPress={handleUseMyLocation}
+            disabled={isGettingLocation}
+          >
+            {isGettingLocation
+              ? <ActivityIndicator size="small" color="#811458" />
+              : <Text style={styles.mapBtnTextDark}>📍 My Location</Text>
+            }
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.mapBtn, styles.mapBtnPrimary]}
+            onPress={handleConfirmLocation}
+            disabled={isGettingLocation || tempLat === null}
+          >
+            <Text style={styles.mapBtnText}>Confirm</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </Modal>
+  );
 
   // ── Dropdown modal ────────────────────────────────────────────────────────
 
@@ -455,13 +628,22 @@ const CompanyCrudScreen = () => {
 
             {/* Company Name */}
             <InputField label="Company Name *" error={errors.AccountName}>
-              <TextInput
-                style={styles.textInput}
-                value={form.AccountName}
-                onChangeText={(v) => setField('AccountName', v)}
-                placeholder="Enter company name"
-                placeholderTextColor="#b0bec5"
-              />
+              <View style={styles.companyNameRow}>
+                <TextInput
+                  style={[styles.textInput, styles.companyNameInput]}
+                  value={form.AccountName}
+                  onChangeText={(v) => setField('AccountName', v)}
+                  placeholder="Enter company name"
+                  placeholderTextColor="#b0bec5"
+                />
+                <TouchableOpacity
+                  style={[styles.locationIconBtn, locationName ? styles.locationIconBtnActive : null]}
+                  onPress={() => { setTempLat(latitude ? Number(latitude) : null); setTempLng(longitude ? Number(longitude) : null); setShowMapModal(true); }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.locationIconText}>📍</Text>
+                </TouchableOpacity>
+              </View>
             </InputField>
 
             {/* Industry */}
@@ -639,7 +821,7 @@ const CompanyCrudScreen = () => {
           <View style={styles.footer}>
             <TouchableOpacity
               style={[styles.footerBtn, styles.btnClear, isSaving && styles.btnDisabled]}
-              onPress={() => { setForm(INITIAL_FORM); setErrors({}); }}
+              onPress={() => { setForm(INITIAL_FORM); setErrors({}); setLatitude(''); setLongitude(''); setLocationName(''); setTempLat(null); setTempLng(null); }}
               activeOpacity={0.8}
               disabled={isSaving}
             >
@@ -662,6 +844,7 @@ const CompanyCrudScreen = () => {
       </KeyboardAvoidingView>
 
       {renderDropdownModal()}
+      {renderMapModal()}
 
     </SafeAreaView>
   );
@@ -896,5 +1079,134 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 24,
     paddingHorizontal: 16,
+  },
+
+  /* Company name + location icon row */
+  companyNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  companyNameInput: {
+    flex: 1,
+  },
+  locationIconBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#DEECFF',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  locationIconBtnActive: {
+    borderColor: '#811458',
+    backgroundColor: '#fdf0f7',
+  },
+  locationIconText: {
+    fontSize: 20,
+  },
+
+  /* Location picker row */
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginTop: 10,
+    marginBottom: 4,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#DEECFF',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  locationRowIcon: {
+    fontSize: 16,
+    marginRight: 8,
+  },
+  locationRowText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#374151',
+  },
+  locationRowEdit: {
+    fontSize: 12,
+    color: '#811458',
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+
+  /* Map modal */
+  mapModalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  mapModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  mapModalTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  mapWebView: {
+    flex: 1,
+  },
+  mapCoordsRow: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#f9f9f9',
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  mapCoordsText: {
+    fontSize: 12,
+    color: '#6b7280',
+    textAlign: 'center',
+  },
+  mapModalFooter: {
+    flexDirection: 'row',
+    gap: 12,
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  mapBtn: {
+    flex: 1,
+    borderRadius: 8,
+    paddingVertical: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mapBtnPrimary: {
+    backgroundColor: '#811458',
+  },
+  mapBtnSecondary: {
+    backgroundColor: '#f3e8f0',
+    borderWidth: 1,
+    borderColor: '#811458',
+  },
+  mapBtnText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  mapBtnTextDark: {
+    color: '#811458',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
