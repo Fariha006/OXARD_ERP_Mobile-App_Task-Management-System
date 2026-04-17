@@ -148,7 +148,11 @@ const CompanyCrudScreen = () => {
   const [longitude, setLongitude]             = useState<string>('');
   const [locationName, setLocationName]       = useState<string>('');
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [locationSearch, setLocationSearch]   = useState('');
+  const [locationSearchResults, setLocationSearchResults] = useState<any[]>([]);
+  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
   const webViewRef = useRef<any>(null);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Load lookup data from local storage ────────────────────────────────────
 
@@ -253,6 +257,9 @@ const CompanyCrudScreen = () => {
             NoofEmployees:  acc.NoofEmployees  != null ? String(acc.NoofEmployees)  : '',
             AnnualTurnOver: acc.AnnualTurnOver != null ? String(acc.AnnualTurnOver) : '',
           });
+          if (acc.Latitude  != null && String(acc.Latitude).trim()  !== '') { setLatitude(String(acc.Latitude)); }
+          if (acc.Longitude != null && String(acc.Longitude).trim() !== '') { setLongitude(String(acc.Longitude)); }
+          if (acc.Location  != null && String(acc.Location).trim()  !== '') { setLocationName(String(acc.Location)); }
         }
       } catch (error: any) {
         const message = error?.response?.data?.message
@@ -387,7 +394,7 @@ const CompanyCrudScreen = () => {
        // Alert.alert('Success', 'Company saved successfully.', [
         //   { text: 'OK', onPress: () => navigation.goBack() },
         // ]);
-        navigation
+        navigation.goBack();
       } else {
         Alert.alert('Error', 'Save failed. Please try again.');
       }
@@ -442,6 +449,34 @@ const CompanyCrudScreen = () => {
     );
   };
 
+  const handleLocationSearch = async (query: string) => {
+    if (!query.trim()) { return; }
+    try {
+      setIsSearchingLocation(true);
+      const res = await axios.get(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5`,
+        { headers: { 'Accept-Language': 'en', 'User-Agent': 'OxardERP/1.0' }, timeout: 8000 },
+      );
+      setLocationSearchResults(res.data ?? []);
+    } catch {
+      setLocationSearchResults([]);
+    } finally {
+      setIsSearchingLocation(false);
+    }
+  };
+
+  const handleSelectSearchResult = (item: any) => {
+    const lat = parseFloat(item.lat);
+    const lng = parseFloat(item.lon);
+    setTempLat(lat);
+    setTempLng(lng);
+    webViewRef.current?.injectJavaScript(
+      `setMarker(${lat}, ${lng}); map.setView([${lat}, ${lng}], 14); true;`,
+    );
+    setLocationSearchResults([]);
+    setLocationSearch('');
+  };
+
   const handleConfirmLocation = async () => {
     if (tempLat === null || tempLng === null) {
       Alert.alert('No Location Selected', 'Tap on the map or use "My Location" first.');
@@ -479,6 +514,54 @@ const CompanyCrudScreen = () => {
             <Text style={styles.modalCloseBtn}>✕</Text>
           </TouchableOpacity>
         </View>
+
+        <View style={styles.mapSearchRow}>
+          <TextInput
+            style={styles.mapSearchInput}
+            value={locationSearch}
+            onChangeText={(text) => {
+              setLocationSearch(text);
+              if (searchDebounceRef.current) { clearTimeout(searchDebounceRef.current); }
+              if (!text.trim()) { setLocationSearchResults([]); return; }
+              searchDebounceRef.current = setTimeout(() => { handleLocationSearch(text); }, 500);
+            }}
+            placeholder="Search location…"
+            placeholderTextColor="#b0bec5"
+            returnKeyType="search"
+            onSubmitEditing={() => handleLocationSearch(locationSearch)}
+          />
+          <TouchableOpacity
+            style={styles.mapSearchBtn}
+            onPress={() => handleLocationSearch(locationSearch)}
+            disabled={isSearchingLocation}
+          >
+            {isSearchingLocation
+              ? <ActivityIndicator size="small" color="#fff" />
+              : <Text style={styles.mapSearchBtnText}>🔍</Text>
+            }
+          </TouchableOpacity>
+        </View>
+
+        {locationSearchResults.length > 0 && (
+          <View style={styles.mapSearchResults}>
+            <FlatList
+              data={locationSearchResults}
+              keyExtractor={(_, i) => String(i)}
+              keyboardShouldPersistTaps="handled"
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.mapSearchResultItem}
+                  onPress={() => handleSelectSearchResult(item)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.mapSearchResultText} numberOfLines={2}>
+                    {item.display_name}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        )}
 
         <WebView
           ref={webViewRef}
@@ -637,11 +720,15 @@ const CompanyCrudScreen = () => {
                   placeholderTextColor="#b0bec5"
                 />
                 <TouchableOpacity
-                  style={[styles.locationIconBtn, locationName ? styles.locationIconBtnActive : null]}
+                  style={styles.locationIconBtn}
                   onPress={() => { setTempLat(latitude ? Number(latitude) : null); setTempLng(longitude ? Number(longitude) : null); setShowMapModal(true); }}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.locationIconText}>📍</Text>
+                  <Image
+                    source={require('../../../assets/images/innerpage/location1.png')}
+                    style={[styles.locationIconImg, latitude && longitude ? styles.locationIconGreen : styles.locationIconRed]}
+                    resizeMode="contain"
+                  />
                 </TouchableOpacity>
               </View>
             </InputField>
@@ -1100,12 +1187,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  locationIconBtnActive: {
-    borderColor: '#811458',
-    backgroundColor: '#fdf0f7',
+  locationIconImg: {
+    width: 26,
+    height: 26,
   },
-  locationIconText: {
-    fontSize: 20,
+  locationIconRed: {
+    tintColor: '#e53935',
+  },
+  locationIconGreen: {
+    tintColor: '#2e7d32',
   },
 
   /* Location picker row */
@@ -1208,5 +1298,65 @@ const styles = StyleSheet.create({
     color: '#811458',
     fontSize: 14,
     fontWeight: '600',
+  },
+
+  /* Map search */
+  mapSearchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    gap: 8,
+  },
+  mapSearchInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#DEECFF',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    fontSize: 14,
+    color: '#111827',
+    backgroundColor: '#fff',
+  },
+  mapSearchBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: '#811458',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mapSearchBtnText: {
+    fontSize: 16,
+  },
+  mapSearchResults: {
+    position: 'absolute',
+    top: 114,
+    left: 12,
+    right: 12,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    maxHeight: 200,
+    zIndex: 10,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+  },
+  mapSearchResultItem: {
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f5f5f5',
+  },
+  mapSearchResultText: {
+    fontSize: 13,
+    color: '#374151',
   },
 });
