@@ -126,14 +126,14 @@ const CrmAccountCrud = () => {
   const [countryOptions, setCountryOptions]    = useState<DropdownOption[]>([]);
   const [activeDropdown, setActiveDropdown]    = useState<DropdownKey | null>(null);
 
-  const [showMapModal, setShowMapModal]           = useState(false);
-  const [tempLat, setTempLat]                     = useState<number | null>(null);
-  const [tempLng, setTempLng]                     = useState<number | null>(null);
-  const [latitude, setLatitude]                   = useState<string>('');
-  const [longitude, setLongitude]                 = useState<string>('');
-  const [locationName, setLocationName]           = useState<string>('');
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [locationSearch, setLocationSearch]       = useState('');
+  const [showMapModal, setShowMapModal]                   = useState(false);
+  const [tempLat, setTempLat]                             = useState<number | null>(null);
+  const [tempLng, setTempLng]                             = useState<number | null>(null);
+  const [latitude, setLatitude]                           = useState<string>('');
+  const [longitude, setLongitude]                         = useState<string>('');
+  const [locationName, setLocationName]                   = useState<string>('');
+  const [isGettingLocation, setIsGettingLocation]         = useState(false);
+  const [locationSearch, setLocationSearch]               = useState('');
   const [locationSearchResults, setLocationSearchResults] = useState<any[]>([]);
   const [isSearchingLocation, setIsSearchingLocation]     = useState(false);
   const webViewRef        = useRef<any>(null);
@@ -488,6 +488,13 @@ const CrmAccountCrud = () => {
           style={styles.mapWebView}
           source={{ html: MAP_HTML }}
           onMessage={handleWebViewMessage}
+          onLoadEnd={() => {
+            if (tempLat !== null && tempLng !== null) {
+              webViewRef.current?.injectJavaScript(
+                `setMarker(${tempLat}, ${tempLng}); map.setView([${tempLat}, ${tempLng}], 15); true;`,
+              );
+            }
+          }}
           javaScriptEnabled
           domStorageEnabled
           originWhitelist={['*']}
@@ -511,6 +518,22 @@ const CrmAccountCrud = () => {
               ? <ActivityIndicator size="small" color="#811458" />
               : <Text style={styles.mapBtnTextDark}>📍 My Location</Text>
             }
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.mapBtn, styles.mapBtnClear]}
+            onPress={() => {
+              setTempLat(null);
+              setTempLng(null);
+              setLatitude('');
+              setLongitude('');
+              setLocationName('');
+              webViewRef.current?.injectJavaScript(
+                `if (marker) { map.removeLayer(marker); marker = null; } selectedLat = null; selectedLng = null; true;`,
+              );
+            }}
+            disabled={isGettingLocation}
+          >
+            <Text style={styles.mapBtnTextClear}>Clear</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.mapBtn, styles.mapBtnPrimary]}
@@ -902,9 +925,9 @@ const styles = StyleSheet.create({
     marginBottom: 2,
     backgroundColor: '#f9f9f9',
   },
-  dropdownValue: { fontSize: 15, color: '#222', flex: 1 },
+  dropdownValue:       { fontSize: 15, color: '#222', flex: 1 },
   dropdownPlaceholder: { fontSize: 15, color: '#b0bec5', flex: 1 },
-  dropdownChevron: { fontSize: 16, color: '#888', marginLeft: 8 },
+  dropdownChevron:     { fontSize: 16, color: '#888', marginLeft: 8 },
   pickerList: { maxHeight: 320 },
   pickerItem: {
     paddingHorizontal: 16,
@@ -914,8 +937,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  pickerItemActive: { backgroundColor: '#fdf0f7' },
-  pickerItemText: { fontSize: 14, color: '#111827' },
+  pickerItemActive:     { backgroundColor: '#fdf0f7' },
+  pickerItemText:       { fontSize: 14, color: '#111827' },
   pickerItemTextActive: { color: '#811458', fontWeight: '600' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', paddingHorizontal: 24 },
   modalCard: {
@@ -937,21 +960,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  modalTitle: { fontSize: 16, fontWeight: '700', color: '#111827' },
+  modalTitle:    { fontSize: 16, fontWeight: '700', color: '#111827' },
   modalCloseBtn: { fontSize: 16, color: '#811458', fontWeight: '700', paddingHorizontal: 4 },
   noOptionsText: { fontSize: 13, color: '#9e9e9e', textAlign: 'center', paddingVertical: 24, paddingHorizontal: 16 },
-  rowTwo: { flexDirection: 'row', gap: 12 },
+  rowTwo:     { flexDirection: 'row', gap: 12 },
   rowTwoItem: { flex: 1 },
-  textArea: { minHeight: 60, textAlignVertical: 'top' },
-  footer: { flexDirection: 'row', gap: 12, marginTop: 16, marginBottom: 8 },
-  footerBtn: { flex: 1, borderRadius: 8, paddingVertical: 14, alignItems: 'center', justifyContent: 'center' },
-  btnClear: { backgroundColor: '#f9a825' },
-  btnSave: { backgroundColor: '#811458' },
+  textArea:   { minHeight: 60, textAlignVertical: 'top' },
+  footer:     { flexDirection: 'row', gap: 12, marginTop: 16, marginBottom: 8 },
+  footerBtn:  { flex: 1, borderRadius: 8, paddingVertical: 14, alignItems: 'center', justifyContent: 'center' },
+  btnClear:    { backgroundColor: '#f9a825' },
+  btnSave:     { backgroundColor: '#811458' },
   btnDisabled: { opacity: 0.55 },
   footerBtnText: { color: '#ffffff', fontSize: 15, fontWeight: '700', letterSpacing: 0.3 },
 
-  /* Account name + location icon row */
-  accountNameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  accountNameRow:  { flexDirection: 'row', alignItems: 'center', gap: 8 },
   accountNameInput: { flex: 1, marginBottom: 0 },
   locationIconBtn: {
     width: 44,
@@ -963,11 +985,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  locationIconImg: { width: 26, height: 26 },
+  locationIconImg:   { width: 26, height: 26 },
   locationIconRed:   { tintColor: '#e53935' },
   locationIconGreen: { tintColor: '#2e7d32' },
 
-  /* Map modal */
   mapModalContainer: { flex: 1, backgroundColor: '#fff' },
   mapModalHeader: {
     flexDirection: 'row',
@@ -979,7 +1000,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f0f0f0',
   },
   mapModalTitle: { fontSize: 17, fontWeight: '700', color: '#111827' },
-  mapWebView: { flex: 1 },
+  mapWebView:    { flex: 1 },
   mapCoordsRow: {
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -995,13 +1016,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
   },
-  mapBtn: { flex: 1, borderRadius: 8, paddingVertical: 13, alignItems: 'center', justifyContent: 'center' },
+  mapBtn:          { flex: 1, borderRadius: 8, paddingVertical: 13, alignItems: 'center', justifyContent: 'center' },
   mapBtnPrimary:   { backgroundColor: '#811458' },
   mapBtnSecondary: { backgroundColor: '#f3e8f0', borderWidth: 1, borderColor: '#811458' },
-  mapBtnText:     { color: '#fff', fontSize: 15, fontWeight: '700' },
-  mapBtnTextDark: { color: '#811458', fontSize: 14, fontWeight: '600' },
+  mapBtnClear:     { backgroundColor: '#fff3e0', borderWidth: 1, borderColor: '#f9a825' },
+  mapBtnText:      { color: '#fff', fontSize: 15, fontWeight: '700' },
+  mapBtnTextDark:  { color: '#811458', fontSize: 14, fontWeight: '600' },
+  mapBtnTextClear: { color: '#f9a825', fontSize: 14, fontWeight: '600' },
 
-  /* Map search */
   mapSearchRow: {
     flexDirection: 'row',
     alignItems: 'center',

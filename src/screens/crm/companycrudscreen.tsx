@@ -139,19 +139,19 @@ const CompanyCrudScreen = () => {
   const [currencyOptions, setCurrencyOptions]  = useState<DropdownOption[]>([]);
   const [countryOptions, setCountryOptions]    = useState<DropdownOption[]>([]);
   const [activeDropdown, setActiveDropdown]    = useState<DropdownKey | null>(null);
-  const [relationData, setRelationData]          = useState<any>(null);
+  const [relationData, setRelationData]        = useState<any>(null);
 
-  const [showMapModal, setShowMapModal]       = useState(false);
-  const [tempLat, setTempLat]                 = useState<number | null>(null);
-  const [tempLng, setTempLng]                 = useState<number | null>(null);
-  const [latitude, setLatitude]               = useState<string>('');
-  const [longitude, setLongitude]             = useState<string>('');
-  const [locationName, setLocationName]       = useState<string>('');
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [locationSearch, setLocationSearch]   = useState('');
-  const [locationSearchResults, setLocationSearchResults] = useState<any[]>([]);
-  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
-  const webViewRef = useRef<any>(null);
+  const [showMapModal, setShowMapModal]                     = useState(false);
+  const [tempLat, setTempLat]                               = useState<number | null>(null);
+  const [tempLng, setTempLng]                               = useState<number | null>(null);
+  const [latitude, setLatitude]                             = useState<string>('');
+  const [longitude, setLongitude]                           = useState<string>('');
+  const [locationName, setLocationName]                     = useState<string>('');
+  const [isGettingLocation, setIsGettingLocation]           = useState(false);
+  const [locationSearch, setLocationSearch]                 = useState('');
+  const [locationSearchResults, setLocationSearchResults]   = useState<any[]>([]);
+  const [isSearchingLocation, setIsSearchingLocation]       = useState(false);
+  const webViewRef        = useRef<any>(null);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Load lookup data from local storage ────────────────────────────────────
@@ -162,7 +162,6 @@ const CompanyCrudScreen = () => {
         const data = await UserStorage.getCrmLoModeData();
         if (!data) { return; }
 
-        // Industry → secondlevel Item2 = data.Rest.Item2
         const restItem2 = (data.Rest as any)?.Item2;
         if (Array.isArray(restItem2)) {
           setIndustryOptions(
@@ -173,7 +172,6 @@ const CompanyCrudScreen = () => {
           );
         }
 
-        // Currency → top-level Item2
         if (Array.isArray(data.Item2)) {
           setCurrencyOptions(
             (data.Item2 as any[]).map((i) => ({
@@ -183,7 +181,6 @@ const CompanyCrudScreen = () => {
           );
         }
 
-        // Country → top-level Item6
         if (Array.isArray(data.Item6)) {
           setCountryOptions(
             (data.Item6 as any[]).map((i) => ({
@@ -232,12 +229,10 @@ const CompanyCrudScreen = () => {
 
         const resData = response.data;
 
-        // Item1[0] → relation/lead details
         if (Array.isArray(resData.Item1) && resData.Item1.length > 0) {
           setRelationData(resData.Item1[0]);
         }
 
-        // Item6[0] → account/company details
         if (Array.isArray(resData.Item6) && resData.Item6.length > 0) {
           const acc = resData.Item6[0] as any;
           setAccountId(String(acc.AccountId ?? ''));
@@ -246,7 +241,7 @@ const CompanyCrudScreen = () => {
             FkIndustryId:   acc.FkIndustryId  != null ? String(acc.FkIndustryId)  : '',
             FkCurrId:       acc.FkCurrId       != null ? String(acc.FkCurrId)       : '',
             ExchRate:       acc.ExchRate       != null ? String(acc.ExchRate)       : '1',
-            FkCountryId:      acc.FkCntryId      != null ? String(acc.FkCntryId)      : '',
+            FkCountryId:    acc.FkCntryId      != null ? String(acc.FkCntryId)      : '',
             State:          String(acc.State           ?? ''),
             City:           String(acc.City            ?? ''),
             Street:         String(acc.Street          ?? ''),
@@ -286,7 +281,7 @@ const CompanyCrudScreen = () => {
     switch (key) {
       case 'FkIndustryId': return industryOptions;
       case 'FkCurrId':     return currencyOptions;
-      case 'FkCountryId':    return countryOptions;
+      case 'FkCountryId':  return countryOptions;
     }
   };
 
@@ -297,7 +292,7 @@ const CompanyCrudScreen = () => {
     switch (key) {
       case 'FkIndustryId': return 'Select industry';
       case 'FkCurrId':     return 'Select currency';
-      case 'FkCountryId':    return 'Select country';
+      case 'FkCountryId':  return 'Select country';
     }
   };
 
@@ -305,7 +300,7 @@ const CompanyCrudScreen = () => {
     switch (key) {
       case 'FkIndustryId': return 'Industry';
       case 'FkCurrId':     return 'Currency';
-      case 'FkCountryId':    return 'Country';
+      case 'FkCountryId':  return 'Country';
     }
   };
 
@@ -317,7 +312,7 @@ const CompanyCrudScreen = () => {
     if (!form.FkIndustryId)        { next.FkIndustryId = 'Industry is required.'; }
     if (!form.FkCurrId)            { next.FkCurrId     = 'Currency is required.'; }
     if (!form.ExchRate.trim())     { next.ExchRate     = 'Exch. Rate is required.'; }
-    if (!form.FkCountryId)           { next.FkCountryId   = 'Country is required.'; }
+    if (!form.FkCountryId)         { next.FkCountryId  = 'Country is required.'; }
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -366,7 +361,7 @@ const CompanyCrudScreen = () => {
           FkIndustryId:   form.FkIndustryId   || '0',
           FkCurrId:       form.FkCurrId        || '0',
           ExchRate:       form.ExchRate        || '1',
-          FkCountryId:    form.FkCountryId       || '0',
+          FkCountryId:    form.FkCountryId     || '0',
           State:          form.State,
           City:           form.City,
           Street:         form.Street,
@@ -391,9 +386,6 @@ const CompanyCrudScreen = () => {
 
       const result = Array.isArray(response.data) ? response.data[0] : null;
       if (result?.IsSuccess === 'True') {
-       // Alert.alert('Success', 'Company saved successfully.', [
-        //   { text: 'OK', onPress: () => navigation.goBack() },
-        // ]);
         navigation.goBack();
       } else {
         Alert.alert('Error', 'Save failed. Please try again.');
@@ -568,6 +560,13 @@ const CompanyCrudScreen = () => {
           style={styles.mapWebView}
           source={{ html: MAP_HTML }}
           onMessage={handleWebViewMessage}
+          onLoadEnd={() => {
+            if (tempLat !== null && tempLng !== null) {
+              webViewRef.current?.injectJavaScript(
+                `setMarker(${tempLat}, ${tempLng}); map.setView([${tempLat}, ${tempLng}], 15); true;`,
+              );
+            }
+          }}
           javaScriptEnabled
           domStorageEnabled
           originWhitelist={['*']}
@@ -591,6 +590,22 @@ const CompanyCrudScreen = () => {
               ? <ActivityIndicator size="small" color="#811458" />
               : <Text style={styles.mapBtnTextDark}>📍 My Location</Text>
             }
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.mapBtn, styles.mapBtnClear]}
+            onPress={() => {
+              setTempLat(null);
+              setTempLng(null);
+              setLatitude('');
+              setLongitude('');
+              setLocationName('');
+              webViewRef.current?.injectJavaScript(
+                `if (marker) { map.removeLayer(marker); marker = null; } selectedLat = null; selectedLng = null; true;`,
+              );
+            }}
+            disabled={isGettingLocation}
+          >
+            <Text style={styles.mapBtnTextClear}>Clear</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.mapBtn, styles.mapBtnPrimary]}
@@ -721,7 +736,11 @@ const CompanyCrudScreen = () => {
                 />
                 <TouchableOpacity
                   style={styles.locationIconBtn}
-                  onPress={() => { setTempLat(latitude ? Number(latitude) : null); setTempLng(longitude ? Number(longitude) : null); setShowMapModal(true); }}
+                  onPress={() => {
+                    setTempLat(latitude ? Number(latitude) : null);
+                    setTempLng(longitude ? Number(longitude) : null);
+                    setShowMapModal(true);
+                  }}
                   activeOpacity={0.7}
                 >
                   <Image
@@ -912,7 +931,7 @@ const CompanyCrudScreen = () => {
               activeOpacity={0.8}
               disabled={isSaving}
             >
-              <Text style={styles.footerBtnTextDark}>Clear</Text>
+              <Text style={styles.footerBtnText}>Clear</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.footerBtn, styles.btnSave, isSaving && styles.btnDisabled]}
@@ -942,29 +961,12 @@ export default CompanyCrudScreen;
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9f9f9',
-  },
-  flex: {
-    flex: 1,
-  },
+  container: { flex: 1, backgroundColor: '#f9f9f9' },
+  flex: { flex: 1 },
 
-  /* Loading */
-  loadingOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#811458',
-    fontWeight: '600',
-  },
+  loadingOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f9f9f9' },
+  loadingText: { marginTop: 12, fontSize: 14, color: '#811458', fontWeight: '600' },
 
-  /* Top bar */
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -972,43 +974,17 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingRight: 10,
   },
-  backIconWrap: {
-    marginLeft: 20,
-  },
-  backIconImg: {
-    width: 25,
-    height: 25,
-  },
-  pageTitleWrap: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  pageTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#811458',
-  },
-  topBarPlaceholder: {
-    width: 40,
-  },
+  backIconWrap: { marginLeft: 20 },
+  backIconImg: { width: 25, height: 25 },
+  pageTitleWrap: { flex: 1, alignItems: 'center' },
+  pageTitle: { fontSize: 22, fontWeight: '700', color: '#811458' },
+  topBarPlaceholder: { width: 40 },
 
-  /* Two-column row */
-  rowTwo: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  rowTwoItem: {
-    flex: 1,
-  },
+  rowTwo: { flexDirection: 'row', gap: 10 },
+  rowTwoItem: { flex: 1 },
 
-  /* Scroll */
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 28,
-  },
+  scrollView: { flex: 1 },
+  scrollContent: { padding: 16, paddingBottom: 28 },
   formCard: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
@@ -1020,7 +996,6 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 
-  /* Text input */
   textInput: {
     borderWidth: 1,
     borderColor: '#DEECFF',
@@ -1032,12 +1007,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     width: '100%',
   },
-  textArea: {
-    height: 100,
-    textAlignVertical: 'top',
-  },
+  textArea: { height: 100, textAlignVertical: 'top' },
 
-  /* Dropdown button */
   dropdownBtn: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1049,65 +1020,18 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     backgroundColor: '#ffffff',
   },
-  dropdownValue: {
-    fontSize: 14,
-    color: '#111827',
-    flex: 1,
-  },
-  dropdownPlaceholder: {
-    fontSize: 14,
-    color: '#b0bec5',
-    flex: 1,
-  },
-  dropdownChevron: {
-    fontSize: 10,
-    color: '#811458',
-    marginLeft: 6,
-  },
+  dropdownValue:       { fontSize: 14, color: '#111827', flex: 1 },
+  dropdownPlaceholder: { fontSize: 14, color: '#b0bec5', flex: 1 },
+  dropdownChevron:     { fontSize: 10, color: '#811458', marginLeft: 6 },
 
-  /* Footer buttons */
-  footer: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  footerBtn: {
-    flex: 1,
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  btnClear: {
-    backgroundColor: '#f9a825',
-  },
-  btnSave: {
-    backgroundColor: '#811458',
-  },
-  btnDisabled: {
-    opacity: 0.55,
-  },
-  footerBtnText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '700',
-    letterSpacing: 0.3,
-  },
-  footerBtnTextDark: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '700',
-    letterSpacing: 0.3,
-  },
+  footer: { flexDirection: 'row', gap: 12, marginTop: 16, marginBottom: 8 },
+  footerBtn: { flex: 1, borderRadius: 8, paddingVertical: 14, alignItems: 'center', justifyContent: 'center' },
+  btnClear:    { backgroundColor: '#f9a825' },
+  btnSave:     { backgroundColor: '#811458' },
+  btnDisabled: { opacity: 0.55 },
+  footerBtnText: { color: '#ffffff', fontSize: 15, fontWeight: '700', letterSpacing: 0.3 },
 
-  /* Dropdown modal */
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', paddingHorizontal: 24 },
   modalCard: {
     backgroundColor: '#ffffff',
     borderRadius: 14,
@@ -1127,20 +1051,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  modalTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  modalCloseBtn: {
-    fontSize: 16,
-    color: '#811458',
-    fontWeight: '700',
-    paddingHorizontal: 4,
-  },
-  pickerList: {
-    maxHeight: 320,
-  },
+  modalTitle:    { fontSize: 16, fontWeight: '700', color: '#111827' },
+  modalCloseBtn: { fontSize: 16, color: '#811458', fontWeight: '700', paddingHorizontal: 4 },
+  pickerList:    { maxHeight: 320 },
   pickerItem: {
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -1149,34 +1062,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  pickerItemActive: {
-    backgroundColor: '#fdf0f7',
-  },
-  pickerItemText: {
-    fontSize: 14,
-    color: '#111827',
-  },
-  pickerItemTextActive: {
-    color: '#811458',
-    fontWeight: '600',
-  },
-  noOptionsText: {
-    fontSize: 13,
-    color: '#9e9e9e',
-    textAlign: 'center',
-    paddingVertical: 24,
-    paddingHorizontal: 16,
-  },
+  pickerItemActive:     { backgroundColor: '#fdf0f7' },
+  pickerItemText:       { fontSize: 14, color: '#111827' },
+  pickerItemTextActive: { color: '#811458', fontWeight: '600' },
+  noOptionsText: { fontSize: 13, color: '#9e9e9e', textAlign: 'center', paddingVertical: 24, paddingHorizontal: 16 },
 
-  /* Company name + location icon row */
-  companyNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  companyNameInput: {
-    flex: 1,
-  },
+  companyNameRow:  { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  companyNameInput: { flex: 1 },
   locationIconBtn: {
     width: 44,
     height: 44,
@@ -1187,57 +1079,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  locationIconImg: {
-    width: 26,
-    height: 26,
-  },
-  locationIconRed: {
-    tintColor: '#e53935',
-  },
-  locationIconGreen: {
-    tintColor: '#2e7d32',
-  },
+  locationIconImg:   { width: 26, height: 26 },
+  locationIconRed:   { tintColor: '#e53935' },
+  locationIconGreen: { tintColor: '#2e7d32' },
 
-  /* Location picker row */
-  locationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 16,
-    marginTop: 10,
-    marginBottom: 4,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#DEECFF',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  locationRowIcon: {
-    fontSize: 16,
-    marginRight: 8,
-  },
-  locationRowText: {
-    flex: 1,
-    fontSize: 13,
-    color: '#374151',
-  },
-  locationRowEdit: {
-    fontSize: 12,
-    color: '#811458',
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-
-  /* Map modal */
-  mapModalContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
+  mapModalContainer: { flex: 1, backgroundColor: '#fff' },
   mapModalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1247,14 +1093,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  mapModalTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  mapWebView: {
-    flex: 1,
-  },
+  mapModalTitle: { fontSize: 17, fontWeight: '700', color: '#111827' },
+  mapWebView:    { flex: 1 },
   mapCoordsRow: {
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -1262,11 +1102,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#eee',
   },
-  mapCoordsText: {
-    fontSize: 12,
-    color: '#6b7280',
-    textAlign: 'center',
-  },
+  mapCoordsText: { fontSize: 12, color: '#6b7280', textAlign: 'center' },
   mapModalFooter: {
     flexDirection: 'row',
     gap: 12,
@@ -1274,33 +1110,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
   },
-  mapBtn: {
-    flex: 1,
-    borderRadius: 8,
-    paddingVertical: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mapBtnPrimary: {
-    backgroundColor: '#811458',
-  },
-  mapBtnSecondary: {
-    backgroundColor: '#f3e8f0',
-    borderWidth: 1,
-    borderColor: '#811458',
-  },
-  mapBtnText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  mapBtnTextDark: {
-    color: '#811458',
-    fontSize: 14,
-    fontWeight: '600',
-  },
+  mapBtn:          { flex: 1, borderRadius: 8, paddingVertical: 13, alignItems: 'center', justifyContent: 'center' },
+  mapBtnPrimary:   { backgroundColor: '#811458' },
+  mapBtnSecondary: { backgroundColor: '#f3e8f0', borderWidth: 1, borderColor: '#811458' },
+  mapBtnClear:     { backgroundColor: '#fff3e0', borderWidth: 1, borderColor: '#f9a825' },
+  mapBtnText:      { color: '#fff', fontSize: 15, fontWeight: '700' },
+  mapBtnTextDark:  { color: '#811458', fontSize: 14, fontWeight: '600' },
+  mapBtnTextClear: { color: '#f9a825', fontSize: 14, fontWeight: '600' },
 
-  /* Map search */
   mapSearchRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1329,9 +1146,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  mapSearchBtnText: {
-    fontSize: 16,
-  },
+  mapSearchBtnText: { fontSize: 16 },
   mapSearchResults: {
     position: 'absolute',
     top: 114,
@@ -1355,8 +1170,5 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f5f5f5',
   },
-  mapSearchResultText: {
-    fontSize: 13,
-    color: '#374151',
-  },
+  mapSearchResultText: { fontSize: 13, color: '#374151' },
 });
