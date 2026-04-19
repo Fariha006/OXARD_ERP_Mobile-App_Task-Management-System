@@ -539,6 +539,12 @@ const LeadOrDealCrudScreen = () => {
   const validate = (): boolean => {
     const next: FormErrors = {};
 
+    if (!form.RegisterDate.trim()) {
+      next.RegisterDate = 'Register Date is required.';
+    }
+    if (!form.LeadTypeId) {
+      next.LeadTypeId = 'Lead Type is required.';
+    }
     if (!form.CompanyName.trim()) {
       next.CompanyName = 'Company Name is required.';
     }
@@ -552,6 +558,15 @@ const LeadOrDealCrudScreen = () => {
     }
     if (form.Email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.Email.trim())) {
       next.Email = 'Enter a valid email address.';
+    }
+    if (form.cr0030List.length === 0) {
+      next.cr0030List = 'Products is required.';
+    }
+    if (form.cr0040List.length === 0) {
+      next.cr0040List = 'Lead Source is required.';
+    }
+    if (!form.FkEmpIdSalesPerson) {
+      next.FkEmpIdSalesPerson = 'Sales Person is required.';
     }
 
     setErrors(next);
@@ -595,7 +610,7 @@ const LeadOrDealCrudScreen = () => {
         FkEmpIdSalesPerson: form.FkEmpIdSalesPerson ? Number(form.FkEmpIdSalesPerson) : null,
         WinningPer:     form.WinningPer      || '0',
         ExpectedBudget: form.ExpectedBudget  || '0',
-        Status:         '1',
+        Status:         statusId,
         AccountName:    form.CompanyName,
         IsAccount:      form.FkAccountId ? '1' : '0',
         LeadStatus:     statusId !== 2 ? (form.StatusId || defaultLeadStatusId) : defaultLeadStatusId,
@@ -912,7 +927,7 @@ const LeadOrDealCrudScreen = () => {
             )}
 
             {/* Register Date */}
-            <InputField label="Register Date" error={errors.RegisterDate}>
+            <InputField label="Register Date" required error={errors.RegisterDate}>
               <TouchableOpacity
                 style={styles.datePickerBtn}
                 onPress={() => setShowDatePicker(true)}
@@ -934,9 +949,9 @@ const LeadOrDealCrudScreen = () => {
             </InputField>
 
             {/* Lead Type */}
-            <InputField label="Lead Type" error={errors.LeadTypeId}>
+            <InputField label="Lead Type" required error={errors.LeadTypeId}>
               <TouchableOpacity
-                style={styles.dropdownBtn}
+                style={[styles.dropdownBtn, errors.LeadTypeId ? styles.inputErrorBorder : null]}
                 onPress={() => setActiveDropdown('LeadTypeId')}
                 activeOpacity={0.7}
               >
@@ -1011,9 +1026,9 @@ const LeadOrDealCrudScreen = () => {
             </InputField>
 
             {/* Products — multi-select */}
-            <InputField label="Products" error={errors.cr0030List}>
+            <InputField label="Products" required error={errors.cr0030List}>
               <TouchableOpacity
-                style={styles.dropdownBtn}
+                style={[styles.dropdownBtn, errors.cr0030List ? styles.inputErrorBorder : null]}
                 onPress={() => openMultiDropdown('cr0030List')}
                 activeOpacity={0.7}
               >
@@ -1038,9 +1053,9 @@ const LeadOrDealCrudScreen = () => {
             </InputField>
 
             {/* Lead Source — multi-select */}
-            <InputField label="Lead Source" error={errors.cr0040List}>
+            <InputField label="Lead Source" required error={errors.cr0040List}>
               <TouchableOpacity
-                style={styles.dropdownBtn}
+                style={[styles.dropdownBtn, errors.cr0040List ? styles.inputErrorBorder : null]}
                 onPress={() => openMultiDropdown('cr0040List')}
                 activeOpacity={0.7}
               >
@@ -1065,9 +1080,9 @@ const LeadOrDealCrudScreen = () => {
             </InputField>
 
             {/* Sales Person */}
-            <InputField label="Sales Person" error={errors.FkEmpIdSalesPerson}>
+            <InputField label="Sales Person" required error={errors.FkEmpIdSalesPerson}>
               <TouchableOpacity
-                style={styles.dropdownBtn}
+                style={[styles.dropdownBtn, errors.FkEmpIdSalesPerson ? styles.inputErrorBorder : null]}
                 onPress={() => setActiveDropdown('FkEmpIdSalesPerson')}
                 activeOpacity={0.7}
               >
